@@ -9,12 +9,12 @@ jobs:
   golangci:
     name: lint
     runs-on: ubuntu-latest
-      steps:
-      - uses: actions/checkout@v2
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
-        with:
-          version: v1.41
+    steps:
+    - uses: actions/checkout@v2
+    - name: golangci-lint
+      uses: golangci/golangci-lint-action@v2
+      with:
+        version: v1.41
 
   build:
     runs-on: ubuntu-latest
