@@ -6,6 +6,15 @@ on:
   pull_request:
 
 jobs:
+  golangci:
+    name: lint
+    runs-on: ubuntu-latest
+      steps:
+      - uses: actions/checkout@v2
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.41
 
   build:
     runs-on: ubuntu-latest
@@ -16,12 +25,6 @@ jobs:
       uses: actions/setup-go@v2
       with:
         go-version: 1.17
-
-    - name: Lint
-      uses: golangci/golangci-lint-action@v2
-      with:
-        version: v1.41
-        args: --deadline=30m
 
     - name: Build
       run: make build
