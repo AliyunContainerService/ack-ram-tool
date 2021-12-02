@@ -57,7 +57,10 @@ func setupAssumeRoleCmd(rootCmd *cobra.Command) {
 	assumeRoleCmd.Flags().StringVarP(&roleArn, "role-arn", "r", "", "")
 	assumeRoleCmd.Flags().StringVarP(&oidcArn, "oidc-provider-arn", "p", "", "")
 	assumeRoleCmd.Flags().StringVarP(&oidcTokenFile, "oidc-token-file", "t", "", "")
-	assumeRoleCmd.MarkFlagRequired("role-arn")
-	assumeRoleCmd.MarkFlagRequired("oidc-provider-arn")
-	assumeRoleCmd.MarkFlagRequired("oidc-token-file")
+	err := assumeRoleCmd.MarkFlagRequired("role-arn")
+	exitIfError(err)
+	err = assumeRoleCmd.MarkFlagRequired("oidc-provider-arn")
+	exitIfError(err)
+	err = assumeRoleCmd.MarkFlagRequired("oidc-token-file")
+	exitIfError(err)
 }

@@ -52,11 +52,6 @@ func (c *Client) UpdateCluster(ctx context.Context, clusterId string, opt Update
 	return &types.ClusterTask{TaskId: tea.StringValue(resp.Body.TaskId)}, nil
 }
 
-type describeTaskInfoResponse struct {
-	Headers map[string]*string `json:"headers,omitempty" xml:"headers,omitempty" require:"true"`
-	Body    *types.ClusterTask `json:"body,omitempty" xml:"body,omitempty" require:"true"`
-}
-
 func (c *Client) GetTask(ctx context.Context, taskId string) (*types.ClusterTask, error) {
 	client := c.csClient
 	resp, err := client.DescribeTaskInfo(tea.String(taskId))
@@ -85,9 +80,7 @@ func convertDescribeClusterDetailResponse(c *types.Cluster, resp *cs.DescribeClu
 	c.State = types.ClusterState(tea.StringValue(body.State))
 
 	metadata := &types.ClusterMetaData{}
-	if err := json.Unmarshal([]byte(tea.StringValue(body.MetaData)), metadata); err != nil {
-		//
-	}
+	_ = json.Unmarshal([]byte(tea.StringValue(body.MetaData)), metadata)
 	c.MetaData = *metadata
 }
 

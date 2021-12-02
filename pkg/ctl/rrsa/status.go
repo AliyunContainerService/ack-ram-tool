@@ -46,7 +46,7 @@ func displayRRSAStatus(c *types.Cluster) {
 	rrsac := c.MetaData.RRSAConfig
 	buf := bytes.NewBuffer(nil)
 	t, _ := template.New("rrsa").Parse(rrsaStatusTemplate)
-	t.Execute(buf, rrsac)
+	_ = t.Execute(buf, rrsac)
 	fmt.Printf("%s\n", strings.TrimSpace(buf.String()))
 }
 
@@ -58,5 +58,6 @@ func getRRSAStatus(ctx context.Context, clusterId string, client openapi.CSClien
 func setupStatusCmd(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(statusCmd)
 	statusCmd.Flags().StringVarP(&clusterId, "cluster-id", "c", "", "")
-	statusCmd.MarkFlagRequired("cluster-id")
+	err := statusCmd.MarkFlagRequired("cluster-id")
+	exitIfError(err)
 }
