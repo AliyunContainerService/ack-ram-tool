@@ -54,7 +54,7 @@ func enableRRSA(ctx context.Context, clusterId string, client openapi.CSClientIn
 
 func setupEnableCmd(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(enableCmd)
-	enableCmd.Flags().StringVarP(&clusterId, "cluster-id", "c", "", "")
+	enableCmd.Flags().StringVarP(&clusterId, "cluster-id", "c", "", "The cluster id to use")
 	err := enableCmd.MarkFlagRequired("cluster-id")
 	exitIfError(err)
 }

@@ -80,10 +80,10 @@ func associateRole(ctx context.Context, c *types.Cluster, client *openapi.Client
 
 func setupAssociateRoleCmd(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(associateRoleCmd)
-	associateRoleCmd.Flags().StringVarP(&clusterId, "cluster-id", "c", "", "")
-	associateRoleCmd.Flags().StringVarP(&roleName, "role-name", "r", "", "")
-	associateRoleCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "")
-	associateRoleCmd.Flags().StringVarP(&serviceAccount, "service-account", "s", "", "")
+	associateRoleCmd.Flags().StringVarP(&clusterId, "cluster-id", "c", "", "The cluster id to use")
+	associateRoleCmd.Flags().StringVarP(&roleName, "role-name", "r", "", "The RAM role name to use")
+	associateRoleCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "The Kubernetes namespace to use")
+	associateRoleCmd.Flags().StringVarP(&serviceAccount, "service-account", "s", "The Kubernetes service account to use", "")
 	err := associateRoleCmd.MarkFlagRequired("cluster-id")
 	exitIfError(err)
 	err = associateRoleCmd.MarkFlagRequired("role-name")

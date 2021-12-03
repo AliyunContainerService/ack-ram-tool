@@ -56,9 +56,10 @@ var assumeRoleCmd = &cobra.Command{
 
 func setupAssumeRoleCmd(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(assumeRoleCmd)
-	assumeRoleCmd.Flags().StringVarP(&roleArn, "role-arn", "r", "", "")
-	assumeRoleCmd.Flags().StringVarP(&oidcArn, "oidc-provider-arn", "p", "", "")
-	assumeRoleCmd.Flags().StringVarP(&oidcTokenFile, "oidc-token-file", "t", "", "")
+	assumeRoleCmd.Flags().StringVarP(&roleArn, "role-arn", "r", "", "The arn of RAM role")
+	assumeRoleCmd.Flags().StringVarP(&oidcArn, "oidc-provider-arn", "p", "", "The arn of OIDC provider")
+	assumeRoleCmd.Flags().StringVarP(&oidcTokenFile, "oidc-token-file", "t", "",
+		"Path to OIDC token file. If value is '-', will read token from stdin")
 	err := assumeRoleCmd.MarkFlagRequired("role-arn")
 	exitIfError(err)
 	err = assumeRoleCmd.MarkFlagRequired("oidc-provider-arn")
