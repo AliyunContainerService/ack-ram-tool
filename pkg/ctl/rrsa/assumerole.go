@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/openapi"
 	"github.com/spf13/cobra"
 )
@@ -40,7 +41,8 @@ var assumeRoleCmd = &cobra.Command{
 			exitByError("invalid token: The length of OIDCToke should be between 4 and 10000")
 		}
 
-		cred, err := openapi.AssumeRoleWithOIDCToken(ctx, oidcArn, roleArn, time.Second*900, token)
+		cred, err := openapi.AssumeRoleWithOIDCToken(ctx, oidcArn, roleArn, time.Second*900, token,
+			openapi.GetStsEndpoint(ctl.GlobalOption.Region, ctl.GlobalOption.UseVPCEndpoint))
 		if err != nil {
 			exitByError(fmt.Sprintf("Assume RAM Role failed: %+v", err))
 		}
@@ -54,9 +56,10 @@ var assumeRoleCmd = &cobra.Command{
 
 func setupAssumeRoleCmd(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(assumeRoleCmd)
-	assumeRoleCmd.Flags().StringVarP(&roleArn, "role-arn", "r", "", "")
-	assumeRoleCmd.Flags().StringVarP(&oidcArn, "oidc-provider-arn", "p", "", "")
-	assumeRoleCmd.Flags().StringVarP(&oidcTokenFile, "oidc-token-file", "t", "", "")
+	assumeRoleCmd.Flags().StringVarP(&roleArn, "role-arn", "r", "", "The arn of RAM role")
+	assumeRoleCmd.Flags().StringVarP(&oidcArn, "oidc-provider-arn", "p", "", "The arn of OIDC provider")
+	assumeRoleCmd.Flags().StringVarP(&oidcTokenFile, "oidc-token-file", "t", "",
+		"Path to OIDC token file. If value is '-', will read token from stdin")
 	err := assumeRoleCmd.MarkFlagRequired("role-arn")
 	exitIfError(err)
 	err = assumeRoleCmd.MarkFlagRequired("oidc-provider-arn")
