@@ -12,10 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	defaultRegion = "cn-hangzhou"
-	clusterId     string
-)
+var clusterId     string
 
 var rrsaStatusTemplate = `
 {{- if .Enabled }}
