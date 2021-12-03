@@ -19,7 +19,7 @@ access_key_secret = bar
 Or environment variables:
 
 ```
-$ export ALIBABA_CLOUD_ACCESS_KEY_Id=foo
+$ export ALIBABA_CLOUD_ACCESS_KEY_ID=foo
 $ export ALIBABA_CLOUD_ACCESS_KEY_SECRET=bar
 ```
 

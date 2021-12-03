@@ -13,6 +13,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	envAccessKeyId = "ALIBABA_CLOUD_ACCESS_KEY_ID"
+	envAccessKeySecret = "ALIBABA_CLOUD_ACCESS_KEY_SECRET"
+)
 var defaultProfilePath = filepath.Join("~", ".alibabacloud", "credentials")
 var profilePath = ""
 
@@ -24,6 +28,12 @@ var (
 
 More info: https://github.com/AliyunContainerService/ack-ram-tool`,
 		PersistentPreRun: func(_ *cobra.Command, _ []string) {
+			if _, ok := os.LookupEnv(envAccessKeyId); ok {
+				_ = os.Setenv(credentials.EnvVarAccessKeyId, os.Getenv(envAccessKeyId))
+			}
+			if _, ok := os.LookupEnv(envAccessKeySecret); ok {
+				_ = os.Setenv(credentials.EnvVarAccessKeySecret, os.Getenv(envAccessKeySecret))
+			}
 			path, err := expandPath(profilePath)
 			if err != nil {
 				fmt.Printf("error: parse profile path %s failed: %+v", profilePath, err)
