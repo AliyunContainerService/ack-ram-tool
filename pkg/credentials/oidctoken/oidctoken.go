@@ -138,10 +138,13 @@ func (p *RoleProvider) retrieve(ctx context.Context) (*Credential, error) {
 
 func AssumeRoleWithOIDCToken(ctx context.Context, providerArn, roleArn, token, stsEndpoint, stsProtocol, policy, roleSessionName string,
 	sessionDuration time.Duration) (*Credential, error) {
-	stsClient, _ := sts.NewClient(&openapi.Config{
+	stsClient, err := sts.NewClient(&openapi.Config{
 		Endpoint: tea.String(stsEndpoint),
 		Protocol: tea.String(stsProtocol),
 	})
+	if err != nil {
+		return nil, err
+	}
 	sessionName := roleSessionName
 	if sessionName == "" {
 		sessionName = fmt.Sprintf("%d", time.Now().UnixNano())
