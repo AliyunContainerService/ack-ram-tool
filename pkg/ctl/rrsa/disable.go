@@ -53,5 +53,6 @@ func disableRRSA(ctx context.Context, clusterId string, client openapi.CSClientI
 func setupDisableCmd(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(disableCmd)
 	disableCmd.Flags().StringVarP(&clusterId, "cluster-id", "c", "", "")
-	disableCmd.MarkFlagRequired("cluster-id")
+	err := disableCmd.MarkFlagRequired("cluster-id")
+	exitIfError(err)
 }

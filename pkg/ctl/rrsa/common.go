@@ -30,7 +30,7 @@ func yesOrExit(msg string) {
 	prompt := &survey.Confirm{
 		Message: msg,
 	}
-	survey.AskOne(prompt, &promptRet)
+	_ = survey.AskOne(prompt, &promptRet)
 	if !promptRet {
 		fmt.Println("Canceled! Bye bye~")
 		os.Exit(0)
@@ -46,7 +46,7 @@ func allowRRSAFeatureOrDie(ctx context.Context, clusterId string, client *openap
 		exitByError(fmt.Sprintf("cluster state is not running: %s", c.State))
 	}
 	if c.ClusterType != types.ClusterTypeManagedKubernetes {
-		exitByError(fmt.Sprintf("only support manged cluster"))
+		exitByError("only support managed cluster")
 	}
 	return c
 }

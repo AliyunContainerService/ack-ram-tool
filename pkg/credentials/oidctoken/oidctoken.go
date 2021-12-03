@@ -184,7 +184,7 @@ func (c *Credential) shouldRefresh(expiryWindow time.Duration) bool {
 		return true
 	}
 	expiryWindow = expiryWindow + time.Duration(rand.Int63n(int64(time.Minute)))
-	return c.Expiration.Sub(time.Now()) <= expiryWindow
+	return time.Until(c.Expiration) <= expiryWindow
 }
 
 func (c *Credential) DeepCopy() *Credential {
