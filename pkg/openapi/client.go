@@ -9,9 +9,9 @@ import (
 )
 
 var (
-	CsApiEndpoint  = "cs.aliyuncs.com"
-	RamApiEndpoint = "ram.aliyuncs.com"
-	StsApiEndpoint = "sts.aliyuncs.com"
+	defaultCsApiEndpoint  = "cs.aliyuncs.com"
+	defaultRamApiEndpoint = "ram.aliyuncs.com"
+	defaultStsApiEndpoint = "sts.aliyuncs.com"
 )
 
 type Client struct {
@@ -24,12 +24,12 @@ func NewClient(config *openapi.Config) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	csClient.Endpoint = tea.String(CsApiEndpoint)
+	csClient.Endpoint = tea.String(defaultCsApiEndpoint)
 	ramClient, err := ram.NewClient(config)
 	if err != nil {
 		return nil, err
 	}
-	ramClient.Endpoint = tea.String(RamApiEndpoint)
+	ramClient.Endpoint = tea.String(defaultRamApiEndpoint)
 	return &Client{
 		ramClient: ramClient,
 		csClient:  csClient,

@@ -15,7 +15,7 @@ import (
 )
 
 func getClientOrDie() *openapi.Client {
-	client, err := NewClient(defaultRegion)
+	client, err := NewClient(ctl.GlobalOption.Region)
 	if err != nil {
 		exitByError(fmt.Sprintf("init client failed: %+v", err))
 	}
