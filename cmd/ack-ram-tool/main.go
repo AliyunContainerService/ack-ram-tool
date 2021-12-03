@@ -47,6 +47,7 @@ More info: https://github.com/AliyunContainerService/ack-ram-tool`,
 func init() {
 	rrsa.SetupRRSACmd(rootCmd)
 	version.SetupVersionCmd(rootCmd)
+	rootCmd.PersistentFlags().StringVar(&ctl.GlobalOption.Region, "region-id", "cn-hangzhou", "The region to use")
 	rootCmd.PersistentFlags().BoolVarP(&ctl.GlobalOption.AssumeYes, "assume-yes", "y", false,
 		"Automatic yes to prompts; assume \"yes\" as answer to all prompts and run non-interactively")
 	rootCmd.PersistentFlags().StringVar(&profilePath, "profile-file", defaultProfilePath, "Path to credential file")
