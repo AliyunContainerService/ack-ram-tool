@@ -101,7 +101,13 @@ func getRRSAFailMessage(ctx context.Context, clusterId string, client openapi.CS
 		// TODO: xxx
 		return ""
 	}
+	max := 20
+	n := 0
 	for _, log := range logs {
+		n++
+		if n >= max {
+			break
+		}
 		if !strings.Contains(log.Log, "Failed") {
 			continue
 		}

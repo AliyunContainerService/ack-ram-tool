@@ -9,9 +9,6 @@ import (
 
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/types"
 	cs "github.com/alibabacloud-go/cs-20151215/v3/client"
-	openapi "github.com/alibabacloud-go/darabonba-openapi/client"
-	openapiutil "github.com/alibabacloud-go/openapi-util/service"
-	util "github.com/alibabacloud-go/tea-utils/service"
 	"github.com/alibabacloud-go/tea/tea"
 )
 
@@ -86,34 +83,11 @@ func convertDescribeClusterDetailResponse(c *types.Cluster, resp *cs.DescribeClu
 
 func (c *Client) GetRecentClusterLogs(ctx context.Context, clusterId string) ([]types.ClusterLog, error) {
 	client := c.csClient
-	runtime := &util.RuntimeOptions{}
-	headers := make(map[string]*string)
-	_result := &cs.DescribeClusterLogsResponse{}
-	clusterId = *(openapiutil.GetEncodeParam(&clusterId))
-	req := &openapi.OpenApiRequest{
-		Headers: headers,
-		Query:   map[string]*string{"limit": tea.String("100")},
-	}
-	params := &openapi.Params{
-		Action:      tea.String("DescribeClusterLogs"),
-		Version:     tea.String("2015-12-15"),
-		Protocol:    tea.String("HTTPS"),
-		Pathname:    tea.String("/clusters/" + clusterId + "/logs"),
-		Method:      tea.String("GET"),
-		AuthType:    tea.String("AK"),
-		Style:       tea.String("ROA"),
-		ReqBodyType: tea.String("json"),
-		BodyType:    tea.String("array"),
-	}
-	_body, err := client.CallApi(params, req, runtime)
+	ret, err := client.DescribeClusterLogs(&clusterId)
 	if err != nil {
 		return nil, err
 	}
-	err = tea.Convert(_body, &_result)
-	if err != nil {
-		return nil, err
-	}
-	return convertDescribeClusterLogsResponse(_result), nil
+	return convertDescribeClusterLogsResponse(ret), nil
 }
 
 func convertDescribeClusterLogsResponse(resp *cs.DescribeClusterLogsResponse) []types.ClusterLog {
