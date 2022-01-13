@@ -14,17 +14,18 @@ import (
 )
 
 const (
-	envAccessKeyId = "ALIBABA_CLOUD_ACCESS_KEY_ID"
+	envAccessKeyId     = "ALIBABA_CLOUD_ACCESS_KEY_ID"
 	envAccessKeySecret = "ALIBABA_CLOUD_ACCESS_KEY_SECRET"
 )
+
 var defaultProfilePath = filepath.Join("~", ".alibabacloud", "credentials")
 var profilePath = ""
 
 var (
 	rootCmd = &cobra.Command{
 		Use:   "ack-ram-tool",
-		Short: "A command line utility for using RAM in ACK.",
-		Long: `A command line utility for using RAM in ACK.
+		Short: "A command line utility for using RAM in Alibaba Cloud Container Service For Kubernetes (ACK).",
+		Long: `A command line utility for using RAM in Alibaba Cloud Container Service For Kubernetes (ACK).
 
 More info: https://github.com/AliyunContainerService/ack-ram-tool`,
 		PersistentPreRun: func(_ *cobra.Command, _ []string) {
