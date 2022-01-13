@@ -54,13 +54,21 @@ func MakeAssumeRolePolicyStatementWithServiceAccount(oidcIssuer, oidcArn, namesp
 	}
 }
 
-func (p AssumeRolePolicyDocument) AppendPolicy(policy AssumeRolePolicyStatement) error {
-	if len(p) == 0 {
-		v := &p
-		*v = MakeAssumeRolePolicyDocument([]AssumeRolePolicyStatement{})
+func (p *AssumeRolePolicyDocument) AppendPolicyIfNotExist(policy AssumeRolePolicyStatement) error {
+	if exist, err := p.IncludePolicy(policy); err != nil {
+		return err
+	} else if exist {
+		return nil
 	}
-	if _, ok := p[AssumeRolePolicyKeyStatement]; !ok {
-		p[AssumeRolePolicyKeyStatement] = []AssumeRolePolicyStatement{}
+	return p.AppendPolicy(policy)
+}
+
+func (p *AssumeRolePolicyDocument) AppendPolicy(policy AssumeRolePolicyStatement) error {
+	if p == nil || len(*p) == 0 {
+		*p = MakeAssumeRolePolicyDocument([]AssumeRolePolicyStatement{})
+	}
+	if _, ok := (*p)[AssumeRolePolicyKeyStatement]; !ok {
+		(*p)[AssumeRolePolicyKeyStatement] = []AssumeRolePolicyStatement{}
 	}
 	policies, err := p.policies()
 	if err != nil {
@@ -68,11 +76,11 @@ func (p AssumeRolePolicyDocument) AppendPolicy(policy AssumeRolePolicyStatement)
 	}
 
 	policies = append(policies, policy)
-	p[AssumeRolePolicyKeyStatement] = policies
+	(*p)[AssumeRolePolicyKeyStatement] = policies
 	return nil
 }
 
-func (p AssumeRolePolicyDocument) IncludePolicy(policy AssumeRolePolicyStatement) (bool, error) {
+func (p *AssumeRolePolicyDocument) IncludePolicy(policy AssumeRolePolicyStatement) (bool, error) {
 	policies, err := p.policies()
 	if err != nil {
 		log.Printf("parse statements failed: %+v", err)
@@ -88,7 +96,7 @@ func (p AssumeRolePolicyDocument) IncludePolicy(policy AssumeRolePolicyStatement
 	return false, nil
 }
 
-func (p AssumeRolePolicyDocument) JSON() string {
+func (p *AssumeRolePolicyDocument) JSON() string {
 	data, err := json.MarshalIndent(p, " ", " ")
 	if err != nil {
 		log.Printf("errro: %+v\n", err)
@@ -96,11 +104,11 @@ func (p AssumeRolePolicyDocument) JSON() string {
 	return string(data)
 }
 
-func (p AssumeRolePolicyDocument) policies() ([]AssumeRolePolicyStatement, error) {
-	if len(p) == 0 {
+func (p *AssumeRolePolicyDocument) policies() ([]AssumeRolePolicyStatement, error) {
+	if p == nil || len(*p) == 0 {
 		return nil, nil
 	}
-	statements, ok := p[AssumeRolePolicyKeyStatement]
+	statements, ok := (*p)[AssumeRolePolicyKeyStatement]
 	if !ok {
 		return nil, nil
 	}
@@ -117,20 +125,20 @@ func (p AssumeRolePolicyDocument) policies() ([]AssumeRolePolicyStatement, error
 	return policies, nil
 }
 
-func (s AssumeRolePolicyStatement) Equal(another AssumeRolePolicyStatement) bool {
+func (s *AssumeRolePolicyStatement) Equal(another AssumeRolePolicyStatement) bool {
 	if reflect.DeepEqual(s, another) {
 		return true
 	}
 	if utils.JSONEqual(s, another) {
 		return true
 	}
-	if utils.StringInterfaceMapEqual(s, another) {
+	if utils.StringInterfaceMapEqual(*s, another) {
 		return true
 	}
 	return false
 }
 
-func (s AssumeRolePolicyStatement) JSON() string {
+func (s *AssumeRolePolicyStatement) JSON() string {
 	data, _ := json.Marshal(s)
 	return string(data)
 }

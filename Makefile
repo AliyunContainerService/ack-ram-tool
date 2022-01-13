@@ -10,3 +10,8 @@ LDFLAGS += -X github.com/AliyunContainerService/ack-ram-tool/pkg/version.GitComm
 build:
 	CGO_ENABLED=$(CGO_ENABLED) go build -ldflags "$(LDFLAGS)" -a -o ack-ram-tool \
 	cmd/ack-ram-tool/main.go
+
+.PHONY: test
+test:
+	go test -v ./...
+
