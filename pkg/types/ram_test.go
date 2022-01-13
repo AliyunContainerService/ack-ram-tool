@@ -278,9 +278,9 @@ func TestAssumeRolePolicyDocument_AppendPolicyIfNotExist(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &AssumeRolePolicyDocument{}
-			json.Unmarshal([]byte(tt.p), p)
+			_ = json.Unmarshal([]byte(tt.p), p)
 			policy := &AssumeRolePolicyStatement{}
-			json.Unmarshal([]byte(tt.args.policy), policy)
+			_ = json.Unmarshal([]byte(tt.args.policy), policy)
 
 			if err := p.AppendPolicyIfNotExist(*policy); (err != nil) != tt.wantErr {
 				t.Errorf("AppendPolicyIfNotExist() error = %v, wantErr %v", err, tt.wantErr)
