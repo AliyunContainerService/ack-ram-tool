@@ -1,6 +1,6 @@
 # ack-ram-tool
 
-A command line utility and library for using RAM in ACK.
+A command line utility and library for using RAM in Alibaba Cloud Container Service For Kubernetes (ACK).
 
 ## Installation
 
