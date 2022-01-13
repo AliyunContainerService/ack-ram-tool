@@ -61,7 +61,7 @@ Diable RRSA feature:
 $ ack-ram-tool rrsa disable -c <clusterId>
 
 ? Are you sure you want to disable RRSA feature? Yes
-Disable RRSA feature for cluster c86fdd096c5ab482982cf33302f914af4 successfully
+Disable RRSA feature for cluster c86fdd*** successfully
 
 ```
 
