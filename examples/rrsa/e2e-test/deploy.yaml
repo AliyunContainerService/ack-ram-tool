@@ -1,0 +1,56 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: run-as-root
+spec:
+  containers:
+    - image: registry-vpc.REGION.aliyuncs.com/acs/busybox:1.33.1
+      command:
+        - sh
+        - -c
+        - 'sleep inf'
+      name: test
+      volumeMounts:
+        - mountPath: /var/run/secrets/tokens
+          name: oidc-token
+  serviceAccountName: user1
+  volumes:
+    - name: oidc-token
+      projected:
+        sources:
+          - serviceAccountToken:
+              path: oidc-token
+              expirationSeconds: 7200
+              audience: "sts.aliyuncs.com"
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: run-as-non-root
+spec:
+  securityContext:
+    fsGroup: 65534  # for < k8s 1.19
+  containers:
+    - image: registry-vpc.REGION.aliyuncs.com/acs/busybox:1.33.1
+      command:
+        - sh
+        - -c
+        - 'sleep inf'
+      name: test
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+      volumeMounts:
+        - mountPath: /var/run/secrets/tokens
+          name: oidc-token
+  serviceAccountName: user1
+  volumes:
+    - name: oidc-token
+      projected:
+        sources:
+          - serviceAccountToken:
+              path: oidc-token
+              expirationSeconds: 7200
+              audience: "sts.aliyuncs.com"

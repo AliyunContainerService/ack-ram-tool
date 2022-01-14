@@ -17,3 +17,4 @@
 /ack-ram-tool
 
 dist/
+kubeconfig

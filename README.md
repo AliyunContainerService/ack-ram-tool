@@ -32,7 +32,7 @@ $ export ALIBABA_CLOUD_ACCESS_KEY_SECRET=bar
 
 ### RAM Roles for Service Accounts (RRSA)
 
-Enable RRSA feature:
+Enable [RRSA feature](https://www.alibabacloud.com/help/doc-detail/356611.html):
 
 ```
 $ ack-ram-tool rrsa enable -c <clusterId>
@@ -120,3 +120,6 @@ SecurityToken:     CAIS***
 Expiration:        2021-12-03T05:51:37Z
 
 ```
+
+There is also have a e2e script for testing: [examples/rrsa/e2e-test](./examples/rrsa/e2e-test/)
+
