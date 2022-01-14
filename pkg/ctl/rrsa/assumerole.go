@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
@@ -41,8 +42,13 @@ var assumeRoleCmd = &cobra.Command{
 			exitByError("invalid token: The length of OIDCToke should be between 4 and 10000")
 		}
 
+		region := ctl.GlobalOption.Region
+		if strings.HasPrefix(region, "cn-") && region != "cn-hongkong" && !ctl.GlobalOption.UseVPCEndpoint {
+			// use default sts endpoint for Chinese mainland
+			region = ""
+		}
 		cred, err := openapi.AssumeRoleWithOIDCToken(ctx, oidcArn, roleArn, time.Second*900, token,
-			openapi.GetStsEndpoint(ctl.GlobalOption.Region, ctl.GlobalOption.UseVPCEndpoint))
+			openapi.GetStsEndpoint(region, ctl.GlobalOption.UseVPCEndpoint))
 		if err != nil {
 			exitByError(fmt.Sprintf("Assume RAM Role failed: %+v", err))
 		}
