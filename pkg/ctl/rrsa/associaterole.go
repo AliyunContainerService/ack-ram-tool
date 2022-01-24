@@ -53,7 +53,7 @@ func associateRole(ctx context.Context, c *types.Cluster, client *openapi.Client
 	assumeRolePolicyDocument := role.AssumeRolePolicyDocument
 	oldDocument := assumeRolePolicyDocument.JSON()
 	policy := types.MakeAssumeRolePolicyStatementWithServiceAccount(
-		rrsac.Issuer, rrsac.OIDCArn, namespace, serviceAccount)
+		rrsac.TokenIssuer(), rrsac.OIDCArn, namespace, serviceAccount)
 	if exist, err := assumeRolePolicyDocument.IncludePolicy(policy); err != nil {
 		return err
 	} else if exist {
@@ -61,6 +61,7 @@ func associateRole(ctx context.Context, c *types.Cluster, client *openapi.Client
 			roleName, serviceAccount, namespace)
 		return nil
 	}
+
 	if err := assumeRolePolicyDocument.AppendPolicy(policy); err != nil {
 		return err
 	}

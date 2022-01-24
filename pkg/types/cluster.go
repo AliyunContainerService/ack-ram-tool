@@ -1,6 +1,7 @@
 package types
 
 import (
+	"strings"
 	"time"
 
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/utils"
@@ -40,6 +41,14 @@ type RRSAConfig struct {
 
 	OIDCName string `json:"oidc_name"`
 	OIDCArn  string `json:"oidc_arn"`
+}
+
+func (c RRSAConfig) TokenIssuer() string {
+	issuers := strings.Split(c.Issuer, ",")
+	if len(issuers) > 1 {
+		return issuers[0]
+	}
+	return c.Issuer
 }
 
 type ClusterTask struct {

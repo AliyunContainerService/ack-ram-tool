@@ -12,14 +12,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var clusterId     string
+var clusterId string
 
 var rrsaStatusTemplate = `
 {{- if .Enabled }}
-RRSA feature: enabled
-OIDC Name:    {{ .OIDCName }}
-OIDC Arn:     {{ .OIDCArn }}
-Issuer:       {{ .Issuer }}
+RRSA feature:          enabled
+OIDC Provider Name:    {{ .OIDCName }}
+OIDC Provider Arn:     {{ .OIDCArn }}
+OIDC Token Issuer:     {{ .TokenIssuer }}
 {{- else }}
 RRSA feature: disabled
 {{- end }}

@@ -48,10 +48,10 @@ Check status of RRSA feature:
 ```
 $ ack-ram-tool rrsa status -c <clusterId>
 
-RRSA feature: enabled
-OIDC Name:    ack-rrsa-c86fdd***
-OIDC Arn:     acs:ram::18***:oidc-provider/ack-rrsa-c86fdd***
-Issuer:       https://oidc-ack-***/c86fdd***
+RRSA feature:          enabled
+OIDC Provider Name:    ack-rrsa-c86fdd***
+OIDC Provider Arn:     acs:ram::18***:oidc-provider/ack-rrsa-c86fdd***
+OIDC Token Issuer:     https://oidc-ack-***/c86fdd***
 
 ```
 
