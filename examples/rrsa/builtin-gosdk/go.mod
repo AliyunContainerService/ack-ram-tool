@@ -1,4 +1,4 @@
-module github.com/AliyunContainerService/ack-ram-tool/examples/rrsa
+module github.com/AliyunContainerService/ack-ram-tool/examples/rrsa/builtin-gosdk
 
 go 1.16
 
@@ -13,4 +13,4 @@ require (
 	gopkg.in/ini.v1 v1.64.0 // indirect
 )
 
-replace github.com/AliyunContainerService/ack-ram-tool => ../../
+replace github.com/AliyunContainerService/ack-ram-tool => ../../../
