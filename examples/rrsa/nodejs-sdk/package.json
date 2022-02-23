@@ -1,0 +1,15 @@
+{
+  "name": "nodejs-sdk",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "demo": "ts-node src/index.ts"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@alicloud/credentials": "^2.2.1",
+    "@alicloud/sts20150401": "^1.1.0"
+  }
+}
