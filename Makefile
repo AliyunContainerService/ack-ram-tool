@@ -6,6 +6,8 @@ LDFLAGS := -extldflags "-static"
 LDFLAGS += -X github.com/AliyunContainerService/ack-ram-tool/pkg/version.Version=$(VERSION)
 LDFLAGS += -X github.com/AliyunContainerService/ack-ram-tool/pkg/version.GitCommit=$(GIT_COMMIT)
 
+CLUSTER_ID ?= ''
+
 .PHONY: build
 build:
 	CGO_ENABLED=$(CGO_ENABLED) go build -ldflags "$(LDFLAGS)" -a -o ack-ram-tool \
@@ -15,3 +17,6 @@ build:
 test:
 	go test -v ./...
 
+.PHONY: e2e
+e2e:
+	bash ./examples/rrsa/e2e-test/e2e.sh $(CLUSTER_ID)
