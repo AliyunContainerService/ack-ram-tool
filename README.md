@@ -55,7 +55,7 @@ OIDC Token Issuer:     https://oidc-ack-***/c86fdd***
 
 ```
 
-Diable RRSA feature:
+Disable RRSA feature:
 
 ```
 $ ack-ram-tool rrsa disable -c <clusterId>
@@ -120,6 +120,3 @@ SecurityToken:     CAIS***
 Expiration:        2021-12-03T05:51:37Z
 
 ```
-
-There is also have a e2e script for testing: [examples/rrsa/e2e-test](./examples/rrsa/e2e-test/)
-
