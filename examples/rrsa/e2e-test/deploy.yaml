@@ -30,8 +30,8 @@ kind: Pod
 metadata:
   name: run-as-non-root
 spec:
-  securityContext:
-    fsGroup: 65534  # for < k8s 1.19
+  # securityContext:
+    # fsGroup: 65534  # for < k8s 1.19
   containers:
     - image: registry-vpc.REGION.aliyuncs.com/acs/busybox:1.33.1
       command:
