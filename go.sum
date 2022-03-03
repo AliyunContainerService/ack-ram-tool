@@ -78,6 +78,8 @@ github.com/aliyun/alibaba-cloud-sdk-go v1.61.1339 h1:pg7GLlF3EFk+N117d/z/hO+aCZV
 github.com/aliyun/alibaba-cloud-sdk-go v1.61.1339/go.mod h1:9CMdKNL3ynIGPpfTcdwTvIm8SGuAZYYC4jFVSSvE1YQ=
 github.com/aliyun/credentials-go v1.1.2 h1:qU1vwGIBb3UJ8BwunHDRFtAhS6jnQLnde/yk0+Ih2GY=
 github.com/aliyun/credentials-go v1.1.2/go.mod h1:ozcZaMR5kLM7pwtCMEpVmQ242suV6qTJya2bDq4X1Tw=
+github.com/aliyun/credentials-go v1.2.1 h1:TrWRFzIyxoNoY6+k+7LXtemV1XHBf7WFX9AERvcf5Zo=
+github.com/aliyun/credentials-go v1.2.1/go.mod h1:/KowD1cfGSLrLsH28Jr8W+xwoId0ywIy5lNzDz6O1vw=
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
 github.com/armon/circbuf v0.0.0-20150827004946-bbbad097214e/go.mod h1:3U/XgcO3hCbHZ8TKRvWD2dDTCfh9M9ya+I9JpbB7O8o=
 github.com/armon/go-metrics v0.0.0-20180917152333-f0300d1749da/go.mod h1:Q73ZrmVTwzkszR9V5SSuryQ31EELlFMUz1kKyl939pY=
