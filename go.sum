@@ -64,8 +64,9 @@ github.com/alibabacloud-go/cs-20151215/v3 v3.0.6 h1:mytzwVN2jySEG5ScXbi51L+PLItx
 github.com/alibabacloud-go/cs-20151215/v3 v3.0.6/go.mod h1:OUbWhDNAXBkHJmB9i20FiSaEU8yo3ceFvXFL2oW9mK0=
 github.com/alibabacloud-go/darabonba-openapi v0.0.9/go.mod h1:YGpp3JTSkPwUK5vH/qFWbxTpfgWp44GkN45QcPAaOyc=
 github.com/alibabacloud-go/darabonba-openapi v0.1.7/go.mod h1:6FV1Bt1AItYIlC2rVopPTumrRNtkfPBmrPVAZ8v2bLk=
-github.com/alibabacloud-go/darabonba-openapi v0.1.14 h1:3bQEoqeO0ZvSor1n5uqkb4TiFNAd8XMFYeGFll75L/c=
 github.com/alibabacloud-go/darabonba-openapi v0.1.14/go.mod h1:w4CosR7O/kapCtEEMBm3JsQqWBU/CnZ2o0pHorsTWDI=
+github.com/alibabacloud-go/darabonba-openapi v0.1.15 h1:PE+D+jaQj31kJk4MGF483DB8V5iyUG67amWHOsHXYnc=
+github.com/alibabacloud-go/darabonba-openapi v0.1.15/go.mod h1:w4CosR7O/kapCtEEMBm3JsQqWBU/CnZ2o0pHorsTWDI=
 github.com/alibabacloud-go/darabonba-string v1.0.0/go.mod h1:93cTfV3vuPhhEwGGpKKqhVW4jLe7tDpo3LUM0i0g6mA=
 github.com/alibabacloud-go/debug v0.0.0-20190504072949-9472017b5c68 h1:NqugFkGxx1TXSh/pBcU00Y6bljgDPaFdh5MUSeJ7e50=
 github.com/alibabacloud-go/debug v0.0.0-20190504072949-9472017b5c68/go.mod h1:6pb/Qy8c+lqua8cFpEy7g39NRRqOWc3rOwAy8m5Y2BY=
