@@ -13,7 +13,12 @@ require (
 	github.com/aliyun/credentials-go v1.2.1
 	github.com/briandowns/spinner v1.18.1
 	github.com/fatih/color v1.13.0
+	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/sergi/go-diff v1.2.0
-	github.com/spf13/cobra v1.3.0
+	github.com/spf13/cobra v1.4.0
 	github.com/stretchr/testify v1.7.0
+	golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d // indirect
+	golang.org/x/sys v0.0.0-20211205182925-97ca703d548d // indirect
+	golang.org/x/text v0.3.7 // indirect
 )
