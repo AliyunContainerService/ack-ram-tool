@@ -3,7 +3,7 @@ module github.com/AliyunContainerService/ack-ram-tool
 go 1.16
 
 require (
-	github.com/AlecAivazis/survey/v2 v2.3.2
+	github.com/AlecAivazis/survey/v2 v2.3.3
 	github.com/alibabacloud-go/cs-20151215/v3 v3.0.9
 	github.com/alibabacloud-go/darabonba-openapi v0.1.15
 	github.com/alibabacloud-go/ram-20150501 v1.0.1
