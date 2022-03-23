@@ -1,6 +1,11 @@
 
 import com.aliyun.credentials.Client;
+import com.aliyun.tea.*;
+import com.aliyun.sts20150401.*;
 import com.aliyun.sts20150401.models.*;
+import com.aliyun.teaopenapi.*;
+import com.aliyun.teaopenapi.models.*;
+import com.aliyun.credentials.models.Config;
 
 // only for oss sdk
 import com.aliyun.oss.ClientBuilderConfiguration;
