@@ -77,8 +77,10 @@ function assume_role() {
 function cleanup() {
   set +e
   bar_tip "cleanup"
-  aliyun ram DeleteRole --RoleName ${ROLE_NAME}
-  rm ${KUBECONFIG_PATH}
+  if ! echo "${SKIP}" |grep cleanup; then
+    aliyun ram DeleteRole --RoleName ${ROLE_NAME}
+    rm ${KUBECONFIG_PATH}
+  fi
   set -e
 }
 
