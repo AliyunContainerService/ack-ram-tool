@@ -1,4 +1,5 @@
 
+// com.aliyun:credentials-java >= 0.2.8
 import com.aliyun.credentials.Client;
 import com.aliyun.tea.*;
 import com.aliyun.sts20150401.*;
