@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/version"
 	openapi "github.com/alibabacloud-go/darabonba-openapi/client"
 	sts "github.com/alibabacloud-go/sts-20150401/client"
 	"github.com/alibabacloud-go/tea/tea"
@@ -139,8 +140,9 @@ func (p *RoleProvider) retrieve(ctx context.Context) (*Credential, error) {
 func AssumeRoleWithOIDCToken(ctx context.Context, providerArn, roleArn, token, stsEndpoint, stsProtocol, policy, roleSessionName string,
 	sessionDuration time.Duration) (*Credential, error) {
 	stsClient, err := sts.NewClient(&openapi.Config{
-		Endpoint: tea.String(stsEndpoint),
-		Protocol: tea.String(stsProtocol),
+		Endpoint:  tea.String(stsEndpoint),
+		Protocol:  tea.String(stsProtocol),
+		UserAgent: tea.String(version.UserAgent()),
 	})
 	if err != nil {
 		return nil, err
