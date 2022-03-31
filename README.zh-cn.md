@@ -1,17 +1,16 @@
 # ack-ram-tool
 
-A command line utility and library for using RAM in Alibaba Cloud Container Service For Kubernetes (ACK).
-
-[中文文档](README.zh-cn.md)
-
-## Installation
-
-You can download the latest release from [Releases](https://github.com/AliyunContainerService/ack-ram-tool/releases) page.
+一个辅助配置在使用 ACK 过程中涉及的 RAM 相关操作的命令行工具及 Golang 库。
 
 
-## Credential
+## 安装
 
-You can use `~/.alibabacloud/credentials` file(this path can be overridden using the `--profile-file` flag):
+您可以通过 [Releases](https://github.com/AliyunContainerService/ack-ram-tool/releases) 页面下载最新版的命令行工具。
+
+
+## 配置认证信息
+
+您可以通过 `~/.alibabacloud/credentials` 文件配置认证信息（也可以通过 `--profile-file` 参数指定文件路径）:
 
 ```
 $ cat ~/.alibabacloud/credentials
@@ -22,19 +21,19 @@ access_key_id = foo
 access_key_secret = bar
 ```
 
-Or environment variables:
+您也可以通过环境变量配置认证信息:
 
 ```
 $ export ALIBABA_CLOUD_ACCESS_KEY_ID=foo
 $ export ALIBABA_CLOUD_ACCESS_KEY_SECRET=bar
 ```
 
-## Usage
+## 使用示例
 
 
 ### RAM Roles for Service Accounts (RRSA)
 
-Enable [RRSA feature](https://www.alibabacloud.com/help/doc-detail/356611.html):
+为集群启用 [RRSA 特性](https://www.alibabacloud.com/help/doc-detail/356611.html):
 
 ```
 $ ack-ram-tool rrsa enable -c <clusterId>
@@ -45,7 +44,7 @@ Enable RRSA feature for cluster c86fdd*** successfully
 ```
 
 
-Check status of RRSA feature:
+检查当前集群是否已启用 RRSA 特性:
 
 ```
 $ ack-ram-tool rrsa status -c <clusterId>
@@ -57,7 +56,7 @@ OIDC Token Issuer:     https://oidc-ack-***/c86fdd***
 
 ```
 
-Disable RRSA feature:
+禁用 RRSA 特性:
 
 ```
 $ ack-ram-tool rrsa disable -c <clusterId>
@@ -67,7 +66,7 @@ Disable RRSA feature for cluster c86fdd*** successfully
 
 ```
 
-Associate an RAM Role to a service account:
+为 RAM 角色关联一个 Service Account（允许使用这个 Service Account 的 OIDC Token 来扮演此 RAM 角色）:
 
 ```
 $ ack-ram-tool rrsa associate-role -c <clusterId> -r <roleName> -n <namespace> -s <serviceAccount>
@@ -110,7 +109,7 @@ Associate RAM Role test-rrsa to service account test-serviceaccount (namespace: 
 
 ```
 
-Testing assume role with give OIDC token:
+测试使用指定的 OIDC token 扮演 RAM 角色获取 STS Token:
 
 ```
 $ ack-ram-tool rrsa assume-role -r <roleArn> -p <oidcProviderArn> -t <oidcTokenFile>
