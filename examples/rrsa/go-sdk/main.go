@@ -9,6 +9,7 @@ import (
 	sts "github.com/alibabacloud-go/sts-20150401/client"
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
+	// github.com/aliyun/credentials-go >= v1.2.1
 	"github.com/aliyun/credentials-go/credentials"
 )
 

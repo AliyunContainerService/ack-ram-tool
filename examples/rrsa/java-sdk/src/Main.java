@@ -100,7 +100,7 @@ public class Main {
         openapiSdk.CallAPIWithRRSAOIDCToken(cred);
 
         // test oss sdk (https://github.com/aliyun/aliyun-oss-java-sdk) use rrsa oidc token
-        if (System.getenv("TEST-OSS-SDK").equals("true")) {
+        if (System.getenv("TEST_OSS_SDK").equals("true")) {
             System.out.println("\n");
             System.out.println("test oss sdk use rrsa oidc token");
             TestOSSSDK osssdk = new TestOSSSDK();
