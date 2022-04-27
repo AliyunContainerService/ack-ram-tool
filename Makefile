@@ -6,7 +6,8 @@ LDFLAGS := -extldflags "-static"
 LDFLAGS += -X github.com/AliyunContainerService/ack-ram-tool/pkg/version.Version=$(VERSION)
 LDFLAGS += -X github.com/AliyunContainerService/ack-ram-tool/pkg/version.GitCommit=$(GIT_COMMIT)
 
-CLUSTER_ID ?= ''
+CLUSTER ?= ''
+CLUSTER_ID ?= $(CLUSTER)
 
 .PHONY: build
 build:
