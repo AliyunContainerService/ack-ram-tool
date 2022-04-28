@@ -41,8 +41,8 @@ github.com/alibabacloud-go/tea-utils v1.4.3/go.mod h1:KNcT0oXlZZxOXINnZBs6YvgOd5
 github.com/aliyun/alibaba-cloud-sdk-go v1.61.1518 h1:nSjwCaMhDn2PxOrJg7GNYxwhfhBFwlMbEuk5K1X3EPo=
 github.com/aliyun/alibaba-cloud-sdk-go v1.61.1518/go.mod h1:RcDobYh8k5VP6TNybz9m++gL3ijVI5wueVr0EM10VsU=
 github.com/aliyun/credentials-go v1.1.2/go.mod h1:ozcZaMR5kLM7pwtCMEpVmQ242suV6qTJya2bDq4X1Tw=
-github.com/aliyun/credentials-go v1.2.1 h1:TrWRFzIyxoNoY6+k+7LXtemV1XHBf7WFX9AERvcf5Zo=
-github.com/aliyun/credentials-go v1.2.1/go.mod h1:/KowD1cfGSLrLsH28Jr8W+xwoId0ywIy5lNzDz6O1vw=
+github.com/aliyun/credentials-go v1.2.2 h1:Od4LtHDmszForEtfLTQXu6iZCYB5VaxUU51VGtwAY4A=
+github.com/aliyun/credentials-go v1.2.2/go.mod h1:/KowD1cfGSLrLsH28Jr8W+xwoId0ywIy5lNzDz6O1vw=
 github.com/briandowns/spinner v1.18.1 h1:yhQmQtM1zsqFsouh09Bk/jCjd50pC3EOGsh28gLVvwY=
 github.com/briandowns/spinner v1.18.1/go.mod h1:mQak9GHqbspjC/5iUx3qMlIho8xBS/ppAL/hX5SmPJU=
 github.com/cpuguy83/go-md2man/v2 v2.0.1/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
