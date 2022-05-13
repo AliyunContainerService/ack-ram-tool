@@ -5,9 +5,9 @@ go 1.16
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.4
 	github.com/alibabacloud-go/cs-20151215/v3 v3.0.9
-	github.com/alibabacloud-go/darabonba-openapi v0.1.16
+	github.com/alibabacloud-go/darabonba-openapi v0.1.15
 	github.com/alibabacloud-go/ram-20150501 v1.0.1
-	github.com/alibabacloud-go/sts-20150401 v1.1.1
+	github.com/alibabacloud-go/sts-20150401 v1.1.0
 	github.com/alibabacloud-go/tea v1.1.17
 	github.com/aliyun/alibaba-cloud-sdk-go v1.61.1518
 	github.com/aliyun/credentials-go v1.2.2
