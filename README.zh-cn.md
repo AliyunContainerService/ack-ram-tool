@@ -66,10 +66,11 @@ Disable RRSA feature for cluster c86fdd*** successfully
 
 ```
 
-为 RAM 角色关联一个 Service Account（允许使用这个 Service Account 的 OIDC Token 来扮演此 RAM 角色）:
+为 RAM 角色关联一个 Service Account（允许使用这个 Service Account 的 OIDC Token 来扮演此 RAM 角色。
+通过指定 ``--create-role-if-not-exist`` 参数实现在角色不存在时自动创建对应的 RAM 角色）:
 
 ```
-$ ack-ram-tool rrsa associate-role -c <clusterId> -r <roleName> -n <namespace> -s <serviceAccount>
+$ ack-ram-tool rrsa associate-role -c <clusterId> --create-role-if-not-exist -r <roleName> -n <namespace> -s <serviceAccount>
 
 ? Are you sure you want to associate RAM Role test-rrsa to service account test-serviceaccount (namespace: test-namespace)? Yes
 Will change the assumeRolePolicyDocument of RAM Role test-rrsa with blow content:

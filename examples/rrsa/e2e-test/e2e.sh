@@ -42,14 +42,12 @@ function create_resources() {
   set +e
   kubectl create ns ${NAMESPACE}
   kubectl create sa ${SERVICE_ACCOUNT} -n ${NAMESPACE}
-  aliyun ram CreateRole --RoleName ${ROLE_NAME} --AssumeRolePolicyDocument \
-    '{"Version": "1", "Statement": [{"Action": "sts:AssumeRole", "Effect": "Allow", "Principal": {"Service": ["cs.aliyuncs.com"]}}]}'
   set -e
 }
 
 function associate_role() {
   bar_tip "associate role"
-  ack-ram-tool rrsa -y -c "${CLUSTER_ID}" associate-role -r ${ROLE_NAME} -n ${NAMESPACE} -s ${SERVICE_ACCOUNT}
+  ack-ram-tool rrsa -y -c "${CLUSTER_ID}" associate-role --create-role-if-not-exist -r ${ROLE_NAME} -n ${NAMESPACE} -s ${SERVICE_ACCOUNT}
 }
 
 function deploy_pods() {

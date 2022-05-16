@@ -67,10 +67,11 @@ Disable RRSA feature for cluster c86fdd*** successfully
 
 ```
 
-Associate an RAM Role to a service account:
+Associate an RAM Role to a service account (use the ``--create-role-if-not-exist`` flag to
+auto create an RAM Role when it doesn't exist):
 
 ```
-$ ack-ram-tool rrsa associate-role -c <clusterId> -r <roleName> -n <namespace> -s <serviceAccount>
+$ ack-ram-tool rrsa associate-role --create-role-if-not-exist -c <clusterId> -r <roleName> -n <namespace> -s <serviceAccount>
 
 ? Are you sure you want to associate RAM Role test-rrsa to service account test-serviceaccount (namespace: test-namespace)? Yes
 Will change the assumeRolePolicyDocument of RAM Role test-rrsa with blow content:
@@ -84,7 +85,6 @@ Will change the assumeRolePolicyDocument of RAM Role test-rrsa with blow content
       "acs:ram::18***:root"
      ]
     }
-   },
    },
    {
     "Action": "sts:AssumeRole",

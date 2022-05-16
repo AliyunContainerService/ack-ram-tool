@@ -11,9 +11,10 @@ import (
 )
 
 var (
-	roleName       = ""
-	namespace      = ""
-	serviceAccount = ""
+	roleName             = ""
+	namespace            = ""
+	serviceAccount       = ""
+	createRoleIfNotExist bool
 )
 
 var associateRoleCmd = &cobra.Command{
@@ -48,12 +49,43 @@ func associateRole(ctx context.Context, c *types.Cluster, client *openapi.Client
 	rrsac := c.MetaData.RRSAConfig
 	role, err := client.GetRole(ctx, roleName)
 	if err != nil {
+		if openapi.IsRoleNotExistErr(err) && createRoleIfNotExist {
+			return createRole(ctx, client, rrsac, roleName)
+		}
 		return err
 	}
+
+	return updateRole(ctx, client, role, rrsac)
+}
+
+func createRole(ctx context.Context, client *openapi.Client, rrsac types.RRSAConfig, roleName string) error {
+	rd := types.MakeAssumeRolePolicyDocument([]types.AssumeRolePolicyStatement{})
+	assumeRolePolicyDocument := &rd
+	role := types.RamRole{
+		RoleName:                 roleName,
+		Description:              "",
+		AssumeRolePolicyDocument: assumeRolePolicyDocument,
+	}
+	policy := types.MakeAssumeRolePolicyStatementWithServiceAccount(
+		rrsac.TokenIssuer(), rrsac.OIDCArn, namespace, serviceAccount)
+	if err := assumeRolePolicyDocument.AppendPolicy(policy); err != nil {
+		return err
+	}
+
+	fmt.Printf("Will create RAM Role %s with blow assumeRolePolicyDocument:\n%s\n",
+		roleName, assumeRolePolicyDocument.JSON())
+	yesOrExit(fmt.Sprintf("Are you sure you want to create RAM Role %s?", roleName))
+
+	_, err := client.CreateRole(ctx, role)
+	return err
+}
+
+func updateRole(ctx context.Context, client *openapi.Client, role *types.RamRole, rrsac types.RRSAConfig) error {
 	assumeRolePolicyDocument := role.AssumeRolePolicyDocument
 	oldDocument := assumeRolePolicyDocument.JSON()
 	policy := types.MakeAssumeRolePolicyStatementWithServiceAccount(
 		rrsac.TokenIssuer(), rrsac.OIDCArn, namespace, serviceAccount)
+
 	if exist, err := assumeRolePolicyDocument.IncludePolicy(policy); err != nil {
 		return err
 	} else if exist {
@@ -67,13 +99,14 @@ func associateRole(ctx context.Context, c *types.Cluster, client *openapi.Client
 	}
 	newDocument := assumeRolePolicyDocument.JSON()
 	diff := utils.DiffPrettyText(oldDocument, newDocument)
+
 	fmt.Printf("Will change the assumeRolePolicyDocument of RAM Role %s with blow content:\n%s\n",
 		roleName, diff)
 	yesOrExit(fmt.Sprintf(
 		"Are you sure you want to associate RAM Role %s to service account %s (namespace: %s)?",
 		roleName, serviceAccount, namespace))
 
-	_, err = client.UpdateRole(ctx, roleName, openapi.UpdateRamRoleOption{
+	_, err := client.UpdateRole(ctx, roleName, openapi.UpdateRamRoleOption{
 		AssumeRolePolicyDocument: assumeRolePolicyDocument,
 	})
 	return err
@@ -84,7 +117,8 @@ func setupAssociateRoleCmd(rootCmd *cobra.Command) {
 	associateRoleCmd.Flags().StringVarP(&clusterId, "cluster-id", "c", "", "The cluster id to use")
 	associateRoleCmd.Flags().StringVarP(&roleName, "role-name", "r", "", "The RAM role name to use")
 	associateRoleCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "The Kubernetes namespace to use")
-	associateRoleCmd.Flags().StringVarP(&serviceAccount, "service-account", "s", "The Kubernetes service account to use", "")
+	associateRoleCmd.Flags().StringVarP(&serviceAccount, "service-account", "s", "", "The Kubernetes service account to use")
+	associateRoleCmd.Flags().BoolVar(&createRoleIfNotExist, "create-role-if-not-exist", false, "Create the RAM role if it does not exist")
 	err := associateRoleCmd.MarkFlagRequired("cluster-id")
 	exitIfError(err)
 	err = associateRoleCmd.MarkFlagRequired("role-name")
