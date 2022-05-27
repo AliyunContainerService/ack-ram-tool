@@ -3,24 +3,24 @@
 github.com/AlecAivazis/survey/v2
 github.com/AlecAivazis/survey/v2/core
 github.com/AlecAivazis/survey/v2/terminal
-# github.com/alibabacloud-go/alibabacloud-gateway-spi v0.0.2
+# github.com/alibabacloud-go/alibabacloud-gateway-spi v0.0.4
 github.com/alibabacloud-go/alibabacloud-gateway-spi/client
 # github.com/alibabacloud-go/cs-20151215/v3 v3.0.9
 ## explicit
 github.com/alibabacloud-go/cs-20151215/v3/client
-# github.com/alibabacloud-go/darabonba-openapi v0.1.15
+# github.com/alibabacloud-go/darabonba-openapi v0.1.16
 ## explicit
 github.com/alibabacloud-go/darabonba-openapi/client
 # github.com/alibabacloud-go/debug v0.0.0-20190504072949-9472017b5c68
 github.com/alibabacloud-go/debug/debug
 # github.com/alibabacloud-go/endpoint-util v1.1.0
 github.com/alibabacloud-go/endpoint-util/service
-# github.com/alibabacloud-go/openapi-util v0.0.10
+# github.com/alibabacloud-go/openapi-util v0.0.11
 github.com/alibabacloud-go/openapi-util/service
 # github.com/alibabacloud-go/ram-20150501 v1.0.1
 ## explicit
 github.com/alibabacloud-go/ram-20150501/client
-# github.com/alibabacloud-go/sts-20150401 v1.1.0
+# github.com/alibabacloud-go/sts-20150401 v1.1.1
 ## explicit
 github.com/alibabacloud-go/sts-20150401/client
 # github.com/alibabacloud-go/tea v1.1.17
@@ -104,5 +104,6 @@ golang.org/x/text/transform
 golang.org/x/text/width
 # gopkg.in/ini.v1 v1.66.2
 gopkg.in/ini.v1
-# gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
+# gopkg.in/yaml.v3 v3.0.0
+## explicit
 gopkg.in/yaml.v3
