@@ -29,7 +29,7 @@ github.com/alibabacloud-go/tea/tea
 github.com/alibabacloud-go/tea/utils
 # github.com/alibabacloud-go/tea-utils v1.4.3
 github.com/alibabacloud-go/tea-utils/service
-# github.com/aliyun/alibaba-cloud-sdk-go v1.61.1518
+# github.com/aliyun/alibaba-cloud-sdk-go v1.61.1612
 ## explicit
 github.com/aliyun/alibaba-cloud-sdk-go/sdk/auth/credentials
 github.com/aliyun/alibaba-cloud-sdk-go/sdk/auth/signers
@@ -104,5 +104,6 @@ golang.org/x/text/transform
 golang.org/x/text/width
 # gopkg.in/ini.v1 v1.66.2
 gopkg.in/ini.v1
-# gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
+# gopkg.in/yaml.v3 v3.0.0
+## explicit
 gopkg.in/yaml.v3
