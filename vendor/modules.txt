@@ -37,7 +37,7 @@ github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors
 github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests
 github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses
 github.com/aliyun/alibaba-cloud-sdk-go/sdk/utils
-# github.com/aliyun/credentials-go v1.2.2
+# github.com/aliyun/credentials-go v1.2.3
 ## explicit
 github.com/aliyun/credentials-go/credentials
 github.com/aliyun/credentials-go/credentials/request
@@ -104,5 +104,6 @@ golang.org/x/text/transform
 golang.org/x/text/width
 # gopkg.in/ini.v1 v1.66.2
 gopkg.in/ini.v1
-# gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
+# gopkg.in/yaml.v3 v3.0.0
+## explicit
 gopkg.in/yaml.v3
