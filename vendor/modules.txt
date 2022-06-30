@@ -29,7 +29,7 @@ github.com/alibabacloud-go/tea/tea
 github.com/alibabacloud-go/tea/utils
 # github.com/alibabacloud-go/tea-utils v1.4.3
 github.com/alibabacloud-go/tea-utils/service
-# github.com/aliyun/alibaba-cloud-sdk-go v1.61.1518
+# github.com/aliyun/alibaba-cloud-sdk-go v1.61.1660
 ## explicit
 github.com/aliyun/alibaba-cloud-sdk-go/sdk/auth/credentials
 github.com/aliyun/alibaba-cloud-sdk-go/sdk/auth/signers
@@ -37,7 +37,7 @@ github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors
 github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests
 github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses
 github.com/aliyun/alibaba-cloud-sdk-go/sdk/utils
-# github.com/aliyun/credentials-go v1.2.2
+# github.com/aliyun/credentials-go v1.2.3
 ## explicit
 github.com/aliyun/credentials-go/credentials
 github.com/aliyun/credentials-go/credentials/request
