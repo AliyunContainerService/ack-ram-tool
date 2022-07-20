@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudsdkgo/helper"
 	"log"
 	"os"
 
@@ -85,18 +86,7 @@ func (p *ossCredentialsProvider) GetCredentials() oss.Credentials {
 }
 
 func main() {
-	roleArn := os.Getenv("ALIBABA_CLOUD_ROLE_ARN")
-	oidcArn := os.Getenv("ALIBABA_CLOUD_OIDC_PROVIDER_ARN")
-	tokenFile := os.Getenv("ALIBABA_CLOUD_OIDC_TOKEN_FILE")
-
-	config := new(credentials.Config).
-		SetType("oidc_role_arn").
-		SetOIDCProviderArn(oidcArn).
-		SetOIDCTokenFilePath(tokenFile).
-		SetRoleArn(roleArn).
-		SetRoleSessionName("test-rrsa-oidc-token")
-
-	oidcCredential, err := credentials.NewCredential(config)
+	oidcCredential, err := helper.GetOidcCredential("test-rrsa-oidc-token")
 	if err != nil {
 		panic(err)
 	}
