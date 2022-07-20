@@ -2,17 +2,13 @@ package main
 
 import (
 	"fmt"
-	"os"
 
-	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudsdkgo"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudgo/helper"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/sts"
 )
 
 func main() {
-	roleArn := os.Getenv("ALIBABA_CLOUD_ROLE_ARN")
-	oidcArn := os.Getenv("ALIBABA_CLOUD_OIDC_PROVIDER_ARN")
-	tokenFile := os.Getenv("ALIBABA_CLOUD_OIDC_TOKEN_FILE")
-	singer, err := alibabacloudsdkgo.NewRAMRoleArnWithOIDCTokenSigner(oidcArn, roleArn, tokenFile, "", "", 0)
+	singer, err := helper.GetOidcSigner("test-old-sdk-use-odic-token")
 	if err != nil {
 		panic(err)
 	}
