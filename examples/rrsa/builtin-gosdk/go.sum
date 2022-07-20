@@ -1,4 +1,8 @@
 github.com/AlecAivazis/survey/v2 v2.3.4/go.mod h1:hrV6Y/kQCLhIZXGcriDCUBtB3wnN7156gMXJ3+b23xM=
+github.com/AliyunContainerService/ack-ram-tool v0.4.0 h1:jN9+8HCgvAUJgqaVX+YsViVr5ddBscxjJj6o9L/hjp0=
+github.com/AliyunContainerService/ack-ram-tool v0.4.0/go.mod h1:ru61nZmncZtM4viGKXjO+CcpCIWEaI4Xlioz2yw0/6o=
+github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudgo/helper v0.0.0-20220720093050-e752e18837af h1:DFyupUBiSHaRbCnkAJ86hcIz7N1Al3XDBEeOxm3IOkI=
+github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudgo/helper v0.0.0-20220720093050-e752e18837af/go.mod h1:CQ6037UAQvpnOOKNify/SNvZXNT4LwStFqsopHe0MS8=
 github.com/Netflix/go-expect v0.0.0-20220104043353-73e0943537d2/go.mod h1:HBCaDeC1lPdgDeDbhX8XFpy1jqjK0IBG8W5K+xYqA0w=
 github.com/alibabacloud-go/alibabacloud-gateway-spi v0.0.2 h1:/c6fLTlYKFd44Bx36A/cNuKekFzMqEPRc0QCLOC2Nok=
 github.com/alibabacloud-go/alibabacloud-gateway-spi v0.0.2/go.mod h1:sCavSAvdzOjul4cEqeVtvlSaSScfNsTQ+46HwlTL1hc=
@@ -38,9 +42,8 @@ github.com/aliyun/alibaba-cloud-sdk-go v1.61.1518/go.mod h1:RcDobYh8k5VP6TNybz9m
 github.com/aliyun/alibaba-cloud-sdk-go v1.61.1681 h1:YFzUCYv/NYLYjAPBeSPGTsVVfdUC1JXxanOjKQ2k+KY=
 github.com/aliyun/alibaba-cloud-sdk-go v1.61.1681/go.mod h1:RcDobYh8k5VP6TNybz9m++gL3ijVI5wueVr0EM10VsU=
 github.com/aliyun/credentials-go v1.1.2/go.mod h1:ozcZaMR5kLM7pwtCMEpVmQ242suV6qTJya2bDq4X1Tw=
+github.com/aliyun/credentials-go v1.2.2 h1:Od4LtHDmszForEtfLTQXu6iZCYB5VaxUU51VGtwAY4A=
 github.com/aliyun/credentials-go v1.2.2/go.mod h1:/KowD1cfGSLrLsH28Jr8W+xwoId0ywIy5lNzDz6O1vw=
-github.com/aliyun/credentials-go v1.2.3 h1:Vmodnr52Rz1mcbwn0kzMhLRKb6soizewuKXdfZiNemU=
-github.com/aliyun/credentials-go v1.2.3/go.mod h1:/KowD1cfGSLrLsH28Jr8W+xwoId0ywIy5lNzDz6O1vw=
 github.com/briandowns/spinner v1.18.1/go.mod h1:mQak9GHqbspjC/5iUx3qMlIho8xBS/ppAL/hX5SmPJU=
 github.com/cpuguy83/go-md2man/v2 v2.0.1/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
 github.com/creack/pty v1.1.17/go.mod h1:MOBLtS5ELjhRRrroQr9kyvTxUAFNvYEK993ew/Vr4O4=
@@ -160,6 +163,5 @@ gopkg.in/yaml.v2 v2.2.8/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
 gopkg.in/yaml.v2 v2.4.0 h1:D8xgwECY7CYvx+Y2n4sBz93Jn9JRvxdiyyo8CTfuKaY=
 gopkg.in/yaml.v2 v2.4.0/go.mod h1:RDklbk79AGWmwhnvt/jBztapEOGDOx6ZbXqjP6csGnQ=
 gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
+gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b h1:h8qDotaEPuJATrMmW04NCwg7v22aHH28wwpauUhK9Oo=
 gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
-gopkg.in/yaml.v3 v3.0.0 h1:hjy8E9ON/egN1tAYqKb61G10WtihqetD4sz2H+8nIeA=
-gopkg.in/yaml.v3 v3.0.0/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
