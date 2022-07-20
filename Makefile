@@ -8,6 +8,7 @@ LDFLAGS += -X github.com/AliyunContainerService/ack-ram-tool/pkg/version.GitComm
 
 CLUSTER ?= ''
 CLUSTER_ID ?= $(CLUSTER)
+cid ?= $(CLUSTER_ID)
 
 .PHONY: build
 build:
@@ -20,4 +21,4 @@ test:
 
 .PHONY: e2e
 e2e:
-	bash ./examples/rrsa/e2e-test/e2e.sh $(CLUSTER_ID)
+	bash ./examples/rrsa/e2e-test/e2e.sh $(cid)
