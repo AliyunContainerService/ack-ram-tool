@@ -72,11 +72,19 @@ function assume_role() {
   done
 }
 
+function test_setup_addon() {
+  ack-ram-tool rrsa setup-addon --addon-name kritis-validation-hook \
+    --cluster-id ${CLUSTER_ID} -y
+}
+
 function cleanup() {
   set +e
   bar_tip "cleanup"
   if ! echo "${SKIP}" |grep cleanup; then
     aliyun ram DeleteRole --RoleName ${ROLE_NAME}
+    aliyun ram DetachPolicyFromRole --RoleName "kritis-validation-hook-${CLUSTER_ID}" \
+          --PolicyName "ack-kritis-validation-hook" --PolicyType "Custom"
+    aliyun ram DeleteRole --RoleName "kritis-validation-hook-${CLUSTER_ID}"
     rm ${KUBECONFIG_PATH}
   fi
   set -e
@@ -99,6 +107,7 @@ function main() {
   associate_role
   deploy_pods
   assume_role
+  test_setup_addon
 }
 
 main
