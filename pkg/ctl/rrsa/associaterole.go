@@ -35,7 +35,8 @@ var associateRoleCmd = &cobra.Command{
 		if !c.MetaData.RRSAConfig.Enabled {
 			exitByError("RRSA feature is not enabled!")
 		}
-		if err := associateRole(context.Background(), c, client); err != nil {
+		if err := associateRole(context.Background(), c, client,
+			roleName, namespace, serviceAccount, createRoleIfNotExist); err != nil {
 			exitByError(fmt.Sprintf("Associate RAM Role %s to service account %s (namespace: %s) failed: %+v",
 				roleName, serviceAccount, namespace, err))
 			return
@@ -45,21 +46,23 @@ var associateRoleCmd = &cobra.Command{
 	},
 }
 
-func associateRole(ctx context.Context, c *types.Cluster, client *openapi.Client) error {
+func associateRole(ctx context.Context, c *types.Cluster, client *openapi.Client,
+	roleName, namespace, serviceAccount string, createRoleIfNotExist bool) error {
 	rrsac := c.MetaData.RRSAConfig
 	role, err := client.GetRole(ctx, roleName)
 	if err != nil {
-		if openapi.IsRoleNotExistErr(err) && createRoleIfNotExist {
-			return createRole(ctx, client, rrsac, roleName)
+		if openapi.IsRamRoleNotExistErr(err) && createRoleIfNotExist {
+			return createRole(ctx, client, rrsac, roleName, namespace, serviceAccount)
 		}
 		return err
 	}
 
-	return updateRole(ctx, client, role, rrsac)
+	return updateRole(ctx, client, role, rrsac, namespace, serviceAccount)
 }
 
-func createRole(ctx context.Context, client *openapi.Client, rrsac types.RRSAConfig, roleName string) error {
-	rd := types.MakeAssumeRolePolicyDocument([]types.AssumeRolePolicyStatement{})
+func createRole(ctx context.Context, client *openapi.Client, rrsac types.RRSAConfig,
+	roleName, namespace, serviceAccount string) error {
+	rd := types.MakeRamPolicyDocument([]types.RamPolicyStatement{})
 	assumeRolePolicyDocument := &rd
 	role := types.RamRole{
 		RoleName:                 roleName,
@@ -72,7 +75,7 @@ func createRole(ctx context.Context, client *openapi.Client, rrsac types.RRSACon
 		return err
 	}
 
-	fmt.Printf("Will create RAM Role %s with blow assumeRolePolicyDocument:\n%s\n",
+	fmt.Printf("Will create RAM Role %q with blow AssumeRole Policy:\n%s\n",
 		roleName, assumeRolePolicyDocument.JSON())
 	yesOrExit(fmt.Sprintf("Are you sure you want to create RAM Role %s?", roleName))
 
@@ -80,7 +83,9 @@ func createRole(ctx context.Context, client *openapi.Client, rrsac types.RRSACon
 	return err
 }
 
-func updateRole(ctx context.Context, client *openapi.Client, role *types.RamRole, rrsac types.RRSAConfig) error {
+func updateRole(ctx context.Context, client *openapi.Client, role *types.RamRole,
+	rrsac types.RRSAConfig, namespace, serviceAccount string) error {
+	roleName := role.RoleName
 	assumeRolePolicyDocument := role.AssumeRolePolicyDocument
 	oldDocument := assumeRolePolicyDocument.JSON()
 	policy := types.MakeAssumeRolePolicyStatementWithServiceAccount(
@@ -89,7 +94,7 @@ func updateRole(ctx context.Context, client *openapi.Client, role *types.RamRole
 	if exist, err := assumeRolePolicyDocument.IncludePolicy(policy); err != nil {
 		return err
 	} else if exist {
-		fmt.Printf("Already associated RAM Role %s to service account %s (namespace: %s). Skip to continue\n",
+		fmt.Printf("Already associated RAM Role %q to service account %q (namespace: %q). Skip to continue\n",
 			roleName, serviceAccount, namespace)
 		return nil
 	}
@@ -100,10 +105,10 @@ func updateRole(ctx context.Context, client *openapi.Client, role *types.RamRole
 	newDocument := assumeRolePolicyDocument.JSON()
 	diff := utils.DiffPrettyText(oldDocument, newDocument)
 
-	fmt.Printf("Will change the assumeRolePolicyDocument of RAM Role %s with blow content:\n%s\n",
+	fmt.Printf("Will change the AssumeRole Policy of RAM Role %q with blow content:\n%s\n",
 		roleName, diff)
 	yesOrExit(fmt.Sprintf(
-		"Are you sure you want to associate RAM Role %s to service account %s (namespace: %s)?",
+		"Are you sure you want to associate RAM Role %q to service account %q (namespace: %q)?",
 		roleName, serviceAccount, namespace))
 
 	_, err := client.UpdateRole(ctx, roleName, openapi.UpdateRamRoleOption{
