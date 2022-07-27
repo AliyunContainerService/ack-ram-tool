@@ -10,9 +10,14 @@ import (
 )
 
 const (
-	AssumeRolePolicyKeyStatement  = "Statement"
-	AssumeRolePolicyKeyVersion    = "Version"
-	AssumeRolePolicyVersionLatest = "1"
+	RamPolicyKeyStatement  = "Statement"
+	RamPolicyKeyVersion    = "Version"
+	RamPolicyVersionLatest = "1"
+)
+
+var (
+	RamPolicyTypeSystem = "System"
+	RamPolicyTypeCustom = "Custom"
 )
 
 type RamRole struct {
@@ -20,25 +25,44 @@ type RamRole struct {
 	RoleId                   string
 	Arn                      string
 	Description              string
-	AssumeRolePolicyDocument *AssumeRolePolicyDocument
+	AssumeRolePolicyDocument *RamPolicyDocument
 	MaxSessionDuration       int64
 }
 
-type AssumeRolePolicyDocument map[string]interface{}
-type AssumeRolePolicyStatement map[string]interface{}
+type RamPolicy struct {
+	DefaultVersion string
+	//UpdateDate      string
+	Description     string
+	PolicyDocument  *RamPolicyDocument
+	AttachmentCount int32
+	PolicyName      string
+	//CreateDate      string
+	PolicyType string
+}
 
-func MakeAssumeRolePolicyDocument(policies []AssumeRolePolicyStatement) AssumeRolePolicyDocument {
-	return AssumeRolePolicyDocument{
-		AssumeRolePolicyKeyStatement: policies,
-		AssumeRolePolicyKeyVersion:   AssumeRolePolicyVersionLatest,
+type RamRolePolicy struct {
+	DefaultVersion string
+	Description    string
+	PolicyName     string
+	//AttachDate     string
+	PolicyType string
+}
+
+type RamPolicyDocument map[string]interface{}
+type RamPolicyStatement map[string]interface{}
+
+func MakeRamPolicyDocument(policies []RamPolicyStatement) RamPolicyDocument {
+	return RamPolicyDocument{
+		RamPolicyKeyStatement: policies,
+		RamPolicyKeyVersion:   RamPolicyVersionLatest,
 	}
 }
 
-func MakeAssumeRolePolicyStatementWithServiceAccount(oidcIssuer, oidcArn, namespace, serviceAccount string) AssumeRolePolicyStatement {
+func MakeAssumeRolePolicyStatementWithServiceAccount(oidcIssuer, oidcArn, namespace, serviceAccount string) RamPolicyStatement {
 	if serviceAccount == "" {
 		serviceAccount = "*"
 	}
-	return AssumeRolePolicyStatement{
+	return RamPolicyStatement{
 		"Action": "sts:AssumeRole",
 		"Condition": map[string]interface{}{
 			"StringEquals": map[string]string{
@@ -54,7 +78,7 @@ func MakeAssumeRolePolicyStatementWithServiceAccount(oidcIssuer, oidcArn, namesp
 	}
 }
 
-func (p *AssumeRolePolicyDocument) AppendPolicyIfNotExist(policy AssumeRolePolicyStatement) error {
+func (p *RamPolicyDocument) AppendPolicyIfNotExist(policy RamPolicyStatement) error {
 	if exist, err := p.IncludePolicy(policy); err != nil {
 		return err
 	} else if exist {
@@ -63,12 +87,12 @@ func (p *AssumeRolePolicyDocument) AppendPolicyIfNotExist(policy AssumeRolePolic
 	return p.AppendPolicy(policy)
 }
 
-func (p *AssumeRolePolicyDocument) AppendPolicy(policy AssumeRolePolicyStatement) error {
+func (p *RamPolicyDocument) AppendPolicy(policy RamPolicyStatement) error {
 	if p == nil || len(*p) == 0 {
-		*p = MakeAssumeRolePolicyDocument([]AssumeRolePolicyStatement{})
+		*p = MakeRamPolicyDocument([]RamPolicyStatement{})
 	}
-	if _, ok := (*p)[AssumeRolePolicyKeyStatement]; !ok {
-		(*p)[AssumeRolePolicyKeyStatement] = []AssumeRolePolicyStatement{}
+	if _, ok := (*p)[RamPolicyKeyStatement]; !ok {
+		(*p)[RamPolicyKeyStatement] = []RamPolicyStatement{}
 	}
 	policies, err := p.policies()
 	if err != nil {
@@ -76,11 +100,11 @@ func (p *AssumeRolePolicyDocument) AppendPolicy(policy AssumeRolePolicyStatement
 	}
 
 	policies = append(policies, policy)
-	(*p)[AssumeRolePolicyKeyStatement] = policies
+	(*p)[RamPolicyKeyStatement] = policies
 	return nil
 }
 
-func (p *AssumeRolePolicyDocument) IncludePolicy(policy AssumeRolePolicyStatement) (bool, error) {
+func (p *RamPolicyDocument) IncludePolicy(policy RamPolicyStatement) (bool, error) {
 	policies, err := p.policies()
 	if err != nil {
 		log.Printf("parse statements failed: %+v", err)
@@ -96,7 +120,7 @@ func (p *AssumeRolePolicyDocument) IncludePolicy(policy AssumeRolePolicyStatemen
 	return false, nil
 }
 
-func (p *AssumeRolePolicyDocument) JSON() string {
+func (p *RamPolicyDocument) JSON() string {
 	data, err := json.MarshalIndent(p, " ", " ")
 	if err != nil {
 		log.Printf("errro: %+v\n", err)
@@ -104,11 +128,11 @@ func (p *AssumeRolePolicyDocument) JSON() string {
 	return string(data)
 }
 
-func (p *AssumeRolePolicyDocument) policies() ([]AssumeRolePolicyStatement, error) {
+func (p *RamPolicyDocument) policies() ([]RamPolicyStatement, error) {
 	if p == nil || len(*p) == 0 {
 		return nil, nil
 	}
-	statements, ok := (*p)[AssumeRolePolicyKeyStatement]
+	statements, ok := (*p)[RamPolicyKeyStatement]
 	if !ok {
 		return nil, nil
 	}
@@ -117,7 +141,7 @@ func (p *AssumeRolePolicyDocument) policies() ([]AssumeRolePolicyStatement, erro
 		log.Printf("parse statements failed: %+v", err)
 		return nil, err
 	}
-	var policies []AssumeRolePolicyStatement
+	var policies []RamPolicyStatement
 	if err := json.Unmarshal(statementsJson, &policies); err != nil {
 		log.Printf("parse statements failed: %+v", err)
 		return nil, err
@@ -125,7 +149,7 @@ func (p *AssumeRolePolicyDocument) policies() ([]AssumeRolePolicyStatement, erro
 	return policies, nil
 }
 
-func (s *AssumeRolePolicyStatement) Equal(another AssumeRolePolicyStatement) bool {
+func (s *RamPolicyStatement) Equal(another RamPolicyStatement) bool {
 	if reflect.DeepEqual(s, another) {
 		return true
 	}
@@ -138,7 +162,7 @@ func (s *AssumeRolePolicyStatement) Equal(another AssumeRolePolicyStatement) boo
 	return false
 }
 
-func (s *AssumeRolePolicyStatement) JSON() string {
+func (s *RamPolicyStatement) JSON() string {
 	data, _ := json.Marshal(s)
 	return string(data)
 }

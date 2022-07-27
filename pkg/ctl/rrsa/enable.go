@@ -3,6 +3,7 @@ package rrsa
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/openapi"
@@ -10,6 +11,12 @@ import (
 	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
 )
+
+type EnableOpts struct {
+	clusterId string
+}
+
+var enableOpts = EnableOpts{}
 
 var enableCmd = &cobra.Command{
 	Use:   "enable",
@@ -19,16 +26,17 @@ var enableCmd = &cobra.Command{
 		client := getClientOrDie()
 		yesOrExit("Are you sure you want to enable RRSA feature?")
 		ctx := context.Background()
+		clusterId := enableOpts.clusterId
 		c := allowRRSAFeatureOrDie(ctx, clusterId, client)
 		if c.MetaData.RRSAConfig.Enabled {
-			fmt.Println("RRSA feature is already enabled. Skip to continue")
+			log.Println("RRSA feature is already enabled.")
 			return
 		}
 
 		var task *types.ClusterTask
 		var err error
+		log.Println("Start to enable RRSA feature")
 		spin := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
-		spin.Prefix = "Start to enable RRSA feature "
 		spin.Start()
 
 		if task, err = enableRRSA(ctx, clusterId, client); err != nil {
@@ -43,7 +51,7 @@ var enableCmd = &cobra.Command{
 		}
 
 		spin.Stop()
-		fmt.Printf("Enable RRSA feature for cluster %s successfully\n", clusterId)
+		log.Printf("Enable RRSA feature for cluster %s successfully", clusterId)
 	},
 }
 
@@ -54,7 +62,7 @@ func enableRRSA(ctx context.Context, clusterId string, client openapi.CSClientIn
 
 func setupEnableCmd(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(enableCmd)
-	enableCmd.Flags().StringVarP(&clusterId, "cluster-id", "c", "", "The cluster id to use")
+	enableCmd.Flags().StringVarP(&enableOpts.clusterId, "cluster-id", "c", "", "The cluster id to use")
 	err := enableCmd.MarkFlagRequired("cluster-id")
 	exitIfError(err)
 }

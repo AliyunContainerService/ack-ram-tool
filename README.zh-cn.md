@@ -56,16 +56,6 @@ OIDC Token Issuer:     https://oidc-ack-***/c86fdd***
 
 ```
 
-禁用 RRSA 特性:
-
-```
-$ ack-ram-tool rrsa disable -c <clusterId>
-
-? Are you sure you want to disable RRSA feature? Yes
-Disable RRSA feature for cluster c86fdd*** successfully
-
-```
-
 为 RAM 角色关联一个 Service Account（允许使用这个 Service Account 的 OIDC Token 来扮演此 RAM 角色。
 通过指定 ``--create-role-if-not-exist`` 参数实现在角色不存在时自动创建对应的 RAM 角色）:
 
@@ -122,3 +112,11 @@ SecurityToken:     CAIS***
 Expiration:        2021-12-03T05:51:37Z
 
 ```
+
+可以通过 `setup-addon` 命令快速配置集群组件使用 RRSA 特性时所需要的 RAM 相关配置。
+比如配置 `kritis-validation-hook` 组件所需的 RAM 配置（需要在安装组件前进行配置）:
+
+```
+$ ack-ram-tool rrsa setup-addon --addon-name kritis-validation-hook -c <clusterId>
+```
+

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -13,11 +14,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	roleArn       = ""
-	oidcArn       = ""
-	oidcTokenFile = ""
-)
+type AssumeRoleOpts struct {
+	roleArn       string
+	oidcArn       string
+	oidcTokenFile string
+}
+
+var assumeRoleOpts = AssumeRoleOpts{}
 
 var assumeRoleCmd = &cobra.Command{
 	Use:   "assume-role",
@@ -27,6 +30,9 @@ var assumeRoleCmd = &cobra.Command{
 		var err error
 		var token []byte
 		ctx := context.Background()
+		roleArn := assumeRoleOpts.roleArn
+		oidcArn := assumeRoleOpts.oidcArn
+		oidcTokenFile := assumeRoleOpts.oidcTokenFile
 		if oidcTokenFile == "-" {
 			token, err = ioutil.ReadAll(os.Stdin)
 			if err != nil {
@@ -39,7 +45,7 @@ var assumeRoleCmd = &cobra.Command{
 			}
 		}
 		if len(token) < 4 || len(token) > 10000 {
-			exitByError("invalid token: The length of OIDCToke should be between 4 and 10000")
+			exitByError("invalid token: The length of OIDC Toke should be between 4 and 10000")
 		}
 
 		region := ctl.GlobalOption.Region
@@ -52,7 +58,7 @@ var assumeRoleCmd = &cobra.Command{
 		if err != nil {
 			exitByError(fmt.Sprintf("Assume RAM Role failed: %+v", err))
 		}
-		fmt.Println("Retrieved a STS token:")
+		log.Println("Retrieved a STS token:")
 		fmt.Printf("AccessKeyId:       %s\n", cred.AccessKeyId)
 		fmt.Printf("AccessKeySecret:   %s\n", cred.AccessKeySecret)
 		fmt.Printf("SecurityToken:     %s\n", cred.SecurityToken)
@@ -62,9 +68,9 @@ var assumeRoleCmd = &cobra.Command{
 
 func setupAssumeRoleCmd(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(assumeRoleCmd)
-	assumeRoleCmd.Flags().StringVarP(&roleArn, "role-arn", "r", "", "The arn of RAM role")
-	assumeRoleCmd.Flags().StringVarP(&oidcArn, "oidc-provider-arn", "p", "", "The arn of OIDC provider")
-	assumeRoleCmd.Flags().StringVarP(&oidcTokenFile, "oidc-token-file", "t", "",
+	assumeRoleCmd.Flags().StringVarP(&assumeRoleOpts.roleArn, "role-arn", "r", "", "The arn of RAM role")
+	assumeRoleCmd.Flags().StringVarP(&assumeRoleOpts.oidcArn, "oidc-provider-arn", "p", "", "The arn of OIDC provider")
+	assumeRoleCmd.Flags().StringVarP(&assumeRoleOpts.oidcTokenFile, "oidc-token-file", "t", "",
 		"Path to OIDC token file. If value is '-', will read token from stdin")
 	err := assumeRoleCmd.MarkFlagRequired("role-arn")
 	exitIfError(err)

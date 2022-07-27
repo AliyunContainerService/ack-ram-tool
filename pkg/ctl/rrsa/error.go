@@ -1,7 +1,7 @@
 package rrsa
 
 import (
-	"fmt"
+	"log"
 	"os"
 )
 
@@ -15,6 +15,6 @@ func exitIfError(err error) {
 }
 
 func exitByError(msg string) {
-	fmt.Println("error: " + msg)
+	log.Println("error: " + msg)
 	os.Exit(1)
 }

@@ -11,14 +11,14 @@ import (
 	"github.com/alibabacloud-go/tea/tea"
 )
 
-type UpdateRamRoleOption struct {
-	AssumeRolePolicyDocument *types.AssumeRolePolicyDocument
-}
-
 type RamClientInterface interface {
 	GetRole(ctx context.Context, name string) (*types.RamRole, error)
 	CreateRole(ctx context.Context, role types.RamRole) (*types.RamRole, error)
 	UpdateRole(ctx context.Context, name string, opt UpdateRamRoleOption) (*types.RamRole, error)
+	ListPoliciesForRole(ctx context.Context, name string) ([]types.RamRolePolicy, error)
+	GetPolicy(ctx context.Context, name, policyType string) (*types.RamPolicy, error)
+	CreatePolicy(ctx context.Context, policy types.RamPolicy) (*types.RamPolicy, error)
+	AttachPolicyToRole(ctx context.Context, policyName, policyType, roleName string) error
 }
 
 func (c *Client) GetRole(ctx context.Context, name string) (*types.RamRole, error) {
@@ -62,6 +62,10 @@ func (c *Client) CreateRole(ctx context.Context, role types.RamRole) (*types.Ram
 	return roleV2, nil
 }
 
+type UpdateRamRoleOption struct {
+	AssumeRolePolicyDocument *types.RamPolicyDocument
+}
+
 func (c *Client) UpdateRole(ctx context.Context, name string, opt UpdateRamRoleOption) (*types.RamRole, error) {
 	client := c.ramClient
 	if opt.AssumeRolePolicyDocument == nil || len(*opt.AssumeRolePolicyDocument) == 0 {
@@ -81,6 +85,73 @@ func (c *Client) UpdateRole(ctx context.Context, name string, opt UpdateRamRoleO
 	return role, nil
 }
 
+func (c *Client) ListPoliciesForRole(ctx context.Context, name string) ([]types.RamRolePolicy, error) {
+	client := c.ramClient
+	req := &ram.ListPoliciesForRoleRequest{
+		RoleName: tea.String(name),
+	}
+	resp, err := client.ListPoliciesForRole(req)
+	if err != nil {
+		return nil, err
+	}
+
+	policies := convertListPoliciesForRoleResponse(resp)
+	return policies, nil
+}
+
+func (c *Client) GetPolicy(ctx context.Context, name, policyType string) (*types.RamPolicy, error) {
+	client := c.ramClient
+	req := &ram.GetPolicyRequest{
+		PolicyType: tea.String(policyType),
+		PolicyName: tea.String(name),
+	}
+	resp, err := client.GetPolicy(req)
+	if err != nil {
+		return nil, err
+	}
+
+	policy := &types.RamPolicy{}
+	convertGetRamPolicyResponse(policy, resp)
+	return policy, nil
+}
+
+func (c *Client) CreatePolicy(ctx context.Context, policy types.RamPolicy) (*types.RamPolicy, error) {
+	client := c.ramClient
+	if policy.PolicyDocument == nil || len(*policy.PolicyDocument) == 0 {
+		return nil, errors.New("PolicyDocument is required")
+	}
+	if policy.PolicyName == "" {
+		return nil, errors.New("RoleName is required")
+	}
+	req := &ram.CreatePolicyRequest{
+		PolicyName:     tea.String(policy.PolicyName),
+		Description:    tea.String(policy.Description),
+		PolicyDocument: tea.String(policy.PolicyDocument.JSON()),
+	}
+	resp, err := client.CreatePolicy(req)
+	if err != nil {
+		return nil, err
+	}
+
+	policyV2 := &types.RamPolicy{}
+	convertCreateRamPolicyResponse(policyV2, resp)
+	if policyV2.PolicyDocument == nil {
+		policyV2.PolicyDocument = policy.PolicyDocument
+	}
+	return policyV2, nil
+}
+
+func (c *Client) AttachPolicyToRole(ctx context.Context, policyName, policyType, roleName string) error {
+	client := c.ramClient
+	req := &ram.AttachPolicyToRoleRequest{
+		PolicyType: tea.String(policyType),
+		PolicyName: tea.String(policyName),
+		RoleName:   tea.String(roleName),
+	}
+	_, err := client.AttachPolicyToRole(req)
+	return err
+}
+
 func convertGetRoleResponse(r *types.RamRole, resp *ram.GetRoleResponse) {
 	body := resp.Body
 	if body == nil {
@@ -97,7 +168,7 @@ func convertGetRoleResponse(r *types.RamRole, resp *ram.GetRoleResponse) {
 	r.Description = tea.StringValue(role.Description)
 	r.MaxSessionDuration = tea.Int64Value(role.MaxSessionDuration)
 	if role.AssumeRolePolicyDocument != nil {
-		policy := &types.AssumeRolePolicyDocument{}
+		policy := &types.RamPolicyDocument{}
 		if err := json.Unmarshal([]byte(*role.AssumeRolePolicyDocument), policy); err != nil {
 			log.Printf("unmarshal AssumeRolePolicyDocument failed: %+v: \n%s\n", *role.AssumeRolePolicyDocument, err)
 		}
@@ -121,7 +192,7 @@ func convertUpdateRoleResponse(r *types.RamRole, resp *ram.UpdateRoleResponse) {
 	r.Description = tea.StringValue(role.Description)
 	r.MaxSessionDuration = tea.Int64Value(role.MaxSessionDuration)
 	if role.AssumeRolePolicyDocument != nil {
-		policy := &types.AssumeRolePolicyDocument{}
+		policy := &types.RamPolicyDocument{}
 		if err := json.Unmarshal([]byte(*role.AssumeRolePolicyDocument), policy); err != nil {
 			log.Printf("unmarshal AssumeRolePolicyDocument failed: %+v: \n%s\n", *role.AssumeRolePolicyDocument, err)
 		}
@@ -145,7 +216,7 @@ func convertCreateRoleResponse(r *types.RamRole, resp *ram.CreateRoleResponse) {
 	r.Description = tea.StringValue(role.Description)
 	r.MaxSessionDuration = tea.Int64Value(role.MaxSessionDuration)
 	if role.AssumeRolePolicyDocument != nil {
-		policy := &types.AssumeRolePolicyDocument{}
+		policy := &types.RamPolicyDocument{}
 		if err := json.Unmarshal([]byte(*role.AssumeRolePolicyDocument), policy); err != nil {
 			log.Printf("unmarshal AssumeRolePolicyDocument failed: %+v: \n%s\n", *role.AssumeRolePolicyDocument, err)
 		}
@@ -153,12 +224,84 @@ func convertCreateRoleResponse(r *types.RamRole, resp *ram.CreateRoleResponse) {
 	}
 }
 
-func IsRoleNotExistErr(err error) bool {
-	return isSdkErrWithCode(err, "EntityNotExist.Role")
+func convertListPoliciesForRoleResponse(resp *ram.ListPoliciesForRoleResponse) []types.RamRolePolicy {
+	body := resp.Body
+	if body == nil {
+		return nil
+	}
+	if body.Policies == nil {
+		return nil
+	}
+	policies := body.Policies.Policy
+	if policies == nil {
+		return nil
+	}
+
+	var rs []types.RamRolePolicy
+	for _, p := range policies {
+		r := types.RamRolePolicy{
+			DefaultVersion: tea.StringValue(p.DefaultVersion),
+			Description:    tea.StringValue(p.Description),
+			PolicyName:     tea.StringValue(p.PolicyName),
+			//AttachDate:     tea.StringValue(p.AttachDate),
+			PolicyType: tea.StringValue(p.PolicyType),
+		}
+		rs = append(rs, r)
+	}
+
+	return rs
 }
 
-func IsRoleExistErr(err error) bool {
-	return isSdkErrWithCode(err, "EntityNotExist.User")
+func convertGetRamPolicyResponse(r *types.RamPolicy, resp *ram.GetPolicyResponse) {
+	body := resp.Body
+	if body == nil {
+		return
+	}
+	p := body.Policy
+	if p == nil {
+		return
+	}
+
+	r.PolicyType = tea.StringValue(p.PolicyType)
+	r.PolicyName = tea.StringValue(p.PolicyName)
+	r.DefaultVersion = tea.StringValue(p.DefaultVersion)
+	r.Description = tea.StringValue(p.Description)
+	r.AttachmentCount = tea.Int32Value(p.AttachmentCount)
+
+	if p.PolicyDocument != nil {
+		policy := &types.RamPolicyDocument{}
+		if err := json.Unmarshal([]byte(*p.PolicyDocument), policy); err != nil {
+			log.Printf("unmarshal PolicyDocument failed: %+v: \n%s\n", *p.PolicyDocument, err)
+		}
+		r.PolicyDocument = policy
+	}
+}
+
+func convertCreateRamPolicyResponse(r *types.RamPolicy, resp *ram.CreatePolicyResponse) {
+	body := resp.Body
+	if body == nil {
+		return
+	}
+	p := body.Policy
+	if p == nil {
+		return
+	}
+
+	r.PolicyType = tea.StringValue(p.PolicyType)
+	r.PolicyName = tea.StringValue(p.PolicyName)
+	r.DefaultVersion = tea.StringValue(p.DefaultVersion)
+	r.Description = tea.StringValue(p.Description)
+}
+
+func IsRamRoleNotExistErr(err error) bool {
+	return isSdkErrWithCode(err, "EntityNotExist.Role")
+}
+func IsRamPolicyNotExistErr(err error) bool {
+	return isSdkErrWithCode(err, "EntityNotExist.Policy")
+}
+
+func IsRamPolicyAttachedToRoleErr(err error) bool {
+	return isSdkErrWithCode(err, "EntityAlreadyExists.Role.Policy")
 }
 
 func isSdkErrWithCode(err error, code string) bool {

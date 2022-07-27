@@ -12,7 +12,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var clusterId string
+type StatusOpts struct {
+	clusterId string
+}
+
+var statusOpts = StatusOpts{}
 
 var rrsaStatusTemplate = `
 {{- if .Enabled }}
@@ -31,6 +35,7 @@ var statusCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		client := getClientOrDie()
+		clusterId := statusOpts.clusterId
 		c, err := getRRSAStatus(context.Background(), clusterId, client)
 		if err != nil {
 			exitByError(fmt.Sprintf("fetch status failed: %+v", err))
@@ -54,7 +59,7 @@ func getRRSAStatus(ctx context.Context, clusterId string, client openapi.CSClien
 
 func setupStatusCmd(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(statusCmd)
-	statusCmd.Flags().StringVarP(&clusterId, "cluster-id", "c", "", "")
+	statusCmd.Flags().StringVarP(&statusOpts.clusterId, "cluster-id", "c", "", "")
 	err := statusCmd.MarkFlagRequired("cluster-id")
 	exitIfError(err)
 }
