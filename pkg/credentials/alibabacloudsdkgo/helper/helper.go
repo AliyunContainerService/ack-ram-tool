@@ -12,6 +12,17 @@ const (
 	EnvOidcTokenFile   = "ALIBABA_CLOUD_OIDC_TOKEN_FILE"
 )
 
+func HaveOidcCredentialRequiredEnv() bool {
+	return os.Getenv(EnvRoleArn) != "" &&
+		os.Getenv(EnvOidcProviderArn) != "" &&
+		os.Getenv(EnvOidcTokenFile) != ""
+}
+
+func NewOidcCredential(sessionName string) (credential credentials.Credential, err error) {
+	return GetOidcCredential(sessionName)
+}
+
+// Deprecated: Use NewOidcCredential instead
 func GetOidcCredential(sessionName string) (credential credentials.Credential, err error) {
 	roleArn := os.Getenv(EnvRoleArn)
 	oidcArn := os.Getenv(EnvOidcProviderArn)
