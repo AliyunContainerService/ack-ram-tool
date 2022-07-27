@@ -13,6 +13,17 @@ const (
 	EnvOidcTokenFile   = "ALIBABA_CLOUD_OIDC_TOKEN_FILE"
 )
 
+func HaveOidcSignerRequiredEnv() bool {
+	return os.Getenv(EnvRoleArn) != "" &&
+		os.Getenv(EnvOidcProviderArn) != "" &&
+		os.Getenv(EnvOidcTokenFile) != ""
+}
+
+func NewOidcSigner(sessionName string) (singer auth.Signer, err error) {
+	return GetOidcSigner(sessionName)
+}
+
+// Deprecated: Use NewOidcSigner instead
 func GetOidcSigner(sessionName string) (singer auth.Signer, err error) {
 	roleArn := os.Getenv(EnvRoleArn)
 	oidcArn := os.Getenv(EnvOidcProviderArn)
