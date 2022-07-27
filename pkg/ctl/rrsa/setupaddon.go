@@ -20,7 +20,7 @@ var setupAddonOpts = SetupAddonOpts{}
 
 var setupAddonCmd = &cobra.Command{
 	Use:   "setup-addon",
-	Short: "setup RAM actions for cluster addon.",
+	Short: "Setup RAM actions for cluster addon.",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		client := getClientOrDie()

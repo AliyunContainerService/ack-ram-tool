@@ -3,6 +3,7 @@ package rrsa
 import (
 	"context"
 	"fmt"
+	"log"
 	"math/rand"
 	"os"
 	"strings"
@@ -32,7 +33,7 @@ func yesOrExit(msg string) {
 	}
 	_ = survey.AskOne(prompt, &promptRet)
 	if !promptRet {
-		fmt.Println("Canceled! Bye bye~")
+		log.Println("Canceled! Bye bye~")
 		os.Exit(0)
 	}
 }
