@@ -57,15 +57,6 @@ OIDC Token Issuer:     https://oidc-ack-***/c86fdd***
 
 ```
 
-Disable RRSA feature:
-
-```
-$ ack-ram-tool rrsa disable -c <clusterId>
-
-? Are you sure you want to disable RRSA feature? Yes
-Disable RRSA feature for cluster c86fdd*** successfully
-
-```
 
 Associate an RAM Role to a service account (use the ``--create-role-if-not-exist`` flag to
 auto create an RAM Role when it doesn't exist):
@@ -121,4 +112,13 @@ AccessKeySecret:   7UVy***
 SecurityToken:     CAIS***
 Expiration:        2021-12-03T05:51:37Z
 
+```
+
+The `setup-addon` command allows you to quickly configure the RAM-related configuration
+required for the cluster components to use the RRSA feature.
+For example, configure the RAM configuration required for the `kritis-validation-hook` 
+component (needs to be configured before installing the component):
+
+```
+$ ack-ram-tool rrsa setup-addon --addon-name kritis-validation-hook -c <clusterId>
 ```
