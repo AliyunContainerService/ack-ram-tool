@@ -3,7 +3,7 @@ module github.com/AliyunContainerService/ack-ram-tool
 go 1.16
 
 require (
-	github.com/AlecAivazis/survey/v2 v2.3.4
+	github.com/AlecAivazis/survey/v2 v2.3.5
 	github.com/alibabacloud-go/cs-20151215/v3 v3.0.9
 	github.com/alibabacloud-go/darabonba-openapi v0.1.15
 	github.com/alibabacloud-go/ram-20150501 v1.0.1
@@ -19,6 +19,5 @@ require (
 	github.com/spf13/cobra v1.4.0
 	github.com/stretchr/testify v1.8.0
 	golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d // indirect
-	golang.org/x/sys v0.0.0-20211205182925-97ca703d548d // indirect
 	golang.org/x/text v0.3.7 // indirect
 )

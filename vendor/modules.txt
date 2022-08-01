@@ -1,4 +1,4 @@
-# github.com/AlecAivazis/survey/v2 v2.3.4
+# github.com/AlecAivazis/survey/v2 v2.3.5
 ## explicit
 github.com/AlecAivazis/survey/v2
 github.com/AlecAivazis/survey/v2/core
@@ -90,8 +90,7 @@ github.com/tjfoc/gmsm/sm3
 ## explicit
 golang.org/x/net/internal/socks
 golang.org/x/net/proxy
-# golang.org/x/sys v0.0.0-20211205182925-97ca703d548d
-## explicit
+# golang.org/x/sys v0.0.0-20220422013727-9388b58f7150
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/plan9
 golang.org/x/sys/unix
