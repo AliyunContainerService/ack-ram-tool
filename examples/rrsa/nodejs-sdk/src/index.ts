@@ -17,6 +17,7 @@ export default class Client {
     let config = new $OpenApi.Config({
       credential: cred,
     });
+    // get endpoint from https://www.alibabacloud.com/help/resource-access-management/latest/endpoints
     config.endpoint = `sts.aliyuncs.com`;
     return new Sts20150401(config);
   }

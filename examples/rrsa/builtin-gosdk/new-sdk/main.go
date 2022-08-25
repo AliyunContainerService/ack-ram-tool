@@ -19,6 +19,7 @@ func main() {
 		panic(err)
 	}
 	client, err := sts.NewClient(&openapi.Config{
+		// get endpoint from https://www.alibabacloud.com/help/resource-access-management/latest/endpoints
 		Endpoint:   tea.String("sts.aliyuncs.com"),
 		Credential: cred,
 	})

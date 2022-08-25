@@ -23,7 +23,7 @@ class TestOpenAPISDK {
         // new client config
         com.aliyun.teaopenapi.models.Config config = new com.aliyun.teaopenapi.models.Config()
                 .setCredential(cred)
-                .setEndpoint("sts.aliyuncs.com");
+                .setEndpoint("sts.aliyuncs.com"); // get endpoint from https://www.alibabacloud.com/help/resource-access-management/latest/endpoints
 
         // init client
         com.aliyun.sts20150401.Client client = new com.aliyun.sts20150401.Client(config);

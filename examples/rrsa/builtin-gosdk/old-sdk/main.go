@@ -20,6 +20,7 @@ func main() {
 
 	req := sts.CreateGetCallerIdentityRequest()
 	req.Scheme = "https"
+	// get endpoint from https://www.alibabacloud.com/help/resource-access-management/latest/endpoints
 	req.SetDomain("sts.aliyuncs.com")
 	resp, err := client.GetCallerIdentity(req)
 	if err != nil {
