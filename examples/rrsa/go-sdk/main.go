@@ -87,7 +87,7 @@ func (p *ossCredentialsProvider) GetCredentials() oss.Credentials {
 }
 
 func main() {
-	oidcCredential, err := helper.GetOidcCredential("test-rrsa-oidc-token")
+	oidcCredential, err := helper.NewOidcCredential("test-rrsa-oidc-token")
 	if err != nil {
 		panic(err)
 	}
