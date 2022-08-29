@@ -120,3 +120,12 @@ Expiration:        2021-12-03T05:51:37Z
 $ ack-ram-tool rrsa setup-addon --addon-name kritis-validation-hook -c <clusterId>
 ```
 
+禁用 RRSA 特性:
+
+```
+$ ack-ram-tool rrsa disable -c <clusterId>
+
+? Are you sure you want to disable RRSA feature? Yes
+Disable RRSA feature for cluster c86fdd*** successfully
+
+```
