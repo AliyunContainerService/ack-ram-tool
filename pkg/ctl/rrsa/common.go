@@ -3,6 +3,7 @@ package rrsa
 import (
 	"context"
 	"fmt"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/common"
 	"log"
 	"math/rand"
 	"os"
@@ -14,14 +15,6 @@ import (
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/openapi"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/types"
 )
-
-func getClientOrDie() *openapi.Client {
-	client, err := NewClient(ctl.GlobalOption.Region)
-	if err != nil {
-		exitByError(fmt.Sprintf("init client failed: %+v", err))
-	}
-	return client
-}
 
 func yesOrExit(msg string) {
 	if ctl.GlobalOption.AssumeYes {
@@ -41,13 +34,13 @@ func yesOrExit(msg string) {
 func allowRRSAFeatureOrDie(ctx context.Context, clusterId string, client *openapi.Client) *types.Cluster {
 	c, err := getRRSAStatus(ctx, clusterId, client)
 	if err != nil {
-		exitByError(fmt.Sprintf("get status failed: %+v", err))
+		common.ExitByError(fmt.Sprintf("get status failed: %+v", err))
 	}
 	if c.State != types.ClusterStateRunning {
-		exitByError(fmt.Sprintf("cluster state is not running: %s", c.State))
+		common.ExitByError(fmt.Sprintf("cluster state is not running: %s", c.State))
 	}
 	if c.ClusterType != types.ClusterTypeManagedKubernetes {
-		exitByError("only support managed cluster")
+		common.ExitByError("only support managed cluster")
 	}
 	return c
 }

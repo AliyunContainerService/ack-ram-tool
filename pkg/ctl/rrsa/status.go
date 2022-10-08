@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/common"
 	"strings"
 	"text/template"
 
@@ -34,11 +35,11 @@ var statusCmd = &cobra.Command{
 	Short: "Show RRSA feature status",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		client := getClientOrDie()
+		client := common.GetClientOrDie()
 		clusterId := statusOpts.clusterId
 		c, err := getRRSAStatus(context.Background(), clusterId, client)
 		if err != nil {
-			exitByError(fmt.Sprintf("fetch status failed: %+v", err))
+			common.ExitByError(fmt.Sprintf("fetch status failed: %+v", err))
 		}
 		displayRRSAStatus(c)
 	},
@@ -61,5 +62,5 @@ func setupStatusCmd(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(statusCmd)
 	statusCmd.Flags().StringVarP(&statusOpts.clusterId, "cluster-id", "c", "", "")
 	err := statusCmd.MarkFlagRequired("cluster-id")
-	exitIfError(err)
+	common.ExitIfError(err)
 }
