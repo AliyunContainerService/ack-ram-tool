@@ -2,6 +2,7 @@ package openapi
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -10,6 +11,7 @@ import (
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/types"
 	cs "github.com/alibabacloud-go/cs-20151215/v3/client"
 	"github.com/alibabacloud-go/tea/tea"
+	"gopkg.in/yaml.v3"
 )
 
 type UpdateClusterOption struct {
@@ -21,6 +23,7 @@ type CSClientInterface interface {
 	GetRecentClusterLogs(ctx context.Context, clusterId string) ([]types.ClusterLog, error)
 	UpdateCluster(ctx context.Context, clusterId string, opt UpdateClusterOption) (*types.ClusterTask, error)
 	GetTask(ctx context.Context, taskId string) (*types.ClusterTask, error)
+	GetUserKubeConfig(ctx context.Context, clusterId string, privateIpAddress bool, temporaryDuration time.Duration) (*types.ClusterKubeConfig, error)
 }
 
 func (c *Client) GetCluster(ctx context.Context, clusterId string) (*types.Cluster, error) {
@@ -88,6 +91,75 @@ func (c *Client) GetRecentClusterLogs(ctx context.Context, clusterId string) ([]
 		return nil, err
 	}
 	return convertDescribeClusterLogsResponse(ret), nil
+}
+
+func (c *Client) GetUserKubeConfig(ctx context.Context, clusterId string,
+	privateIpAddress bool, temporaryDuration time.Duration) (*types.ClusterKubeConfig, error) {
+	client := c.csClient
+	req := &cs.DescribeClusterUserKubeconfigRequest{
+		PrivateIpAddress:         nil,
+		TemporaryDurationMinutes: nil,
+	}
+	if temporaryDuration != 0 {
+		dm := int64(temporaryDuration / time.Minute)
+		if dm < 15 || dm > 4320 {
+			return nil, fmt.Errorf("temporaryDuration should > 15 minutes and < 3 days")
+		}
+		req.TemporaryDurationMinutes = &dm
+	}
+	if privateIpAddress {
+		req.PrivateIpAddress = &privateIpAddress
+	}
+	resp, err := client.DescribeClusterUserKubeconfig(&clusterId, req)
+	if err != nil {
+		return nil, err
+	}
+
+	ret := &types.ClusterKubeConfig{}
+	if err := convertDescribeClusterUserKubeconfigResponse(ret, resp); err != nil {
+		return nil, err
+	}
+	return ret, nil
+}
+
+func convertDescribeClusterUserKubeconfigResponse(c *types.ClusterKubeConfig, resp *cs.DescribeClusterUserKubeconfigResponse) error {
+	body := resp.Body
+	if body == nil {
+		return nil
+	}
+
+	exp := tea.StringValue(body.Expiration)
+	expT, err := time.Parse(time.RFC3339, exp)
+	if err != nil {
+		return err
+	}
+	c.Expiration = expT
+
+	rawConf := tea.StringValue(body.Config)
+	kubeconfig := types.KubeConfig{}
+	if err := yaml.Unmarshal([]byte(rawConf), &kubeconfig); err != nil {
+		return err
+	}
+
+	c.Server = kubeconfig.Clusters[0].Cluster.Server
+	ca, err := base64.StdEncoding.DecodeString(kubeconfig.Clusters[0].Cluster.CertificateAuthorityData)
+	if err != nil {
+		return err
+	}
+	c.CertificateAuthorityData = string(ca)
+
+	cd, err := base64.StdEncoding.DecodeString(kubeconfig.Users[0].User.ClientCertificateData)
+	if err != nil {
+		return err
+	}
+	c.ClientCertificateData = string(cd)
+
+	ck, err := base64.StdEncoding.DecodeString(kubeconfig.Users[0].User.ClientKeyData)
+	if err != nil {
+		return err
+	}
+	c.ClientKeyData = string(ck)
+	return nil
 }
 
 func convertDescribeClusterLogsResponse(resp *cs.DescribeClusterLogsResponse) []types.ClusterLog {

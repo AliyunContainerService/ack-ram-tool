@@ -74,3 +74,16 @@ type ClusterLog struct {
 	Log     string
 	Created time.Time
 }
+
+type ClusterKubeConfig struct {
+	// server
+	Server string
+	// certificate-authority-data
+	CertificateAuthorityData string
+	// client-certificate-data
+	ClientCertificateData string
+	// client-key-data
+	ClientKeyData string
+	// expiration
+	Expiration time.Time
+}

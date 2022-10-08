@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/credentialplugin"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/rrsa"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/version"
 	"github.com/aliyun/credentials-go/credentials"
@@ -47,11 +48,14 @@ More info: https://github.com/AliyunContainerService/ack-ram-tool`,
 
 func init() {
 	rrsa.SetupRRSACmd(rootCmd)
+	credentialplugin.SetupCredentialPluginCmd(rootCmd)
 	version.SetupVersionCmd(rootCmd)
+
 	rootCmd.PersistentFlags().StringVar(&ctl.GlobalOption.Region, "region-id", "cn-hangzhou", "The region to use")
 	rootCmd.PersistentFlags().BoolVarP(&ctl.GlobalOption.AssumeYes, "assume-yes", "y", false,
 		"Automatic yes to prompts; assume \"yes\" as answer to all prompts and run non-interactively")
 	rootCmd.PersistentFlags().StringVar(&profilePath, "profile-file", defaultProfilePath, "Path to credential file")
+	//rootCmd.PersistentFlags().BoolVarP(&ctl.GlobalOption.InsecureSkipTLSVerify, "insecure-skip-tls-verify", "", false, "Skips the validity check for the server's certificate")
 }
 
 func expandPath(path string) (string, error) {
