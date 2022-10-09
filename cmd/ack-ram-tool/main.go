@@ -10,6 +10,7 @@ import (
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/credentialplugin"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/rrsa"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/version"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/utils"
 	"github.com/aliyun/credentials-go/credentials"
 	"github.com/spf13/cobra"
 )
@@ -36,7 +37,7 @@ More info: https://github.com/AliyunContainerService/ack-ram-tool`,
 			if _, ok := os.LookupEnv(envAccessKeySecret); ok {
 				_ = os.Setenv(credentials.EnvVarAccessKeySecret, os.Getenv(envAccessKeySecret))
 			}
-			path, err := expandPath(profilePath)
+			path, err := utils.ExpandPath(profilePath)
 			if err != nil {
 				fmt.Printf("error: parse profile path %s failed: %+v", profilePath, err)
 				os.Exit(1)
@@ -56,17 +57,6 @@ func init() {
 		"Automatic yes to prompts; assume \"yes\" as answer to all prompts and run non-interactively")
 	rootCmd.PersistentFlags().StringVar(&profilePath, "profile-file", defaultProfilePath, "Path to credential file")
 	//rootCmd.PersistentFlags().BoolVarP(&ctl.GlobalOption.InsecureSkipTLSVerify, "insecure-skip-tls-verify", "", false, "Skips the validity check for the server's certificate")
-}
-
-func expandPath(path string) (string, error) {
-	if len(path) > 0 && path[0] == '~' {
-		home, err := os.UserHomeDir()
-		if err != nil {
-			return "", err
-		}
-		path = filepath.Join(home, path[1:])
-	}
-	return path, nil
 }
 
 func main() {

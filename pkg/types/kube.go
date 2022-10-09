@@ -9,6 +9,9 @@ type KubeConfig struct {
 	Contexts       []KubeContext  `json:"contexts" yaml:"contexts"`
 	CurrentContext string         `json:"current-context" yaml:"current-context"`
 	Users          []KubeAuthUser `json:"users" yaml:"users"`
+	Preferences    interface{}    `json:"preferences" yaml:"preferences"`
+
+	Expiration time.Time `json:"-" yaml:"-"`
 }
 
 type KubeCluster struct {
@@ -31,18 +34,31 @@ type KubeAuthUser struct {
 }
 
 type KubeAuthInfo struct {
-	//ClientCertificate     string `json:"client-certificate,omitempty" yaml:"client-certificate,omitempty"`
-	ClientCertificateData string `json:"client-certificate-data,omitempty" yaml:"client-certificate-data,omitempty"`
-	//ClientKey             string `json:"client-key,omitempty" yaml:"client-key,omitempty"`
-	ClientKeyData string `json:"client-key-data,omitempty" yaml:"client-key-data,omitempty"`
-	//Token                 string              `json:"token,omitempty" yaml:"token,omitempty"`
-	//TokenFile             string              `json:"tokenFile,omitempty" yaml:"tokenFile,omitempty"`
-	//Impersonate           string              `json:"act-as,omitempty" yaml:"act-as,omitempty"`
-	//ImpersonateGroups     []string            `json:"act-as-groups,omitempty" yaml:"act-as-groups,omitempty"`
-	//ImpersonateUserExtra  map[string][]string `json:"act-as-user-extra,omitempty" yaml:"act-as-user-extra,omitempty"`
-	//Username              string              `json:"username,omitempty" yaml:"username,omitempty"`
-	//Password              string              `json:"password,omitempty" yaml:"password,omitempty"`
-	//AuthProvider          *KubeAuthProviderConfig `json:"auth-provider,omitempty" yaml:"auth-provider,omitempty"`
+	ClientCertificateData string          `json:"client-certificate-data,omitempty" yaml:"client-certificate-data,omitempty"`
+	ClientKeyData         string          `json:"client-key-data,omitempty" yaml:"client-key-data,omitempty"`
+	Exec                  *KubeExecConfig `json:"exec,omitempty" yaml:"exec,omitempty"`
+}
+
+type ExecInteractiveMode string
+
+const (
+	NeverExecInteractiveMode ExecInteractiveMode = "Never"
+)
+
+type KubeExecConfig struct {
+	Command string   `json:"command" yaml:"command"`
+	Args    []string `json:"args" yaml:"args"`
+	//Env []ExecEnvVar `json:"env" yaml:"env"`
+
+	APIVersion string `json:"apiVersion,omitempty" yaml:"apiVersion,omitempty"`
+
+	InstallHint string `json:"installHint,omitempty" yaml:"installHint,omitempty"`
+
+	ProvideClusterInfo bool `json:"provideClusterInfo" yaml:"provideClusterInfo"`
+
+	//Config runtime.Object
+
+	InteractiveMode ExecInteractiveMode `json:"interactiveMode" yaml:"interactiveMode"`
 }
 
 type KubeContext struct {

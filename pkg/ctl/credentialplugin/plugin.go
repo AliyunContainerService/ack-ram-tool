@@ -11,3 +11,8 @@ var rootCmd = &cobra.Command{
 func SetupCredentialPluginCmd(root *cobra.Command) {
 	root.AddCommand(rootCmd)
 }
+
+func init() {
+	setupGetKubeconfigCmd(rootCmd)
+	setupGetCredentialCmdCmd(rootCmd)
+}
