@@ -22,3 +22,4 @@ test:
 .PHONY: e2e
 e2e:
 	bash ./examples/rrsa/e2e-test/e2e.sh $(cid)
+	bash ./examples/credential-plugin/e2e.sh $(cid)
