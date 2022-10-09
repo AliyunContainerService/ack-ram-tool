@@ -14,10 +14,11 @@ require (
 	github.com/briandowns/spinner v1.19.0
 	github.com/fatih/color v1.13.0
 	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/kr/text v0.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/sergi/go-diff v1.2.0
 	github.com/spf13/cobra v1.4.0
 	github.com/stretchr/testify v1.8.0
-	golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d // indirect
-	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd // indirect
+	gopkg.in/yaml.v3 v3.0.1
 )

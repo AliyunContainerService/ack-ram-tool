@@ -3,6 +3,7 @@ package rrsa
 import (
 	"context"
 	"fmt"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/common"
 	"log"
 	"time"
 
@@ -23,7 +24,7 @@ var enableCmd = &cobra.Command{
 	Short: "Enable RRSA feature",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		client := getClientOrDie()
+		client := common.GetClientOrDie()
 		yesOrExit("Are you sure you want to enable RRSA feature?")
 		ctx := context.Background()
 		clusterId := enableOpts.clusterId
@@ -41,13 +42,13 @@ var enableCmd = &cobra.Command{
 
 		if task, err = enableRRSA(ctx, clusterId, client); err != nil {
 			spin.Stop()
-			exitByError(fmt.Sprintf("Failed to enable RRSA feature for cluster %s: %+v", clusterId, err))
+			common.ExitByError(fmt.Sprintf("Failed to enable RRSA feature for cluster %s: %+v", clusterId, err))
 		}
 		ctx, cancel := context.WithTimeout(ctx, time.Minute*15)
 		defer cancel()
 		if err := waitClusterUpdateFinished(ctx, clusterId, task.TaskId, client); err != nil {
 			spin.Stop()
-			exitByError(fmt.Sprintf("Failed to enable RRSA feature for cluster %s: %+v", clusterId, err))
+			common.ExitByError(fmt.Sprintf("Failed to enable RRSA feature for cluster %s: %+v", clusterId, err))
 		}
 
 		spin.Stop()
@@ -64,5 +65,5 @@ func setupEnableCmd(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(enableCmd)
 	enableCmd.Flags().StringVarP(&enableOpts.clusterId, "cluster-id", "c", "", "The cluster id to use")
 	err := enableCmd.MarkFlagRequired("cluster-id")
-	exitIfError(err)
+	common.ExitIfError(err)
 }

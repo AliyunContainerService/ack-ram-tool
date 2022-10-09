@@ -3,6 +3,7 @@ package rrsa
 import (
 	"context"
 	"fmt"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/common"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/rrsa/addon"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/openapi"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/types"
@@ -23,7 +24,7 @@ var setupAddonCmd = &cobra.Command{
 	Short: "Setup RAM actions for cluster addon.",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		client := getClientOrDie()
+		client := common.GetClientOrDie()
 		addon := addon.GetAddon(setupAddonOpts.addonName)
 
 		yesOrExit(fmt.Sprintf(
@@ -33,30 +34,30 @@ var setupAddonCmd = &cobra.Command{
 		ctx := context.Background()
 		c, err := getRRSAStatus(ctx, setupAddonOpts.clusterId, client)
 		if err != nil {
-			exitByError(fmt.Sprintf("get status failed: %+v", err))
+			common.ExitByError(fmt.Sprintf("get status failed: %+v", err))
 		}
 		rrsaConfig := c.MetaData.RRSAConfig
 		if !rrsaConfig.Enabled {
-			exitByError("RRSA feature is not enabled!")
+			common.ExitByError("RRSA feature is not enabled!")
 		}
 
 		policy := addon.RamPolicy()
 		log.Printf("start to ensure RAM policy(%q) is exist and be configured", policy.PolicyName)
 		if err := ensureRamPolicy(ctx, addon, c, client); err != nil {
-			exitIfError(err)
+			common.ExitIfError(err)
 		}
 
 		roleName := addon.RoleName(c.ClusterId)
 		log.Printf("start to ensure RAM role(%q) is exist and be configured", roleName)
 		if err := associateRole(ctx, c, client, roleName,
 			addon.NameSpace(), addon.ServiceAccountName(), true); err != nil {
-			exitIfError(err)
+			common.ExitIfError(err)
 		}
 
 		ap := addon.RamPolicy()
 		log.Printf("start to attach RAM polciy(%q) to role(%q)", ap.PolicyName, roleName)
 		if err := ensureAttachPolicyToRamRole(ctx, addon, c, client, rrsaConfig, roleName); err != nil {
-			exitIfError(err)
+			common.ExitIfError(err)
 		}
 		log.Printf("attach RAM polciy(%q) to role(%q) is successful", ap.PolicyName, roleName)
 	},
@@ -104,10 +105,10 @@ func sSetupAddonCmd(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(setupAddonCmd)
 	setupAddonCmd.Flags().StringVarP(&setupAddonOpts.clusterId, "cluster-id", "c", "", "The cluster id to use")
 	err := setupAddonCmd.MarkFlagRequired("cluster-id")
-	exitIfError(err)
+	common.ExitIfError(err)
 
 	setupAddonCmd.Flags().StringVarP(&setupAddonOpts.addonName, "addon-name", "a", "The name of cluster addon",
 		fmt.Sprintf("addon name: %s", strings.Join(addon.ListAddonNames(), ",")))
 	err = setupAddonCmd.MarkFlagRequired("addon-name")
-	exitIfError(err)
+	common.ExitIfError(err)
 }

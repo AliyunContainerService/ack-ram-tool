@@ -32,6 +32,29 @@ $ export ALIBABA_CLOUD_ACCESS_KEY_SECRET=bar
 ## Usage
 
 
+### kubectl/client-go credential plugin
+
+A [kubectl/client-go credential plugin](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#client-go-credential-plugins) for ACK。
+
+Get a kubeconfig with exec credential plugin format：
+
+```
+ack-ram-tool credential-plugin get-kubeconfig --cluster-id <clusterId> > kubeconfig
+```
+
+Use this kubeconfig to access cluster:
+
+```
+kubectl --kubeconfig=kubeconfig get ns
+```
+
+Remove cached credentials:
+
+```
+rm ~/.kube/cache/ack-ram-tool/*-exec-auth-credential-*.json
+```
+
+
 ### RAM Roles for Service Accounts (RRSA)
 
 Enable [RRSA feature](https://www.alibabacloud.com/help/doc-detail/356611.html):

@@ -1,20 +1,20 @@
-package rrsa
+package common
 
 import (
 	"log"
 	"os"
 )
 
-func exitIfError(err error) {
+func ExitIfError(err error) {
 	if err == nil {
 		return
 	}
 	if err != nil {
-		exitByError(err.Error())
+		ExitByError(err.Error())
 	}
 }
 
-func exitByError(msg string) {
+func ExitByError(msg string) {
 	log.Println("error: " + msg)
 	os.Exit(1)
 }

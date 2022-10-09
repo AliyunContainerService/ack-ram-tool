@@ -3,6 +3,8 @@ package utils
 import (
 	"bytes"
 	"encoding/json"
+	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 )
@@ -48,4 +50,15 @@ func JSONValue(o interface{}) []byte {
 func ReplaceNewLine(s string) string {
 	s = strings.ReplaceAll(s, "\r", "")
 	return strings.ReplaceAll(s, "\n", " ")
+}
+
+func ExpandPath(path string) (string, error) {
+	if len(path) > 0 && path[0] == '~' {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return "", err
+		}
+		path = filepath.Join(home, path[1:])
+	}
+	return path, nil
 }

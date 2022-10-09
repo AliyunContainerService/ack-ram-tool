@@ -3,6 +3,7 @@ package rrsa
 import (
 	"context"
 	"fmt"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/common"
 	"io/ioutil"
 	"log"
 	"os"
@@ -36,16 +37,16 @@ var assumeRoleCmd = &cobra.Command{
 		if oidcTokenFile == "-" {
 			token, err = ioutil.ReadAll(os.Stdin)
 			if err != nil {
-				exitByError(fmt.Sprintf("read token from stdin failed: %+v", err))
+				common.ExitByError(fmt.Sprintf("read token from stdin failed: %+v", err))
 			}
 		} else {
 			token, err = ioutil.ReadFile(oidcTokenFile)
 			if err != nil {
-				exitByError(fmt.Sprintf("read token file failed: %+v", err))
+				common.ExitByError(fmt.Sprintf("read token file failed: %+v", err))
 			}
 		}
 		if len(token) < 4 || len(token) > 10000 {
-			exitByError("invalid token: The length of OIDC Toke should be between 4 and 10000")
+			common.ExitByError("invalid token: The length of OIDC Toke should be between 4 and 10000")
 		}
 
 		region := ctl.GlobalOption.Region
@@ -56,7 +57,7 @@ var assumeRoleCmd = &cobra.Command{
 		cred, err := openapi.AssumeRoleWithOIDCToken(ctx, oidcArn, roleArn, time.Second*900, token,
 			openapi.GetStsEndpoint(region, ctl.GlobalOption.UseVPCEndpoint))
 		if err != nil {
-			exitByError(fmt.Sprintf("Assume RAM Role failed: %+v", err))
+			common.ExitByError(fmt.Sprintf("Assume RAM Role failed: %+v", err))
 		}
 		log.Println("Retrieved a STS token:")
 		fmt.Printf("AccessKeyId:       %s\n", cred.AccessKeyId)
@@ -73,9 +74,9 @@ func setupAssumeRoleCmd(rootCmd *cobra.Command) {
 	assumeRoleCmd.Flags().StringVarP(&assumeRoleOpts.oidcTokenFile, "oidc-token-file", "t", "",
 		"Path to OIDC token file. If value is '-', will read token from stdin")
 	err := assumeRoleCmd.MarkFlagRequired("role-arn")
-	exitIfError(err)
+	common.ExitIfError(err)
 	err = assumeRoleCmd.MarkFlagRequired("oidc-provider-arn")
-	exitIfError(err)
+	common.ExitIfError(err)
 	err = assumeRoleCmd.MarkFlagRequired("oidc-token-file")
-	exitIfError(err)
+	common.ExitIfError(err)
 }

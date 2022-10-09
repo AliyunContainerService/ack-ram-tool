@@ -1,6 +1,7 @@
 package types
 
 import (
+	"encoding/base64"
 	"strings"
 	"time"
 
@@ -73,4 +74,42 @@ func (s ClusterState) IsRunning() bool {
 type ClusterLog struct {
 	Log     string
 	Created time.Time
+}
+
+type ClusterCredential struct {
+	// server
+	Server string
+	// certificate-authority-data
+	CertificateAuthorityData string
+	// client-certificate-data
+	ClientCertificateData string
+	// client-key-data
+	ClientKeyData string
+	// expiration
+	Expiration time.Time
+}
+
+func (c *ClusterCredential) LoadKubeConfig(conf *KubeConfig) error {
+	c.Server = conf.Clusters[0].Cluster.Server
+
+	ca, err := base64.StdEncoding.DecodeString(conf.Clusters[0].Cluster.CertificateAuthorityData)
+	if err != nil {
+		return err
+	}
+	c.CertificateAuthorityData = string(ca)
+
+	cd, err := base64.StdEncoding.DecodeString(conf.Users[0].User.ClientCertificateData)
+	if err != nil {
+		return err
+	}
+	c.ClientCertificateData = string(cd)
+
+	ck, err := base64.StdEncoding.DecodeString(conf.Users[0].User.ClientKeyData)
+	if err != nil {
+		return err
+	}
+	c.ClientKeyData = string(ck)
+
+	c.Expiration = conf.Expiration
+	return nil
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/types"
 	cs "github.com/alibabacloud-go/cs-20151215/v3/client"
 	"github.com/alibabacloud-go/tea/tea"
+	"gopkg.in/yaml.v3"
 )
 
 type UpdateClusterOption struct {
@@ -21,6 +22,7 @@ type CSClientInterface interface {
 	GetRecentClusterLogs(ctx context.Context, clusterId string) ([]types.ClusterLog, error)
 	UpdateCluster(ctx context.Context, clusterId string, opt UpdateClusterOption) (*types.ClusterTask, error)
 	GetTask(ctx context.Context, taskId string) (*types.ClusterTask, error)
+	GetUserKubeConfig(ctx context.Context, clusterId string, privateIpAddress bool, temporaryDuration time.Duration) (*types.KubeConfig, error)
 }
 
 func (c *Client) GetCluster(ctx context.Context, clusterId string) (*types.Cluster, error) {
@@ -88,6 +90,55 @@ func (c *Client) GetRecentClusterLogs(ctx context.Context, clusterId string) ([]
 		return nil, err
 	}
 	return convertDescribeClusterLogsResponse(ret), nil
+}
+
+func (c *Client) GetUserKubeConfig(ctx context.Context, clusterId string,
+	privateIpAddress bool, temporaryDuration time.Duration) (*types.KubeConfig, error) {
+	client := c.csClient
+	req := &cs.DescribeClusterUserKubeconfigRequest{
+		PrivateIpAddress:         nil,
+		TemporaryDurationMinutes: nil,
+	}
+	if temporaryDuration != 0 {
+		dm := int64(temporaryDuration / time.Minute)
+		if dm < 15 || dm > 4320 {
+			return nil, fmt.Errorf("temporaryDuration should > 15 minutes and < 3 days")
+		}
+		req.TemporaryDurationMinutes = &dm
+	}
+	if privateIpAddress {
+		req.PrivateIpAddress = &privateIpAddress
+	}
+	resp, err := client.DescribeClusterUserKubeconfig(&clusterId, req)
+	if err != nil {
+		return nil, err
+	}
+
+	ret := &types.KubeConfig{}
+	if err := convertDescribeClusterUserKubeconfigResponse(ret, resp); err != nil {
+		return nil, err
+	}
+	return ret, nil
+}
+
+func convertDescribeClusterUserKubeconfigResponse(kubeconfig *types.KubeConfig, resp *cs.DescribeClusterUserKubeconfigResponse) error {
+	body := resp.Body
+	if body == nil {
+		return nil
+	}
+
+	exp := tea.StringValue(body.Expiration)
+	expT, err := time.Parse(time.RFC3339, exp)
+	if err != nil {
+		return err
+	}
+
+	rawConf := tea.StringValue(body.Config)
+	if err := yaml.Unmarshal([]byte(rawConf), kubeconfig); err != nil {
+		return err
+	}
+	kubeconfig.Expiration = expT
+	return nil
 }
 
 func convertDescribeClusterLogsResponse(resp *cs.DescribeClusterLogsResponse) []types.ClusterLog {

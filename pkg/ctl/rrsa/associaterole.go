@@ -3,6 +3,7 @@ package rrsa
 import (
 	"context"
 	"fmt"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/common"
 	"log"
 
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/openapi"
@@ -26,7 +27,7 @@ var associateRoleCmd = &cobra.Command{
 	Short: "Associate an RAM role to a Kubernetes Service Account",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		client := getClientOrDie()
+		client := common.GetClientOrDie()
 		clusterId := associateRoleOpts.clusterId
 		roleName := associateRoleOpts.roleName
 		serviceAccount := associateRoleOpts.serviceAccount
@@ -40,14 +41,14 @@ var associateRoleCmd = &cobra.Command{
 		ctx := context.Background()
 		c, err := getRRSAStatus(ctx, clusterId, client)
 		if err != nil {
-			exitByError(fmt.Sprintf("get status failed: %+v", err))
+			common.ExitByError(fmt.Sprintf("get status failed: %+v", err))
 		}
 		if !c.MetaData.RRSAConfig.Enabled {
-			exitByError("RRSA feature is not enabled!")
+			common.ExitByError("RRSA feature is not enabled!")
 		}
 		if err := associateRole(context.Background(), c, client,
 			roleName, namespace, serviceAccount, createRoleIfNotExist); err != nil {
-			exitByError(fmt.Sprintf("Associate RAM Role %q to service account %q (namespace: %q) failed: %+v",
+			common.ExitByError(fmt.Sprintf("Associate RAM Role %q to service account %q (namespace: %q) failed: %+v",
 				roleName, serviceAccount, namespace, err))
 			return
 		}
@@ -135,11 +136,11 @@ func setupAssociateRoleCmd(rootCmd *cobra.Command) {
 	associateRoleCmd.Flags().StringVarP(&associateRoleOpts.serviceAccount, "service-account", "s", "", "The Kubernetes service account to use")
 	associateRoleCmd.Flags().BoolVar(&associateRoleOpts.createRoleIfNotExist, "create-role-if-not-exist", false, "Create the RAM role if it does not exist")
 	err := associateRoleCmd.MarkFlagRequired("cluster-id")
-	exitIfError(err)
+	common.ExitIfError(err)
 	err = associateRoleCmd.MarkFlagRequired("role-name")
-	exitIfError(err)
+	common.ExitIfError(err)
 	err = associateRoleCmd.MarkFlagRequired("namespace")
-	exitIfError(err)
+	common.ExitIfError(err)
 	err = associateRoleCmd.MarkFlagRequired("service-account")
-	exitIfError(err)
+	common.ExitIfError(err)
 }
