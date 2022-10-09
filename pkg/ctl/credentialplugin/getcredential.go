@@ -16,9 +16,9 @@ type GetCredentialOpts struct {
 	temporaryDuration time.Duration
 	privateIpAddress  bool
 
-	apiVersion   string
-	cacheDir     string
-	disableCache bool
+	apiVersion string
+	cacheDir   string
+	//disableCache bool
 }
 
 var getCredentialOpts = GetCredentialOpts{
