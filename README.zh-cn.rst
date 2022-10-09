@@ -44,21 +44,24 @@ kubectl/client-go 认证插件
 
 获取使用该认证插件的 kubeconfig 文件（使用临时 kubeconfig）：
 
-```
-ack-ram-tool credential-plugin get-kubeconfig --cluster-id <clusterId> > kubeconfig
-```
+.. code-block:: shell
+
+    ack-ram-tool credential-plugin get-kubeconfig --cluster-id <clusterId> > kubeconfig
+
 
 使用获取的 kubeconfig 访问集群（在证书过期前会自动获取新的证书）：
 
-```
-kubectl --kubeconfig=kubeconfig get ns
-```
+.. code-block:: shell
+
+    kubectl --kubeconfig=kubeconfig get ns
+
 
 清理缓存的访问凭证：
 
-```
-rm ~/.kube/cache/ack-ram-tool/*-exec-auth-credential-*.json
-```
+.. code-block:: shell
+
+    rm ~/.kube/cache/ack-ram-tool/*-exec-auth-credential-*.json
+
 
 
 RAM Roles for Service Accounts (RRSA)

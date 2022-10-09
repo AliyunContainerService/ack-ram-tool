@@ -156,7 +156,7 @@ component (needs to be configured before installing the component):
 
 .. code-block:: shell
 
-    $ ack-ram-tool rrsa setup-addon --addon-name kritis-validation-hook -c <clusterId>
+    ack-ram-tool rrsa setup-addon --addon-name kritis-validation-hook -c <clusterId>
 
 
 Disable RRSA feature:
