@@ -30,6 +30,28 @@ $ export ALIBABA_CLOUD_ACCESS_KEY_SECRET=bar
 
 ## 使用示例
 
+### kubectl/client-go 认证插件
+
+一个用于访问 ACK 集群的 [kubectl/client-go 认证插件](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#client-go-credential-plugins)。
+
+获取使用该认证插件的 kubeconfig 文件（使用临时 kubeconfig）：
+
+```
+ack-ram-tool credential-plugin get-kubeconfig --cluster-id <clusterId> > kubeconfig
+```
+
+使用获取的 kubeconfig 访问集群（在证书过期前会自动获取新的证书）：
+
+```
+kubectl --kubeconfig=kubeconfig get ns
+```
+
+清理缓存的访问凭证：
+
+```
+rm ~/.kube/cache/ack-ram-tool/*-exec-auth-credential-*.json
+```
+
 
 ### RAM Roles for Service Accounts (RRSA)
 
@@ -117,7 +139,7 @@ Expiration:        2021-12-03T05:51:37Z
 比如配置 `kritis-validation-hook` 组件所需的 RAM 配置（需要在安装组件前进行配置）:
 
 ```
-$ ack-ram-tool rrsa setup-addon --addon-name kritis-validation-hook -c <clusterId>
+ack-ram-tool rrsa setup-addon --addon-name kritis-validation-hook -c <clusterId>
 ```
 
 禁用 RRSA 特性:

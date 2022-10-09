@@ -30,7 +30,7 @@ function cleanup() {
 
   rm ${KUBECONFIG_PATH}
   rm ${CACHE_DIR}/*
-  rm ${CACHE_DIR}
+  rm -r ${CACHE_DIR}
 
   set -e
 }

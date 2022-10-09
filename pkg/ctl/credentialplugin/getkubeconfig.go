@@ -21,7 +21,7 @@ const (
 
 var getKubeconfigCmd = &cobra.Command{
 	Use:   "get-kubeconfig",
-	Short: "get an kubeconfig with exec credential plugin format.",
+	Short: "get a kubeconfig with exec credential plugin format.",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		client := common.GetClientOrDie()
