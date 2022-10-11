@@ -8,5 +8,5 @@ const (
 
 	envNewSdkCredentialsURI = "ALIBABA_CLOUD_CREDENTIALS_URI"
 
-	envNewSdkCredentialFile = "ALIBABA_CLOUD_CREDENTIALS_FILE"
+	//envNewSdkCredentialFile = "ALIBABA_CLOUD_CREDENTIALS_FILE"
 )
