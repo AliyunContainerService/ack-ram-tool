@@ -65,7 +65,7 @@ kubectl/client-go 认证插件
 
 .. code-block:: shell
 
-    rm ~/.kube/cache/ack-ram-tool/*-exec-auth-credential-*.json
+    rm ~/.kube/cache/ack-ram-tool/credential-plugin/*.json
 
 
 

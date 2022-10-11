@@ -68,7 +68,7 @@ Remove cached credentials:
 
 .. code-block:: shell
 
-    rm ~/.kube/cache/ack-ram-tool/*-exec-auth-credential-*.json
+    rm ~/.kube/cache/ack-ram-tool/credential-plugin/*.json
 
 
 
