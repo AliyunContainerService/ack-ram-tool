@@ -54,6 +54,15 @@ func getCredConfig() *credentials.Config {
 		}
 		return config
 	}
+
+	if kid != "" && ks != "" {
+		config = &credentials.Config{
+			Type:            tea.String("access_key"),
+			AccessKeyId:     tea.String(kid),
+			AccessKeySecret: tea.String(ks),
+		}
+		return config
+	}
 	return config
 }
 
