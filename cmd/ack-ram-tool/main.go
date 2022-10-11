@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/env"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/credentialplugin"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/rrsa"
@@ -13,11 +14,6 @@ import (
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/utils"
 	"github.com/aliyun/credentials-go/credentials"
 	"github.com/spf13/cobra"
-)
-
-const (
-	envAccessKeyId     = "ALIBABA_CLOUD_ACCESS_KEY_ID"
-	envAccessKeySecret = "ALIBABA_CLOUD_ACCESS_KEY_SECRET"
 )
 
 var defaultProfilePath = filepath.Join("~", ".alibabacloud", "credentials")
@@ -31,11 +27,11 @@ var (
 
 More info: https://github.com/AliyunContainerService/ack-ram-tool`,
 		PersistentPreRun: func(_ *cobra.Command, _ []string) {
-			if _, ok := os.LookupEnv(envAccessKeyId); ok {
-				_ = os.Setenv(credentials.EnvVarAccessKeyId, os.Getenv(envAccessKeyId))
+			if v := env.GetAccessKeyId(); v != "" {
+				_ = os.Setenv(credentials.EnvVarAccessKeyId, v)
 			}
-			if _, ok := os.LookupEnv(envAccessKeySecret); ok {
-				_ = os.Setenv(credentials.EnvVarAccessKeySecret, os.Getenv(envAccessKeySecret))
+			if v := env.GetAccessKeySecret(); v != "" {
+				_ = os.Setenv(credentials.EnvVarAccessKeySecret, v)
 			}
 			path, err := utils.ExpandPath(profilePath)
 			if err != nil {

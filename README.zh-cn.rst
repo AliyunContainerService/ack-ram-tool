@@ -30,8 +30,13 @@ ack-ram-tool
 
 .. code-block:: shell
 
+    # access key id
     $ export ALIBABA_CLOUD_ACCESS_KEY_ID=foo
+    # access key secret
     $ export ALIBABA_CLOUD_ACCESS_KEY_SECRET=bar
+
+    # or use credentials URI: https://github.com/aliyun/aliyun-cli#use-credentials-uri
+    $ export ALIBABA_CLOUD_CREDENTIALS_URI=http://localhost:6666/?user=jacksontian
 
 
 使用示例
