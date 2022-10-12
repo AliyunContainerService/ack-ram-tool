@@ -4,7 +4,7 @@ set -e
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
 CLUSTER_ID="$1"
 KUBECONFIG_PATH="${SCRIPT_DIR}/kubeconfig"
-CACHE_DIR="${HOME}/.kube/cache/ack-ram-tool"
+CACHE_DIR="${HOME}/.kube/cache/ack-ram-tool/credential-plugin"
 
 trap cleanup EXIT
 

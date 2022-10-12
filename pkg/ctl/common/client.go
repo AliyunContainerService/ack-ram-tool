@@ -2,6 +2,10 @@ package common
 
 import (
 	"fmt"
+	"log"
+	"net/url"
+
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/env"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/openapi"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/version"
@@ -11,7 +15,11 @@ import (
 )
 
 func NewClient(regionId string) (*openapi.Client, error) {
-	crd, err := credentials.NewCredential(nil)
+	config := getCredConfig()
+	if config != nil {
+		log.Printf("credential type: %s", tea.StringValue(config.Type))
+	}
+	crd, err := credentials.NewCredential(config)
 	if err != nil {
 		return nil, err
 	}
@@ -22,10 +30,46 @@ func NewClient(regionId string) (*openapi.Client, error) {
 	})
 }
 
+func getCredConfig() *credentials.Config {
+	var config *credentials.Config
+	if rawUri := env.GetCredentialsURI(); rawUri != "" {
+		if _, err := url.Parse(rawUri); err == nil {
+			config = &credentials.Config{
+				Type: tea.String("credentials_uri"),
+				Url:  tea.String(rawUri),
+			}
+			return config
+		}
+	}
+
+	kid := env.GetAccessKeyId()
+	ks := env.GetAccessKeySecret()
+	st := env.GetSecurityToken()
+	if kid != "" && ks != "" && st != "" {
+		config = &credentials.Config{
+			Type:            tea.String("sts"),
+			AccessKeyId:     tea.String(kid),
+			AccessKeySecret: tea.String(ks),
+			SecurityToken:   tea.String(st),
+		}
+		return config
+	}
+
+	if kid != "" && ks != "" {
+		config = &credentials.Config{
+			Type:            tea.String("access_key"),
+			AccessKeyId:     tea.String(kid),
+			AccessKeySecret: tea.String(ks),
+		}
+		return config
+	}
+	return config
+}
+
 func GetClientOrDie() *openapi.Client {
-	client, err := NewClient(ctl.GlobalOption.Region)
+	c, err := NewClient(ctl.GlobalOption.Region)
 	if err != nil {
 		ExitByError(fmt.Sprintf("init client failed: %+v", err))
 	}
-	return client
+	return c
 }

@@ -15,7 +15,7 @@ const (
 	expirationDelta time.Duration = time.Minute * 5
 )
 
-var defaultCacheDir = filepath.Join("~", ".kube", "cache", "ack-ram-tool")
+var defaultCacheDir = filepath.Join("~", ".kube", "cache", "ack-ram-tool", "credential-plugin")
 var (
 	errNoValidCache     = errors.New("no valid cache")
 	errNeedRefreshCache = errors.New("need refresh cache")
@@ -61,11 +61,7 @@ func (c *CredentialCache) SaveCredential(cred *types.ExecCredential) error {
 }
 
 func getCacheFilePath(cacheDir string, opts GetCredentialOpts) string {
-	addressType := "public"
-	if opts.privateIpAddress {
-		addressType = "private"
-	}
-	filename := fmt.Sprintf("%s-%s-exec-auth-credential-%s.json",
-		opts.clusterId, addressType, opts.apiVersion)
+	filename := fmt.Sprintf("%s-exec-auth-credential-%s.json",
+		opts.clusterId, opts.apiVersion)
 	return filepath.Join(cacheDir, filename)
 }
