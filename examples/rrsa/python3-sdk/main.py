@@ -3,6 +3,8 @@ import json
 import os
 
 import oss2
+
+# alibabacloud-credentials>=0.3.0
 from alibabacloud_credentials.client import Client as CredClient
 from alibabacloud_credentials.models import Config as CredConfig
 
