@@ -274,9 +274,9 @@ func (s *AttributeMap) SetKey(v map[string]*string) *AttributeMap {
 }
 
 type ClientInterface interface {
-	modifyConfiguration(context *InterceptorContext, attributeMap *AttributeMap)
-	modifyRequest(context *InterceptorContext, attributeMap *AttributeMap)
-	modifyResponse(context *InterceptorContext, attributeMap *AttributeMap)
+	ModifyConfiguration(context *InterceptorContext, attributeMap *AttributeMap) error
+	ModifyRequest(context *InterceptorContext, attributeMap *AttributeMap) error
+	ModifyResponse(context *InterceptorContext, attributeMap *AttributeMap) error
 }
 
 type Client struct {
