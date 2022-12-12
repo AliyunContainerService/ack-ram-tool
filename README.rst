@@ -36,6 +36,8 @@ Or environment variables:
     $ export ALIBABA_CLOUD_ACCESS_KEY_ID=foo
     # access key secret
     $ export ALIBABA_CLOUD_ACCESS_KEY_SECRET=bar
+    # sts token (optional)
+    $ export ALIBABA_CLOUD_SECURITY_TOKEN=foobar
 
     # or use credentials URI: https://github.com/aliyun/aliyun-cli#use-credentials-uri
     $ export ALIBABA_CLOUD_CREDENTIALS_URI=http://localhost:6666/?user=jacksontian
