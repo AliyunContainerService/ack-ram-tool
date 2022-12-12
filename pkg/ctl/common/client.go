@@ -32,15 +32,6 @@ func NewClient(regionId string) (*openapi.Client, error) {
 
 func getCredConfig() *credentials.Config {
 	var config *credentials.Config
-	if rawUri := env.GetCredentialsURI(); rawUri != "" {
-		if _, err := url.Parse(rawUri); err == nil {
-			config = &credentials.Config{
-				Type: tea.String("credentials_uri"),
-				Url:  tea.String(rawUri),
-			}
-			return config
-		}
-	}
 
 	kid := env.GetAccessKeyId()
 	ks := env.GetAccessKeySecret()
@@ -55,15 +46,17 @@ func getCredConfig() *credentials.Config {
 		return config
 	}
 
-	if kid != "" && ks != "" {
-		config = &credentials.Config{
-			Type:            tea.String("access_key"),
-			AccessKeyId:     tea.String(kid),
-			AccessKeySecret: tea.String(ks),
+	if rawUri := env.GetCredentialsURI(); rawUri != "" {
+		if _, err := url.Parse(rawUri); err == nil {
+			config = &credentials.Config{
+				Type: tea.String("credentials_uri"),
+				Url:  tea.String(rawUri),
+			}
+			return config
 		}
-		return config
 	}
-	return config
+
+	return nil
 }
 
 func GetClientOrDie() *openapi.Client {
