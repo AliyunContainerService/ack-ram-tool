@@ -15,6 +15,7 @@ func init() {
 	setupAssociateRoleCmd(rootCmd)
 	setupAssumeRoleCmd(rootCmd)
 	sSetupAddonCmd(rootCmd)
+	setupDemoCmd(rootCmd)
 }
 
 func SetupRRSACmd(root *cobra.Command) {

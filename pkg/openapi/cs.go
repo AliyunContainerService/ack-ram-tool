@@ -23,6 +23,7 @@ type CSClientInterface interface {
 	UpdateCluster(ctx context.Context, clusterId string, opt UpdateClusterOption) (*types.ClusterTask, error)
 	GetTask(ctx context.Context, taskId string) (*types.ClusterTask, error)
 	GetUserKubeConfig(ctx context.Context, clusterId string, privateIpAddress bool, temporaryDuration time.Duration) (*types.KubeConfig, error)
+	ListClusters(ctx context.Context) ([]types.Cluster, error)
 }
 
 func (c *Client) GetCluster(ctx context.Context, clusterId string) (*types.Cluster, error) {
@@ -34,6 +35,16 @@ func (c *Client) GetCluster(ctx context.Context, clusterId string) (*types.Clust
 	cluster := &types.Cluster{}
 	convertDescribeClusterDetailResponse(cluster, resp)
 	return cluster, nil
+}
+
+func (c *Client) ListClusters(ctx context.Context) ([]types.Cluster, error) {
+	client := c.csClient
+	resp, err := client.DescribeClusters(&cs.DescribeClustersRequest{})
+	if err != nil {
+		return nil, err
+	}
+
+	return convertDescribeClustersResponse(resp), nil
 }
 
 func (c *Client) UpdateCluster(ctx context.Context, clusterId string, opt UpdateClusterOption) (*types.ClusterTask, error) {
@@ -156,4 +167,27 @@ func convertDescribeClusterLogsResponse(resp *cs.DescribeClusterLogsResponse) []
 		})
 	}
 	return ret
+}
+
+func convertDescribeClustersResponse(resp *cs.DescribeClustersResponse) []types.Cluster {
+	body := resp.Body
+	if body == nil {
+		return nil
+	}
+	var clusters []types.Cluster
+	for _, item := range body {
+		c := types.Cluster{}
+		c.ClusterId = tea.StringValue(item.ClusterId)
+		c.ClusterType = types.ClusterType(tea.StringValue(item.ClusterType))
+		c.Name = tea.StringValue(item.Name)
+		c.RegionId = tea.StringValue(item.RegionId)
+		c.State = types.ClusterState(tea.StringValue(item.State))
+
+		metadata := &types.ClusterMetaData{}
+		_ = json.Unmarshal([]byte(tea.StringValue(item.MetaData)), metadata)
+		c.MetaData = *metadata
+		clusters = append(clusters, c)
+	}
+
+	return clusters
 }

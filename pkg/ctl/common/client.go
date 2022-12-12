@@ -2,9 +2,9 @@ package common
 
 import (
 	"fmt"
-	"log"
 	"net/url"
 
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudsdkgo/helper"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/env"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/openapi"
@@ -15,11 +15,7 @@ import (
 )
 
 func NewClient(regionId string) (*openapi.Client, error) {
-	config := getCredConfig()
-	if config != nil {
-		log.Printf("credential type: %s", tea.StringValue(config.Type))
-	}
-	crd, err := credentials.NewCredential(config)
+	crd, err := getCredential()
 	if err != nil {
 		return nil, err
 	}
@@ -30,33 +26,35 @@ func NewClient(regionId string) (*openapi.Client, error) {
 	})
 }
 
-func getCredConfig() *credentials.Config {
-	var config *credentials.Config
-
+func getCredential() (credentials.Credential, error) {
 	kid := env.GetAccessKeyId()
 	ks := env.GetAccessKeySecret()
 	st := env.GetSecurityToken()
 	if kid != "" && ks != "" && st != "" {
-		config = &credentials.Config{
+		config := &credentials.Config{
 			Type:            tea.String("sts"),
 			AccessKeyId:     tea.String(kid),
 			AccessKeySecret: tea.String(ks),
 			SecurityToken:   tea.String(st),
 		}
-		return config
+		return credentials.NewCredential(config)
 	}
 
 	if rawUri := env.GetCredentialsURI(); rawUri != "" {
 		if _, err := url.Parse(rawUri); err == nil {
-			config = &credentials.Config{
+			config := &credentials.Config{
 				Type: tea.String("credentials_uri"),
 				Url:  tea.String(rawUri),
 			}
-			return config
+			return credentials.NewCredential(config)
 		}
 	}
 
-	return nil
+	if helper.HaveOidcCredentialRequiredEnv() {
+		return helper.NewOidcCredential(version.UserAgent())
+	}
+
+	return credentials.NewCredential(nil)
 }
 
 func GetClientOrDie() *openapi.Client {
