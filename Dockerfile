@@ -1,4 +1,5 @@
 FROM golang:1.19.2-buster as builder
+# TARGETPLATFORM
 
 WORKDIR /workspace
 COPY . ./
