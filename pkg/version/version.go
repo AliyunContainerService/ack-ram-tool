@@ -19,6 +19,13 @@ func init() {
 	}
 }
 
+func BinName() string {
+	if binName == "" {
+		return defaultProgramName
+	}
+	return binName
+}
+
 func UserAgent() string {
 	if binName == "" || binName == defaultProgramName {
 		return fmt.Sprintf("ack-ram-tool/%s", Version)

@@ -51,7 +51,7 @@ func getCredential() (credentials.Credential, error) {
 	}
 
 	if helper.HaveOidcCredentialRequiredEnv() {
-		return helper.NewOidcCredential(version.UserAgent())
+		return helper.NewOidcCredential(version.BinName())
 	}
 
 	return credentials.NewCredential(nil)
