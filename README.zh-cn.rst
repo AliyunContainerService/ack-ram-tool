@@ -28,7 +28,8 @@ ack-ram-tool
     access_key_id = foo
     access_key_secret = bar
 
-您也可以通过环境变量配置凭证信息:
+您也可以通过环境变量配置凭证信息 （
+注：程序也支持 `aliyun cli 所支持的类似含义的环境变量 <https://github.com/aliyun/aliyun-cli#support-for-environment-variables>`__ ）:
 
 .. code-block:: shell
 
