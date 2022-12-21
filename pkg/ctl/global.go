@@ -5,6 +5,10 @@ type globalOption struct {
 	Region                string
 	UseVPCEndpoint        bool
 	InsecureSkipTLSVerify bool
+
+	CredentialFilePath      string
+	AliyuncliConfigFilePath string
+	AliyuncliProfileName    string
 }
 
 var GlobalOption = &globalOption{}

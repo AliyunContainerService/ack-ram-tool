@@ -64,8 +64,8 @@ function deploy_pod() {
   bar_tip "deploy pod"
   kubectl -n ${NAMESPACE} delete pod --all
 
-  sed "s#__ALIBABA_CLOUD_ROLE_ARN__#${ROLE_ARN}#g" "${SCRIPT_DIR}/deploy.yaml" | \
-    sed "s#__ALIBABA_CLOUD_OIDC_PROVIDER_ARN__#${OIDC_ARN}#g" | \
+  sed "s#<role_arn>#${ROLE_ARN}#g" "${SCRIPT_DIR}/deploy.yaml" | \
+    sed "s#<oidc_arn>#${OIDC_ARN}#g" | \
     kubectl -n ${NAMESPACE} apply -f -
 }
 

@@ -13,9 +13,9 @@ spec:
       name: test
       env:
         - name: ALIBABA_CLOUD_ROLE_ARN
-          value: __ALIBABA_CLOUD_ROLE_ARN__
+          value: <role_arn>
         - name: ALIBABA_CLOUD_OIDC_PROVIDER_ARN
-          value: __ALIBABA_CLOUD_OIDC_PROVIDER_ARN__
+          value: <oidc_arn>
         - name: ALIBABA_CLOUD_OIDC_TOKEN_FILE
           value: /var/run/secrets/rrsa/oidc-token
       volumeMounts:

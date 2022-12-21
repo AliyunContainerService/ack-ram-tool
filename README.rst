@@ -16,7 +16,11 @@ You can download the latest release from `Releases <https://github.com/AliyunCon
 Credential
 -------------
 
-You can use ``~/.alibabacloud/credentials`` file(this path can be overridden using the ``--profile-file`` flag):
+You can reuse ``~/.aliyun/config.json`` file from aliyun cli (For detailed configuration instructions, please visit the document
+`Configuration Alibaba Cloud CLI <https://www.alibabacloud.com/help/doc-detail/110341.htm>`__ ).
+
+
+Or use ``~/.alibabacloud/credentials`` file (this path can be overridden using the ``--profile-file`` flag):
 
 .. code-block:: shell
 
@@ -26,7 +30,6 @@ You can use ``~/.alibabacloud/credentials`` file(this path can be overridden usi
     type = access_key
     access_key_id = foo
     access_key_secret = bar
-
 
 Or environment variables:
 
