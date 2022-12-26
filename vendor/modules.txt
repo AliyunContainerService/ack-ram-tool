@@ -29,7 +29,7 @@ github.com/alibabacloud-go/tea/tea
 github.com/alibabacloud-go/tea/utils
 # github.com/alibabacloud-go/tea-utils v1.4.3
 github.com/alibabacloud-go/tea-utils/service
-# github.com/aliyun/alibaba-cloud-sdk-go v1.61.1518
+# github.com/aliyun/alibaba-cloud-sdk-go v1.62.100
 ## explicit
 github.com/aliyun/alibaba-cloud-sdk-go/sdk/auth/credentials
 github.com/aliyun/alibaba-cloud-sdk-go/sdk/auth/signers
@@ -73,6 +73,9 @@ github.com/mgutz/ansi
 github.com/modern-go/concurrent
 # github.com/modern-go/reflect2 v1.0.2
 github.com/modern-go/reflect2
+# github.com/opentracing/opentracing-go v1.2.1-0.20220228012449-10b1cf09e00b
+github.com/opentracing/opentracing-go
+github.com/opentracing/opentracing-go/log
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
 # github.com/sergi/go-diff v1.2.0
