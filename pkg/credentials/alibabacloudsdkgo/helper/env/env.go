@@ -61,6 +61,12 @@ var (
 		envAliyuncliProfileName2,
 		envAliyuncliProfileName3,
 	}
+	aliyuncliIgnoreProfileEnvs = []string{
+		envAliyuncliIgnoreProfile,
+	}
+	aliyuncliProfilePathEnvs = []string{
+		envAliyuncliProfilePath,
+	}
 )
 
 // NewCredential return a Credential base on environment variables
@@ -74,7 +80,6 @@ func NewCredential() (credentials.Credential, error) {
 	oidcTokenFile := GetOIDCTokenFile()
 	sessionName := GetRoleSessionName()
 
-	//credFile := GetCredentialsFile()
 	config := &credentials.Config{
 		AccessKeyId:       stringPoint(keyId),
 		AccessKeySecret:   stringPoint(keySecret),
@@ -122,6 +127,14 @@ func GetCredentialsFile() string {
 
 func GetAliyuncliProfileName() string {
 	return getEnvsValue(aliyuncliProfileNameEnvs)
+}
+
+func GetAliyuncliIgnoreProfile() string {
+	return getEnvsValue(aliyuncliIgnoreProfileEnvs)
+}
+
+func GetAliyuncliProfilePath() string {
+	return getEnvsValue(aliyuncliProfilePathEnvs)
 }
 
 func GetRoleArn() string {
