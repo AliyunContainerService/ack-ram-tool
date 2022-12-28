@@ -1,7 +1,7 @@
 ack-ram-tool
 =============
 
-A command line utility and library for using RAM in Alibaba Cloud Container Service For Kubernetes (ACK).
+A command line utility and library for using RAM、Credential and permission related features in Alibaba Cloud Container Service For Kubernetes (ACK).
 
 .. contents::
 
@@ -31,7 +31,7 @@ Or use ``~/.alibabacloud/credentials`` file (this path can be overridden using t
     access_key_id = foo
     access_key_secret = bar
 
-Or environment variables:
+Or environment variables (also support credential related environment variables from `aliyun cli <https://github.com/aliyun/aliyun-cli#support-for-environment-variables>`__):
 
 .. code-block:: shell
 
