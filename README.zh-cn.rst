@@ -104,7 +104,8 @@ RAM Roles for Service Accounts (RRSA)
 
 .. code-block:: shell
 
-    $ ack-ram-tool rrsa associate-role -c <clusterId> --create-role-if-not-exist -r <roleName> -n <namespace> -s <serviceAccount>
+    $ ack-ram-tool rrsa associate-role -c <clusterId> --create-role-if-not-exist \
+        -r <roleName> -n <namespace> -s <serviceAccount>
 
     ? Are you sure you want to associate RAM Role test-rrsa to service account test-serviceaccount (namespace: test-namespace)? Yes
     Will change the assumeRolePolicyDocument of RAM Role test-rrsa with blow content:
