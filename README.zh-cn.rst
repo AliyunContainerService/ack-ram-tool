@@ -17,7 +17,7 @@ ack-ram-tool
 您可以直接使用 aliyun cli 的配置文件 ``~/.aliyun/config.json`` (关于 aliyun cli 的配置文件详情请参考
   `官方文档 <https://www.alibabacloud.com/help/doc-detail/110341.htm>`__ ) 中配置的凭证信息.
 
-您也可以通过 ``~/.alibabacloud/credentials`` 文件配置凭证信息（也可以通过 ``--profile-file`` 参数指定文件路径）:
+您也可以通过 ``~/.alibabacloud/credentials`` 文件配置凭证信息（可以通过 ``--profile-file`` 参数指定文件路径）:
 
 .. code-block:: shell
 
