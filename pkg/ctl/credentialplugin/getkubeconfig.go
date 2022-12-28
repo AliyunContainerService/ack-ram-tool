@@ -21,7 +21,7 @@ const (
 
 var getKubeconfigCmd = &cobra.Command{
 	Use:   "get-kubeconfig",
-	Short: "get a kubeconfig with exec credential plugin format.",
+	Short: "Get a kubeconfig with exec credential plugin format.",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		client := common.GetClientOrDie()
@@ -54,10 +54,10 @@ func generateExecKubeconfig(config *types.KubeConfig) *types.KubeConfig {
 		"get-credential",
 		"--cluster-id",
 		getCredentialOpts.clusterId,
-		//"--api-version",
-		//getCredentialOpts.apiVersion,
-		//"--expiration",
-		//"1h",
+		"--api-version",
+		getCredentialOpts.apiVersion,
+		"--expiration",
+		"3h",
 	}
 	for _, u := range newConf.Users {
 		newU := types.KubeAuthUser{
