@@ -5,8 +5,11 @@ const (
 	envNewSdkAccessKeyId     = "ALIBABA_CLOUD_ACCESS_KEY_ID"
 	envNewSdkAccessKeySecret = "ALIBABA_CLOUD_ACCESS_KEY_SECRET"
 	envNewSdkSecurityToken   = "ALIBABA_CLOUD_SECURITY_TOKEN"
+	envNewSdkRoleSessionName = "ALIBABA_CLOUD_ROLE_SESSION_NAME"
 
 	envNewSdkCredentialsURI = "ALIBABA_CLOUD_CREDENTIALS_URI"
 
-	//envNewSdkCredentialFile = "ALIBABA_CLOUD_CREDENTIALS_FILE"
+	envNewSdkCredentialFile = "ALIBABA_CLOUD_CREDENTIALS_FILE"
+
+	EnvRoleSessionName = envNewSdkRoleSessionName
 )

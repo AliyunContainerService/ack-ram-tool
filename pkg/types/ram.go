@@ -59,9 +59,6 @@ func MakeRamPolicyDocument(policies []RamPolicyStatement) RamPolicyDocument {
 }
 
 func MakeAssumeRolePolicyStatementWithServiceAccount(oidcIssuer, oidcArn, namespace, serviceAccount string) RamPolicyStatement {
-	if serviceAccount == "" {
-		serviceAccount = "*"
-	}
 	return RamPolicyStatement{
 		"Action": "sts:AssumeRole",
 		"Condition": map[string]interface{}{

@@ -2,10 +2,9 @@ package common
 
 import (
 	"fmt"
-	"log"
-	"net/url"
+	"os"
 
-	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/env"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudsdkgo/helper"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/openapi"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/version"
@@ -14,12 +13,8 @@ import (
 	"github.com/aliyun/credentials-go/credentials"
 )
 
-func NewClient(regionId string) (*openapi.Client, error) {
-	config := getCredConfig()
-	if config != nil {
-		log.Printf("credential type: %s", tea.StringValue(config.Type))
-	}
-	crd, err := credentials.NewCredential(config)
+func NewClient(regionId, credentialFilePath, aliyuncliConfigFilePath, aliyuncliProfileName string) (*openapi.Client, error) {
+	crd, err := getCredential(credentialFilePath, aliyuncliConfigFilePath, aliyuncliProfileName, version.BinName())
 	if err != nil {
 		return nil, err
 	}
@@ -30,37 +25,26 @@ func NewClient(regionId string) (*openapi.Client, error) {
 	})
 }
 
-func getCredConfig() *credentials.Config {
-	var config *credentials.Config
-
-	kid := env.GetAccessKeyId()
-	ks := env.GetAccessKeySecret()
-	st := env.GetSecurityToken()
-	if kid != "" && ks != "" && st != "" {
-		config = &credentials.Config{
-			Type:            tea.String("sts"),
-			AccessKeyId:     tea.String(kid),
-			AccessKeySecret: tea.String(ks),
-			SecurityToken:   tea.String(st),
-		}
-		return config
+func getCredential(credentialFilePath, aliyuncliConfigFilePath, aliyuncliProfileName, sessionName string) (credentials.Credential, error) {
+	cred, err := helper.NewCredential(credentialFilePath, aliyuncliConfigFilePath, aliyuncliProfileName, sessionName)
+	if err == nil && cred != nil {
+		return cred, err
 	}
-
-	if rawUri := env.GetCredentialsURI(); rawUri != "" {
-		if _, err := url.Parse(rawUri); err == nil {
-			config = &credentials.Config{
-				Type: tea.String("credentials_uri"),
-				Url:  tea.String(rawUri),
-			}
-			return config
+	if credentialFilePath != "" {
+		if _, err := os.Stat(credentialFilePath); err == nil {
+			os.Setenv(credentials.ENVCredentialFile, credentialFilePath)
 		}
 	}
-
-	return nil
+	return credentials.NewCredential(nil)
 }
 
 func GetClientOrDie() *openapi.Client {
-	c, err := NewClient(ctl.GlobalOption.Region)
+	c, err := NewClient(
+		ctl.GlobalOption.Region,
+		ctl.GlobalOption.CredentialFilePath,
+		ctl.GlobalOption.AliyuncliConfigFilePath,
+		ctl.GlobalOption.AliyuncliProfileName,
+	)
 	if err != nil {
 		ExitByError(fmt.Sprintf("init client failed: %+v", err))
 	}

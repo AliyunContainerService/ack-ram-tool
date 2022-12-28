@@ -30,7 +30,7 @@ var getCredentialOpts = GetCredentialOpts{
 
 var getCredentialCmd = &cobra.Command{
 	Use:   "get-credential",
-	Short: "get ACK credential",
+	Short: "Get ACK credential",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		client := common.GetClientOrDie()
