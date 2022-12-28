@@ -86,7 +86,10 @@ function cleanup() {
   set +e
   bar_tip "cleanup"
   if ! echo "${SKIP}" |grep cleanup; then
+    aliyun ram DetachPolicyFromRole --RoleName ${ROLE_NAME} \
+              --PolicyName ${POLICY_NAME} --PolicyType "System"
     aliyun ram DeleteRole --RoleName ${ROLE_NAME}
+
     aliyun ram DetachPolicyFromRole --RoleName "kritis-validation-hook-${CLUSTER_ID}" \
           --PolicyName "ack-kritis-validation-hook" --PolicyType "Custom"
     aliyun ram DeleteRole --RoleName "kritis-validation-hook-${CLUSTER_ID}"
