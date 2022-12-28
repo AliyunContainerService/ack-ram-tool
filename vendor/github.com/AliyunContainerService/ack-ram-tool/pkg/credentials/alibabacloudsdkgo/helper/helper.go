@@ -39,7 +39,14 @@ func NewCredential(credentialFilePath, aliyuncliConfigFilePath, aliyuncliProfile
 	if sessionName != "" {
 		os.Setenv(env.EnvRoleSessionName, sessionName)
 	}
-	if aliyuncliConfigFilePath == "" {
+	if rawP := env.GetAliyuncliProfilePath(); aliyuncliConfigFilePath == "" && rawP != "" {
+		if path, err := expandPath(rawP); err == nil && path != "" {
+			if _, err := os.Stat(path); err == nil {
+				aliyuncliConfigFilePath = path
+			}
+		}
+	}
+	if aliyuncliConfigFilePath == "" || env.GetAliyuncliIgnoreProfile() == "TRUE" {
 		if cred, err := env.NewCredential(); err == nil && cred != nil {
 			return cred, err
 		}

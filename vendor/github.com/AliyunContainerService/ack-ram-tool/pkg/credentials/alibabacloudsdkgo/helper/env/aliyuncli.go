@@ -18,4 +18,8 @@ const (
 	envAliyuncliProfileName1 = "ALIBABACLOUD_PROFILE"
 	envAliyuncliProfileName2 = "ALIBABA_CLOUD_PROFILE"
 	envAliyuncliProfileName3 = "ALICLOUD_PROFILE"
+
+	envAliyuncliIgnoreProfile = "ALIBABACLOUD_IGNORE_PROFILE"
+
+	envAliyuncliProfilePath = "ALIBABACLOUD_PROFILE_PATH"
 )
