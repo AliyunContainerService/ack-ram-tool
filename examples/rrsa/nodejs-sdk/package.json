@@ -4,12 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "demo": "ts-node src/index.ts"
+    "demo": "node_modules/.bin/ts-node src/index.ts"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@alicloud/credentials": "^2.2.1",
-    "@alicloud/sts20150401": "^1.1.0"
+    "@alicloud/credentials": "^2.2.6",
+    "@alicloud/cs20151215": "^3.0.20",
+    "@alicloud/openapi-client": "^0.4.4"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.1"
   }
 }
