@@ -17,3 +17,5 @@ require (
 	golang.org/x/time v0.0.0-20220224211638-0e9765cccd65 // indirect
 	gopkg.in/ini.v1 v1.66.6 // indirect
 )
+
+replace github.com/aliyun/credentials-go v1.2.5 => github.com/mozillazg/credentials-go v1.2.1-0.20230203062104-a568cc8208a9
