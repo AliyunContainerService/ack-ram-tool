@@ -5,31 +5,29 @@ import Credential, {Config} from '@alicloud/credentials';
 
 export default class Demo {
 
-  static newConfigWithCred(): $OpenApi.Config {
+  static newCredWithCred(): Credential {
     // https://www.alibabacloud.com/help/doc-detail/378664.html
-    const cred =  new Credential(new Config({
-      type:                   'oidc_role_arn',
-      roleArn:                process.env.ALIBABA_CLOUD_ROLE_ARN,
-      oidcProviderArn:        process.env.ALIBABA_CLOUD_OIDC_PROVIDER_ARN,
-      oidcTokenFilePath:      process.env.ALIBABA_CLOUD_OIDC_TOKEN_FILE,
-      roleSessionName:        'test-rrsa-oidc-token',
-    }));
-    return new $OpenApi.Config({
-      credential: cred,
-    });
+    return new Credential(new Config({
+      type: 'oidc_role_arn',
+      roleArn: process.env.ALIBABA_CLOUD_ROLE_ARN,
+      oidcProviderArn: process.env.ALIBABA_CLOUD_OIDC_PROVIDER_ARN,
+      oidcTokenFilePath: process.env.ALIBABA_CLOUD_OIDC_TOKEN_FILE,
+      roleSessionName: 'test-rrsa-oidc-token',
+    }))
   }
 
-  static newConfig(): $OpenApi.Config {
+  static newCred(): Credential {
     // https://www.alibabacloud.com/help/doc-detail/378664.html
-    return new $OpenApi.Config();
+    return new Credential();
   }
 
   static async main(args: string[]): Promise<void> {
     // 两种方法都可以
-    const config = Demo.newConfig();
+    const cred = Demo.newCred();
     // or
-    // const config = Demo.newConfigWithCred();
+    // const cred = Demo.newC();
 
+    const config =  new $OpenApi.Config({credential: cred})
     config.endpoint = 'cs.cn-hangzhou.aliyuncs.com';
     const client = new CS20151215(config);
     const req = new $CS20151215.DescribeClustersRequest({})
