@@ -3,9 +3,9 @@ package com.alibabacloud;
 // com.aliyun:credentials-java >= 0.2.10
 import com.aliyun.credentials.Client;
 import com.aliyun.cs20151215.models.DescribeClustersRequest;
+import com.aliyun.cs20151215.models.DescribeClustersResponse;
 
 // only for oss sdk
-import com.aliyun.cs20151215.models.DescribeClustersResponse;
 import com.aliyun.oss.ClientBuilderConfiguration;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.common.auth.*;
