@@ -27,9 +27,9 @@ def test_open_api_sdk(cred):
     client = CS20151215Client(config)
     resp = client.describe_clusters(csmodules.DescribeClustersRequest())
 
-    print("call sts.GetCallerIdentity via oidc token success:\n")
+    print("call cs.describe_clusters via oidc token success:\n")
     for cluster in resp.body:
-        print("cluster id: %s, cluster name: %s\n", cluster.cluster_id, cluster.name)
+        print("cluster id: {}, cluster name: {}".format(cluster.cluster_id, cluster.name))
     print('\n')
 
 
