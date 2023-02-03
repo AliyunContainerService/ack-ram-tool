@@ -4,27 +4,27 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.example</groupId>
+    <groupId>com.alibabacloud</groupId>
     <artifactId>demo</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
             <groupId>com.aliyun</groupId>
-            <artifactId>sts20150401</artifactId>
-            <version>1.1.0</version>
+            <artifactId>cs20151215</artifactId>
+            <version>3.0.25</version>
         </dependency>
 
         <dependency>
             <groupId>com.aliyun</groupId>
             <artifactId>credentials-java</artifactId>
-            <version>0.2.8</version>
+            <version>0.2.10</version>
         </dependency>
 
         <dependency>
             <groupId>com.aliyun.oss</groupId>
             <artifactId>aliyun-sdk-oss</artifactId>
-            <version>3.14.0</version>
+            <version>3.15.2</version>
         </dependency>
 
     </dependencies>
@@ -34,5 +34,47 @@
         <maven.compiler.source>18</maven.compiler.source>
         <maven.compiler.target>18</maven.compiler.target>
     </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>com.alibabacloud.Demo</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.4.2</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.alibabacloud.Demo</mainClass>
+                        </manifest>
+                    </archive>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id> <!-- this is used for inheritance merges -->
+                        <phase>package</phase> <!-- bind to the packaging phase -->
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
