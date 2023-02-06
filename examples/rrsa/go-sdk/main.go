@@ -9,7 +9,7 @@ import (
 	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
-	// github.com/aliyun/credentials-go >= v1.2.5
+	// github.com/aliyun/credentials-go >= v1.2.6
 	"github.com/aliyun/credentials-go/credentials"
 )
 

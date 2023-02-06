@@ -8,7 +8,7 @@ require (
 	github.com/alibabacloud-go/tea v1.1.19
 	github.com/alibabacloud-go/tea-utils v1.3.9 // indirect
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.2+incompatible
-	github.com/aliyun/credentials-go v1.2.5
+	github.com/aliyun/credentials-go v1.2.6
 	github.com/baiyubin/aliyun-sts-go-sdk v0.0.0-20180326062324-cfa1a18b161f // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
@@ -17,5 +17,3 @@ require (
 	golang.org/x/time v0.0.0-20220224211638-0e9765cccd65 // indirect
 	gopkg.in/ini.v1 v1.66.6 // indirect
 )
-
-replace github.com/aliyun/credentials-go v1.2.5 => github.com/mozillazg/credentials-go v1.2.1-0.20230203062104-a568cc8208a9
