@@ -10,17 +10,19 @@ github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudsdkgo
 github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudsdkgo/helper/env
 # github.com/alibabacloud-go/alibabacloud-gateway-spi v0.0.4
 github.com/alibabacloud-go/alibabacloud-gateway-spi/client
-# github.com/alibabacloud-go/cs-20151215/v3 v3.0.9
+# github.com/alibabacloud-go/cs-20151215/v3 v3.0.31
 ## explicit
 github.com/alibabacloud-go/cs-20151215/v3/client
 # github.com/alibabacloud-go/darabonba-openapi v0.1.18
 ## explicit
 github.com/alibabacloud-go/darabonba-openapi/client
+# github.com/alibabacloud-go/darabonba-openapi/v2 v2.0.2
+github.com/alibabacloud-go/darabonba-openapi/v2/client
 # github.com/alibabacloud-go/debug v0.0.0-20190504072949-9472017b5c68
 github.com/alibabacloud-go/debug/debug
 # github.com/alibabacloud-go/endpoint-util v1.1.0
 github.com/alibabacloud-go/endpoint-util/service
-# github.com/alibabacloud-go/openapi-util v0.0.11
+# github.com/alibabacloud-go/openapi-util v0.1.0
 github.com/alibabacloud-go/openapi-util/service
 # github.com/alibabacloud-go/ram-20150501 v1.0.2
 ## explicit
@@ -34,6 +36,8 @@ github.com/alibabacloud-go/tea/tea
 github.com/alibabacloud-go/tea/utils
 # github.com/alibabacloud-go/tea-utils v1.4.5
 github.com/alibabacloud-go/tea-utils/service
+# github.com/alibabacloud-go/tea-utils/v2 v2.0.1
+github.com/alibabacloud-go/tea-utils/v2/service
 # github.com/alibabacloud-go/tea-xml v1.1.2
 github.com/alibabacloud-go/tea-xml/service
 # github.com/aliyun/alibaba-cloud-sdk-go v1.61.1518
