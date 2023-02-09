@@ -13,11 +13,11 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
-        go-version: 1.17
+        go-version: 1.19
     - name: golangci-lint
       uses: golangci/golangci-lint-action@v3
       with:
-        version: v1.41
+        version: v1.51.1
 
   releaser-test:
     runs-on: ubuntu-latest
@@ -27,7 +27,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
-          go-version: 1.17
+          go-version: 1.19
         env:
           GOPATH: ${{ env.HOME }}
 
@@ -49,7 +49,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
-        go-version: 1.17
+        go-version: 1.19
       env:
         GOPATH: ${{ env.HOME }}
 
