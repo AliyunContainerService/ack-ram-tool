@@ -1,5 +1,7 @@
 import CS20151215, * as $CS20151215 from '@alicloud/cs20151215';
 import * as $OpenApi from '@alicloud/openapi-client';
+
+// @alicloud/credentials >= 2.2.6
 import Credential, {Config} from '@alicloud/credentials';
 
 
