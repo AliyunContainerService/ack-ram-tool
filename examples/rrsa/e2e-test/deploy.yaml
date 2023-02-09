@@ -1,33 +1,36 @@
 ---
 apiVersion: v1
-kind: Pod
+kind: Namespace
+metadata:
+  name: rrsa-demo
+  labels:
+    pod-identity.alibabacloud.com/injection: enabled
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: demo-sa
+  namespace: rrsa-demo
+  annotations:
+    pod-identity.alibabacloud.com/role-name: test-rrsa-demo
+
+---
+apiVersion: batch/v1
+kind: Job
 metadata:
   name: demo
+  namespace: rrsa-demo
 spec:
-  containers:
-    - image: registry.cn-hangzhou.aliyuncs.com/acs/ack-ram-tool:1.0.0
-      imagePullPolicy: "Always"
-      args:
-        - rrsa
-        - demo
-      name: test
-      env:
-        - name: ALIBABA_CLOUD_ROLE_ARN
-          value: <role_arn>
-        - name: ALIBABA_CLOUD_OIDC_PROVIDER_ARN
-          value: <oidc_arn>
-        - name: ALIBABA_CLOUD_OIDC_TOKEN_FILE
-          value: /var/run/secrets/rrsa/oidc-token
-      volumeMounts:
-        - mountPath: /var/run/secrets/rrsa
-          name: rrsa-oidc-token
-  serviceAccountName: sa-abc
-  restartPolicy: Never
-  volumes:
-    - name: rrsa-oidc-token
-      projected:
-        sources:
-          - serviceAccountToken:
-              path: oidc-token
-              expirationSeconds: 7200
-              audience: "sts.aliyuncs.com"
+  template:
+    spec:
+      serviceAccountName: demo-sa
+      restartPolicy: Never
+      containers:
+        - image: registry.cn-hangzhou.aliyuncs.com/acs/ack-ram-tool:1.0.0
+          imagePullPolicy: "Always"
+          args:
+            - rrsa
+            - demo
+            - --no-loop
+          name: test
