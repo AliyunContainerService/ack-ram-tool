@@ -1,38 +1,19 @@
-package rrsa
+package common
 
 import (
 	"context"
 	"fmt"
-	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/common"
-	"log"
 	"math/rand"
-	"os"
 	"strings"
 	"time"
 
-	survey "github.com/AlecAivazis/survey/v2"
-	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/common"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/openapi"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/types"
 )
 
-func yesOrExit(msg string) {
-	if ctl.GlobalOption.AssumeYes {
-		return
-	}
-	var promptRet bool
-	prompt := &survey.Confirm{
-		Message: msg,
-	}
-	_ = survey.AskOne(prompt, &promptRet)
-	if !promptRet {
-		log.Println("Canceled! Bye bye~")
-		os.Exit(0)
-	}
-}
-
-func allowRRSAFeatureOrDie(ctx context.Context, clusterId string, client *openapi.Client) *types.Cluster {
-	c, err := getRRSAStatus(ctx, clusterId, client)
+func AllowRRSAFeatureOrDie(ctx context.Context, clusterId string, client *openapi.Client) *types.Cluster {
+	c, err := GetRRSAStatus(ctx, clusterId, client)
 	if err != nil {
 		common.ExitByError(fmt.Sprintf("get status failed: %+v", err))
 	}
@@ -45,7 +26,36 @@ func allowRRSAFeatureOrDie(ctx context.Context, clusterId string, client *openap
 	return c
 }
 
-func waitClusterUpdateFinished(ctx context.Context, clusterId, taskId string, client openapi.CSClientInterface) error {
+func GetRRSAStatus(ctx context.Context, clusterId string, client openapi.CSClientInterface) (*types.Cluster, error) {
+	c, err := client.GetCluster(ctx, clusterId)
+	return c, err
+}
+
+func getRRSAFailMessage(ctx context.Context, clusterId string, client openapi.CSClientInterface) string {
+	logs, err := client.GetRecentClusterLogs(ctx, clusterId)
+	if err != nil {
+		// TODO: xxx
+		return ""
+	}
+	max := 20
+	n := 0
+	for _, item := range logs {
+		n++
+		if n >= max {
+			break
+		}
+		if !strings.Contains(item.Log, "Failed") {
+			continue
+		}
+		if !strings.Contains(item.Log, "RRSA") {
+			continue
+		}
+		return item.Log
+	}
+	return ""
+}
+
+func WaitClusterUpdateFinished(ctx context.Context, clusterId, taskId string, client openapi.CSClientInterface) error {
 	n := int64(1)
 	var taskSuccess bool
 	for {
@@ -87,28 +97,4 @@ func waitClusterUpdateFinished(ctx context.Context, clusterId, taskId string, cl
 		time.Sleep(time.Second*20 + jitter)
 		n++
 	}
-}
-
-func getRRSAFailMessage(ctx context.Context, clusterId string, client openapi.CSClientInterface) string {
-	logs, err := client.GetRecentClusterLogs(ctx, clusterId)
-	if err != nil {
-		// TODO: xxx
-		return ""
-	}
-	max := 20
-	n := 0
-	for _, log := range logs {
-		n++
-		if n >= max {
-			break
-		}
-		if !strings.Contains(log.Log, "Failed") {
-			continue
-		}
-		if !strings.Contains(log.Log, "RRSA") {
-			continue
-		}
-		return log.Log
-	}
-	return ""
 }

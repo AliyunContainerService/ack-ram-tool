@@ -4,11 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
+
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/common"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/openapi"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/types"
 	"github.com/spf13/cobra"
-	"time"
 )
 
 type GetCredentialOpts struct {
@@ -35,6 +37,9 @@ var getCredentialCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		client := common.GetClientOrDie()
 		ctx := context.Background()
+		clusterId := ctl.GlobalOption.ClusterId
+		getCredentialOpts.clusterId = clusterId
+
 		cacheDir, err := common.EnsureDir(getCredentialOpts.cacheDir)
 		common.ExitIfError(err)
 		cache := NewCredentialCache(cacheDir, getCredentialOpts)
@@ -42,8 +47,9 @@ var getCredentialCmd = &cobra.Command{
 		if err != nil && err != errNoValidCache && err != errNeedRefreshCache {
 			common.ExitIfError(err)
 		}
+
 		if cred == nil {
-			cred, err = getKubeconfigExecCredential(ctx, client)
+			cred, err = getKubeconfigExecCredential(ctx, clusterId, client)
 			common.ExitIfError(err)
 			err = cache.SaveCredential(cred)
 			common.ExitIfError(err)
@@ -55,8 +61,8 @@ var getCredentialCmd = &cobra.Command{
 	},
 }
 
-func getKubeconfigExecCredential(ctx context.Context, client *openapi.Client) (*types.ExecCredential, error) {
-	kubeconfig, err := client.GetUserKubeConfig(ctx, getCredentialOpts.clusterId,
+func getKubeconfigExecCredential(ctx context.Context, clusterId string, client *openapi.Client) (*types.ExecCredential, error) {
+	kubeconfig, err := client.GetUserKubeConfig(ctx, clusterId,
 		true, getCredentialOpts.temporaryDuration)
 	if err != nil {
 		return nil, err
@@ -97,9 +103,7 @@ func getApiVersion(version string) string {
 
 func setupGetCredentialCmdCmd(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(getCredentialCmd)
-	getCredentialCmd.Flags().StringVarP(&getCredentialOpts.clusterId, "cluster-id", "c", "", "The cluster id to use")
-	err := getCredentialCmd.MarkFlagRequired("cluster-id")
-	common.ExitIfError(err)
+	common.SetupClusterIdFlag(getCredentialCmd)
 
 	getCredentialCmd.Flags().DurationVar(&getCredentialOpts.temporaryDuration, "expiration", time.Hour, "The credential expiration")
 	//getCredentialCmd.Flags().BoolVar(&getCredentialOpts.privateIpAddress, "private-address", getCredentialOpts.privateIpAddress, "Use private ip as api-server address")

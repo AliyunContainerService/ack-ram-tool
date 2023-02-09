@@ -1,54 +1,55 @@
-package rrsa
+package associaterole
 
 import (
 	"context"
 	"fmt"
-	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/common"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
 	"log"
 
+	ctlcommon "github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/common"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/rrsa/common"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/openapi"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/types"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
-type AssociateRoleOpts struct {
+type Option struct {
 	roleName             string
 	namespace            string
 	serviceAccount       string
 	createRoleIfNotExist bool
-	clusterId            string
 }
 
-var associateRoleOpts = AssociateRoleOpts{}
+var Opts = Option{}
 
-var associateRoleCmd = &cobra.Command{
+var cmd = &cobra.Command{
 	Use:   "associate-role",
 	Short: "Associate an RAM role to a Kubernetes Service Account",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		client := common.GetClientOrDie()
-		clusterId := associateRoleOpts.clusterId
-		roleName := associateRoleOpts.roleName
-		serviceAccount := associateRoleOpts.serviceAccount
-		namespace := associateRoleOpts.namespace
-		createRoleIfNotExist := associateRoleOpts.createRoleIfNotExist
+		client := ctlcommon.GetClientOrDie()
+		clusterId := ctl.GlobalOption.ClusterId
+		roleName := Opts.roleName
+		serviceAccount := Opts.serviceAccount
+		namespace := Opts.namespace
+		createRoleIfNotExist := Opts.createRoleIfNotExist
 
-		yesOrExit(fmt.Sprintf(
+		ctlcommon.YesOrExit(fmt.Sprintf(
 			"Are you sure you want to associate RAM Role %q to service account %q (namespace: %q)?",
 			roleName, serviceAccount, namespace))
 
 		ctx := context.Background()
-		c, err := getRRSAStatus(ctx, clusterId, client)
+		c, err := common.GetRRSAStatus(ctx, clusterId, client)
 		if err != nil {
-			common.ExitByError(fmt.Sprintf("get status failed: %+v", err))
+			ctlcommon.ExitByError(fmt.Sprintf("get status failed: %+v", err))
 		}
 		if !c.MetaData.RRSAConfig.Enabled {
-			common.ExitByError("RRSA feature is not enabled!")
+			ctlcommon.ExitByError("RRSA feature is not enabled!")
 		}
-		if err := associateRole(context.Background(), c, client,
+		if err := AssociateRole(context.Background(), c, client,
 			roleName, namespace, serviceAccount, createRoleIfNotExist); err != nil {
-			common.ExitByError(fmt.Sprintf("Associate RAM Role %q to service account %q (namespace: %q) failed: %+v",
+			ctlcommon.ExitByError(fmt.Sprintf("Associate RAM Role %q to service account %q (namespace: %q) failed: %+v",
 				roleName, serviceAccount, namespace, err))
 			return
 		}
@@ -57,7 +58,7 @@ var associateRoleCmd = &cobra.Command{
 	},
 }
 
-func associateRole(ctx context.Context, c *types.Cluster, client *openapi.Client,
+func AssociateRole(ctx context.Context, c *types.Cluster, client *openapi.Client,
 	roleName, namespace, serviceAccount string, createRoleIfNotExist bool) error {
 	rrsac := c.MetaData.RRSAConfig
 	role, err := client.GetRole(ctx, roleName)
@@ -88,7 +89,7 @@ func createRole(ctx context.Context, client *openapi.Client, rrsac types.RRSACon
 
 	log.Printf("will create RAM Role %q with blow AssumeRole Policy:\n%s\n",
 		roleName, assumeRolePolicyDocument.JSON())
-	yesOrExit(fmt.Sprintf("Are you sure you want to create RAM Role %q?", roleName))
+	ctlcommon.YesOrExit(fmt.Sprintf("Are you sure you want to create RAM Role %q?", roleName))
 
 	_, err := client.CreateRole(ctx, role)
 	return err
@@ -118,7 +119,7 @@ func updateRole(ctx context.Context, client *openapi.Client, role *types.RamRole
 
 	log.Printf("will change the AssumeRole Policy of RAM Role %q with blow content:\n%s\n",
 		roleName, diff)
-	yesOrExit(fmt.Sprintf(
+	ctlcommon.YesOrExit(fmt.Sprintf(
 		"Are you sure you want to associate RAM Role %q to service account %q (namespace: %q)?",
 		roleName, serviceAccount, namespace))
 
@@ -128,19 +129,16 @@ func updateRole(ctx context.Context, client *openapi.Client, role *types.RamRole
 	return err
 }
 
-func setupAssociateRoleCmd(rootCmd *cobra.Command) {
-	rootCmd.AddCommand(associateRoleCmd)
-	associateRoleCmd.Flags().StringVarP(&associateRoleOpts.clusterId, "cluster-id", "c", "", "The cluster id to use")
-	associateRoleCmd.Flags().StringVarP(&associateRoleOpts.roleName, "role-name", "r", "", "The RAM role name to use")
-	associateRoleCmd.Flags().StringVarP(&associateRoleOpts.namespace, "namespace", "n", "", "The Kubernetes namespace to use")
-	associateRoleCmd.Flags().StringVarP(&associateRoleOpts.serviceAccount, "service-account", "s", "", "The Kubernetes service account to use")
-	associateRoleCmd.Flags().BoolVar(&associateRoleOpts.createRoleIfNotExist, "create-role-if-not-exist", false, "Create the RAM role if it does not exist")
-	err := associateRoleCmd.MarkFlagRequired("cluster-id")
-	common.ExitIfError(err)
-	err = associateRoleCmd.MarkFlagRequired("role-name")
-	common.ExitIfError(err)
-	err = associateRoleCmd.MarkFlagRequired("namespace")
-	common.ExitIfError(err)
-	err = associateRoleCmd.MarkFlagRequired("service-account")
-	common.ExitIfError(err)
+func SetupCmd(rootCmd *cobra.Command) {
+	rootCmd.AddCommand(cmd)
+	ctlcommon.SetupClusterIdFlag(cmd)
+
+	cmd.Flags().StringVarP(&Opts.roleName, "role-name", "r", "", "The RAM role name to use")
+	cmd.Flags().StringVarP(&Opts.namespace, "namespace", "n", "", "The Kubernetes namespace to use")
+	cmd.Flags().StringVarP(&Opts.serviceAccount, "service-account", "s", "", "The Kubernetes service account to use")
+	cmd.Flags().BoolVar(&Opts.createRoleIfNotExist, "create-role-if-not-exist", false, "Create the RAM role if it does not exist")
+
+	ctlcommon.ExitIfError(cmd.MarkFlagRequired("role-name"))
+	ctlcommon.ExitIfError(cmd.MarkFlagRequired("namespace"))
+	ctlcommon.ExitIfError(cmd.MarkFlagRequired("service-account"))
 }
