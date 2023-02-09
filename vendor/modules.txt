@@ -13,7 +13,7 @@ github.com/alibabacloud-go/alibabacloud-gateway-spi/client
 # github.com/alibabacloud-go/cs-20151215/v3 v3.0.31
 ## explicit
 github.com/alibabacloud-go/cs-20151215/v3/client
-# github.com/alibabacloud-go/darabonba-openapi v0.1.18
+# github.com/alibabacloud-go/darabonba-openapi v0.2.1
 ## explicit
 github.com/alibabacloud-go/darabonba-openapi/client
 # github.com/alibabacloud-go/darabonba-openapi/v2 v2.0.2
