@@ -55,6 +55,37 @@ func getRRSAFailMessage(ctx context.Context, clusterId string, client openapi.CS
 	return ""
 }
 
+func WaitAddonActionFinished(ctx context.Context, clusterId string, addon types.ClusterAddon, client openapi.CSClientInterface) error {
+	n := int64(1)
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
+
+		ret, err := client.GetAddonStatus(ctx, clusterId, addon.Name)
+		if err == nil && ret == nil {
+			if addon.NextVersion == "" {
+				if ret.Version != "" {
+					return nil
+				}
+			} else {
+				if ret.Version == addon.NextVersion {
+					return nil
+				}
+			}
+		}
+
+		jitter := time.Duration(rand.Int63n(int64(time.Second) * n))
+		if jitter > time.Second*15 {
+			jitter = time.Second*15 + time.Duration(rand.Int63n(int64(time.Second)*10))
+		}
+		time.Sleep(time.Minute + jitter)
+		n++
+	}
+}
+
 func WaitClusterUpdateFinished(ctx context.Context, clusterId, taskId string, client openapi.CSClientInterface) error {
 	n := int64(1)
 	var taskSuccess bool

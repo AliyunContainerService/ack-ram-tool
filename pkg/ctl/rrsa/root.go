@@ -5,6 +5,7 @@ import (
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/rrsa/assumerole"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/rrsa/disable"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/rrsa/enable"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/rrsa/installhelperaddon"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/rrsa/setupaddon"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/rrsa/status"
 	"github.com/spf13/cobra"
@@ -23,6 +24,7 @@ func init() {
 	associaterole.SetupCmd(rootCmd)
 	assumerole.SetupCmd(rootCmd)
 	setupaddon.SetupCmd(rootCmd)
+	installhelperaddon.SetupCmd(rootCmd)
 	setupDemoCmd(rootCmd)
 }
 
