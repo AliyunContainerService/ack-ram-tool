@@ -19,9 +19,11 @@ type Option struct {
 	namespace            string
 	serviceAccount       string
 	createRoleIfNotExist bool
+	attachSystemPolicy   string
+	attachCustomPolicy   string
 }
 
-var Opts = Option{}
+var opts = Option{}
 
 var cmd = &cobra.Command{
 	Use:   "associate-role",
@@ -30,10 +32,10 @@ var cmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		client := ctlcommon.GetClientOrDie()
 		clusterId := ctl.GlobalOption.ClusterId
-		roleName := Opts.roleName
-		serviceAccount := Opts.serviceAccount
-		namespace := Opts.namespace
-		createRoleIfNotExist := Opts.createRoleIfNotExist
+		roleName := opts.roleName
+		serviceAccount := opts.serviceAccount
+		namespace := opts.namespace
+		createRoleIfNotExist := opts.createRoleIfNotExist
 
 		ctlcommon.YesOrExit(fmt.Sprintf(
 			"Are you sure you want to associate RAM Role %q to service account %q (namespace: %q)?",
@@ -53,8 +55,10 @@ var cmd = &cobra.Command{
 				roleName, serviceAccount, namespace, err))
 			return
 		}
-		log.Printf("Associate RAM Role %q to service account %q (namespace: %q) successfully\n",
+		log.Printf("Associate RAM Role %q to service account %q (namespace: %q) successfully",
 			roleName, serviceAccount, namespace)
+
+		attachPolices(ctx, client, roleName)
 	},
 }
 
@@ -129,14 +133,48 @@ func updateRole(ctx context.Context, client *openapi.Client, role *types.RamRole
 	return err
 }
 
+func attachPolices(ctx context.Context, client *openapi.Client, roleName string) {
+	if opts.attachSystemPolicy == "" && opts.attachCustomPolicy == "" {
+		return
+	}
+
+	log.Println("Start to attach policies")
+	if opts.attachSystemPolicy != "" {
+		policyName := opts.attachSystemPolicy
+		if err := attachPolicy(ctx, client, roleName, policyName, types.RamPolicyTypeSystem); err != nil {
+			ctlcommon.ExitByError(fmt.Sprintf("Attach System policy %s failed: %+v", policyName, err))
+			return
+		}
+	}
+	if opts.attachCustomPolicy != "" {
+		policyName := opts.attachCustomPolicy
+		if err := attachPolicy(ctx, client, roleName, policyName, types.RamPolicyTypeCustom); err != nil {
+			ctlcommon.ExitByError(fmt.Sprintf("Attach Custom policy %s failed: %+v", policyName, err))
+			return
+		}
+	}
+	log.Println("Attach policies successfully")
+}
+
+func attachPolicy(ctx context.Context, client *openapi.Client, roleName, policyName, policyType string) error {
+	log.Printf("Start to attach the %s policy %s to the Role %s", policyType, policyName, roleName)
+	ctlcommon.YesOrExit(fmt.Sprintf(
+		"Are you sure you want to attach the %s policy %s to the Role %s?", policyType, policyName, roleName))
+
+	err := client.AttachPolicyToRole(ctx, policyName, policyType, roleName)
+	return err
+}
+
 func SetupCmd(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(cmd)
 	ctlcommon.SetupClusterIdFlag(cmd)
 
-	cmd.Flags().StringVarP(&Opts.roleName, "role-name", "r", "", "The RAM role name to use")
-	cmd.Flags().StringVarP(&Opts.namespace, "namespace", "n", "", "The Kubernetes namespace to use")
-	cmd.Flags().StringVarP(&Opts.serviceAccount, "service-account", "s", "", "The Kubernetes service account to use")
-	cmd.Flags().BoolVar(&Opts.createRoleIfNotExist, "create-role-if-not-exist", false, "Create the RAM role if it does not exist")
+	cmd.Flags().StringVarP(&opts.roleName, "role-name", "r", "", "The RAM Role name to use")
+	cmd.Flags().StringVarP(&opts.namespace, "namespace", "n", "", "The Kubernetes namespace to use")
+	cmd.Flags().StringVarP(&opts.serviceAccount, "service-account", "s", "", "The Kubernetes service account to use")
+	cmd.Flags().BoolVar(&opts.createRoleIfNotExist, "create-role-if-not-exist", false, "Create the RAM Role if it does not exist")
+	cmd.Flags().StringVar(&opts.attachSystemPolicy, "attach-system-policy", "", "Attach this system policy to the RAM Role")
+	cmd.Flags().StringVar(&opts.attachCustomPolicy, "attach-custom-policy", "", "Attach this custom policy to the RAM Role")
 
 	ctlcommon.ExitIfError(cmd.MarkFlagRequired("role-name"))
 	ctlcommon.ExitIfError(cmd.MarkFlagRequired("namespace"))

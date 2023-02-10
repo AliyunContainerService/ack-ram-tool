@@ -29,26 +29,15 @@ function install_helper_addon() {
 
 function get_kubeconfig() {
   bar_tip "get and setup kubeconfig"
-  aliyun cs DescribeClusterUserKubeconfig --ClusterId "${CLUSTER_ID}" --TemporaryDurationMinutes 15 \
-    --endpoint cs.aliyuncs.com | jq '.config' -r > ${KUBECONFIG_PATH}
+  ack-ram-tool credential-plugin get-kubeconfig --cluster-id "${CLUSTER_ID}" > ${KUBECONFIG_PATH}
   export KUBECONFIG=${KUBECONFIG_PATH}
 }
 
-function associate_role() {
-  bar_tip "associate role"
-  ack-ram-tool rrsa -y -c "${CLUSTER_ID}" associate-role --create-role-if-not-exist \
-                    -r ${ROLE_NAME} -n ${NAMESPACE} -s ${SERVICE_ACCOUNT}
-}
-
-function attach_policy_to_role() {
-  bar_tip "attach policy to role"
-
-  if aliyun ram ListPoliciesForRole --RoleName ${ROLE_NAME} | grep ${POLICY_NAME}; then
-    return
-  fi
-
-  aliyun ram AttachPolicyToRole --PolicyType System --PolicyName ${POLICY_NAME} \
-                                --RoleName ${ROLE_NAME}
+function associate_role_and_attach_policy() {
+  bar_tip "associate role and attach policy"
+  ack-ram-tool rrsa -y --cluster-id "${CLUSTER_ID}" associate-role \
+      --role-name ${ROLE_NAME} --namespace ${NAMESPACE} --service-account ${SERVICE_ACCOUNT} \
+      --create-role-if-not-exist --attach-system-policy ${POLICY_NAME}
 }
 
 function deploy_workload() {
@@ -97,8 +86,7 @@ function main() {
   enable_rrsa
   install_helper_addon
   get_kubeconfig
-  associate_role
-  attach_policy_to_role
+  associate_role_and_attach_policy
   deploy_workload
   wait_pod_success
   test_setup_addon
