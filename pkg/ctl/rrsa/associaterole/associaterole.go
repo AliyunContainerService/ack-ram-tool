@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
 	"log"
+	"strings"
 
 	ctlcommon "github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/common"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/rrsa/common"
@@ -162,6 +163,9 @@ func attachPolicy(ctx context.Context, client *openapi.Client, roleName, policyN
 		"Are you sure you want to attach the %s policy %s to the Role %s?", policyType, policyName, roleName))
 
 	err := client.AttachPolicyToRole(ctx, policyName, policyType, roleName)
+	if err != nil && strings.Contains(err.Error(), "EntityAlreadyExists.Role.Policy") {
+		return nil
+	}
 	return err
 }
 
