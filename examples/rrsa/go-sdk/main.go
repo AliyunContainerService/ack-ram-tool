@@ -32,12 +32,12 @@ func testOpenAPISDK() {
 		panic(err)
 	}
 
-	req := &cs20151215.DescribeClustersV1Request{}
-	resp, err := client.DescribeClustersV1(req)
+	req := &cs20151215.DescribeClustersRequest{}
+	resp, err := client.DescribeClusters(req)
 	if err != nil {
 		panic(err)
 	}
-	for _, c := range resp.Body.Clusters {
+	for _, c := range resp.Body {
 		fmt.Printf("cluster id: %s, cluster name: %s\n", *c.ClusterId, *c.Name)
 	}
 }
