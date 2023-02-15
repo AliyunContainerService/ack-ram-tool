@@ -1,9 +1,11 @@
 FROM golang:1.19.4-buster as builder
 # TARGETPLATFORM
+ARG VERSION
+ARG GIT_COMMIT
 
 WORKDIR /workspace
 COPY . ./
-RUN make build
+RUN make build VERSION=${VERSION} GIT_COMMIT=${GIT_COMMIT}
 
 FROM alpine:3.16.3
 
