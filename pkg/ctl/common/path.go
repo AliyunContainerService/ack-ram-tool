@@ -21,6 +21,6 @@ func EnsureDir(dir string) (string, error) {
 		}
 		return realDir, err
 	}
-	f.Close()
+	_ = f.Close()
 	return realDir, nil
 }
