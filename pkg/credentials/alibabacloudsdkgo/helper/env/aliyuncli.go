@@ -1,7 +1,5 @@
 package env
 
-// https://github.com/aliyun/aliyun-cli/blob/master/config/profile.go
-
 const (
 	envAliyuncliAccessKeyId1 = "ALIBABACLOUD_ACCESS_KEY_ID"
 	envAliyuncliAccessKeyId2 = "ALICLOUD_ACCESS_KEY_ID"

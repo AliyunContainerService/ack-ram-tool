@@ -2,35 +2,52 @@ package main
 
 import (
 	"fmt"
-	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudsdkgo/helper"
 	"log"
 	"os"
 
-	openapi "github.com/alibabacloud-go/darabonba-openapi/client"
-	sts "github.com/alibabacloud-go/sts-20150401/client"
+	cs20151215 "github.com/alibabacloud-go/cs-20151215/v3/client"
+	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
-	// github.com/aliyun/credentials-go >= v1.2.1
+	// github.com/aliyun/credentials-go >= v1.2.6
 	"github.com/aliyun/credentials-go/credentials"
 )
 
-func testOpenAPISDK(cred credentials.Credential) {
-	client, err := sts.NewClient(&openapi.Config{
-		// get endpoint from https://www.alibabacloud.com/help/resource-access-management/latest/endpoints
-		Endpoint:   tea.String("sts.aliyuncs.com"),
-		Credential: cred,
-	})
+const (
+	EnvRoleArn         = "ALIBABA_CLOUD_ROLE_ARN"
+	EnvOidcProviderArn = "ALIBABA_CLOUD_OIDC_PROVIDER_ARN"
+	EnvOidcTokenFile   = "ALIBABA_CLOUD_OIDC_TOKEN_FILE"
+)
+
+func testOpenAPISDK() {
+	// 两种方法都可以
+	cred := newCredential()
+	// or
+	// cred := newOidcCredential()
+
+	config := &openapi.Config{Credential: cred}
+	config.Endpoint = tea.String("cs.cn-hangzhou.aliyuncs.com")
+	client, err := cs20151215.NewClient(config)
 	if err != nil {
 		panic(err)
 	}
-	resp, err := client.GetCallerIdentity()
+
+	req := &cs20151215.DescribeClustersRequest{}
+	resp, err := client.DescribeClusters(req)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("call sts.GetCallerIdentity via oidc token success:\n%s\n", resp.String())
+	for _, c := range resp.Body {
+		fmt.Printf("cluster id: %s, cluster name: %s\n", *c.ClusterId, *c.Name)
+	}
 }
 
-func testOSSSDK(cred credentials.Credential) {
+func testOSSSDK() {
+	// 两种方法都可以
+	cred := newCredential()
+	// or
+	// cred := newOidcCredential()
+
 	provider := &ossCredentialsProvider{cred: cred}
 	client, err := oss.New("https://oss-cn-hangzhou.aliyuncs.com", "", "",
 		oss.SetCredentialsProvider(provider))
@@ -45,6 +62,31 @@ func testOSSSDK(cred credentials.Credential) {
 	for _, item := range ret.Buckets {
 		fmt.Printf("-%s\n", item.Name)
 	}
+}
+
+func newCredential() credentials.Credential {
+	// https://www.alibabacloud.com/help/doc-detail/378661.html
+	cred, err := credentials.NewCredential(nil)
+	if err != nil {
+		panic(err)
+	}
+	return cred
+}
+
+func newOidcCredential() credentials.Credential {
+	// https://www.alibabacloud.com/help/doc-detail/378661.html
+	config := new(credentials.Config).
+		SetType("oidc_role_arn").
+		SetRoleArn(os.Getenv(EnvRoleArn)).
+		SetOIDCProviderArn(os.Getenv(EnvOidcProviderArn)).
+		SetOIDCTokenFilePath(os.Getenv(EnvOidcTokenFile)).
+		SetRoleSessionName("test-rrsa-oidc-token")
+
+	oidcCredential, err := credentials.NewCredential(config)
+	if err != nil {
+		panic(err)
+	}
+	return oidcCredential
 }
 
 type ossCredentials struct {
@@ -87,18 +129,13 @@ func (p *ossCredentialsProvider) GetCredentials() oss.Credentials {
 }
 
 func main() {
-	oidcCredential, err := helper.NewOidcCredential("test-rrsa-oidc-token")
-	if err != nil {
-		panic(err)
-	}
-
 	// test open api sdk (https://github.com/aliyun/alibabacloud-go-sdk) use rrsa oidc token
-	fmt.Println("\ntest open api sdk use rrsa oidc token")
-	testOpenAPISDK(oidcCredential)
+	log.Printf("test open api sdk use rrsa oidc token")
+	testOpenAPISDK()
 
 	// test oss sdk (https://github.com/aliyun/aliyun-oss-go-sdk) use rrsa oidc token
 	if os.Getenv("TEST_OSS_SDK") == "true" {
-		fmt.Println("\ntest oss sdk use rrsa oidc token")
-		testOSSSDK(oidcCredential)
+		log.Printf("test oss sdk use rrsa oidc token")
+		testOSSSDK()
 	}
 }

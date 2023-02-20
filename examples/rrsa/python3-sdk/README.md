@@ -2,36 +2,51 @@
 
 ## Usage
 
-```bash
-$ python3 -m venv venv
-$ . ./venv/bin/activate
-$ pip install -r requirements.txt
+1. Enable RRSA:
 
-# https://www.alibabacloud.com/help/resource-access-management/latest/view-the-basic-information-about-a-ram-role
-$ export ALIBABA_CLOUD_ROLE_ARN=<role_arn>
+```
+export CLUSTER_ID=<cluster_id>
+ack-ram-tool rrsa enable --cluster-id "${CLUSTER_ID}"
+```
 
-# https://www.alibabacloud.com/help/resource-access-management/latest/manage-an-oidc-idp#section-f4d-9qk-bfl
-$ export ALIBABA_CLOUD_OIDC_PROVIDER_ARN=<oidc_provider_arn>
+2. Install ack-pod-identity-webhook:
 
-# /path/to/oidc/token/file
-$ export ALIBABA_CLOUD_OIDC_TOKEN_FILE=<oidc_token_file>
+```
+ack-ram-tool rrsa install-helper-addon --cluster-id "${CLUSTER_ID}"
+```
 
-$ python main.py
+3. Create a RAM Role and attach a system policy to the role:
 
+```
+ack-ram-tool rrsa associate-role --cluster-id "${CLUSTER_ID}" \
+    --namespace rrsa-demo-python3-sdk \
+    --service-account demo-sa \
+    --role-name test-rrsa-demo \
+    --create-role-if-not-exist \
+    --attach-system-policy AliyunCSReadOnlyAccess
+```
+
+4. Deploy demo job:
+
+```
+ack-ram-tool credential-plugin get-kubeconfig --cluster-id "${CLUSTER_ID}" > kubeconfig
+kubectl --kubeconfig ./kubeconfig apply -f deploy.yaml
+```
+
+5. Get logs:
+
+```
+kubectl --kubeconfig ./kubeconfig -n rrsa-demo-python3-sdk wait --for=condition=complete job/demo --timeout=240s
+kubectl --kubeconfig ./kubeconfig -n rrsa-demo-python3-sdk logs job/demo
+```
+
+Outputs:
+
+```
 test open api sdk use rrsa oidc token
-call sts.GetCallerIdentity via oidc token success:
-{
-  "headers": {
-    ...
-  },
-  "body": {
-    "AccountId": "18***",
-    "Arn": "***",
-    "IdentityType": "AssumedRoleUser",
-    "PrincipalId": "***:auth-with-rrsa-oidc-token",
-    "RequestId": "4FCA5B69-***",
-    "RoleId": "***"
-  }
-}
+call cs.describe_clusters via oidc token success:
+
+cluster id: c4db8***, cluster name: foo***
+cluster id: cc20c***, cluster name: bar***
 
 ```

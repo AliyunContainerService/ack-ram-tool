@@ -113,3 +113,13 @@ func (c *ClusterCredential) LoadKubeConfig(conf *KubeConfig) error {
 	c.Expiration = conf.Expiration
 	return nil
 }
+
+type ClusterAddon struct {
+	Name        string `json:"name"`
+	Version     string `json:"version"`
+	NextVersion string `json:"next_version"`
+}
+
+func (c ClusterAddon) Installed() bool {
+	return c.Version != ""
+}

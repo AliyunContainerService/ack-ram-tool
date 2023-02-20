@@ -9,6 +9,8 @@ type globalOption struct {
 	CredentialFilePath      string
 	AliyuncliConfigFilePath string
 	AliyuncliProfileName    string
+
+	ClusterId string
 }
 
 var GlobalOption = &globalOption{}

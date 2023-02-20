@@ -3,6 +3,8 @@ package credentialplugin
 import (
 	"context"
 	"fmt"
+
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/common"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/types"
 	"github.com/spf13/cobra"
@@ -26,11 +28,12 @@ var getKubeconfigCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		client := common.GetClientOrDie()
 		ctx := context.Background()
+		clusterId := ctl.GlobalOption.ClusterId
 
-		kubeconfig, err := client.GetUserKubeConfig(ctx, getCredentialOpts.clusterId,
+		kubeconfig, err := client.GetUserKubeConfig(ctx, clusterId,
 			getCredentialOpts.privateIpAddress, getCredentialOpts.temporaryDuration)
 		common.ExitIfError(err)
-		newConf := generateExecKubeconfig(kubeconfig)
+		newConf := generateExecKubeconfig(clusterId, kubeconfig)
 
 		d, err := yaml.Marshal(newConf)
 		common.ExitIfError(err)
@@ -38,7 +41,7 @@ var getKubeconfigCmd = &cobra.Command{
 	},
 }
 
-func generateExecKubeconfig(config *types.KubeConfig) *types.KubeConfig {
+func generateExecKubeconfig(clusterId string, config *types.KubeConfig) *types.KubeConfig {
 	newConf := &types.KubeConfig{
 		Kind:           config.Kind,
 		APIVersion:     config.APIVersion,
@@ -53,7 +56,7 @@ func generateExecKubeconfig(config *types.KubeConfig) *types.KubeConfig {
 		"credential-plugin",
 		"get-credential",
 		"--cluster-id",
-		getCredentialOpts.clusterId,
+		clusterId,
 		"--api-version",
 		getCredentialOpts.apiVersion,
 		"--expiration",
@@ -81,9 +84,7 @@ func generateExecKubeconfig(config *types.KubeConfig) *types.KubeConfig {
 
 func setupGetKubeconfigCmd(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(getKubeconfigCmd)
-	getKubeconfigCmd.Flags().StringVarP(&getCredentialOpts.clusterId, "cluster-id", "c", "", "The cluster id to use")
-	err := getKubeconfigCmd.MarkFlagRequired("cluster-id")
-	common.ExitIfError(err)
+	common.SetupClusterIdFlag(getKubeconfigCmd)
 
 	//getKubeconfigCmd.Flags().DurationVar(&getCredentialOpts.temporaryDuration, "expiration", time.Hour, "The credential expiration")
 	getKubeconfigCmd.Flags().BoolVar(&getCredentialOpts.privateIpAddress, "private-address", getCredentialOpts.privateIpAddress, "Use private ip as api-server address")

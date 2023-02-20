@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: rrsa-demo
+  name: rrsa-demo-java-sdk
   labels:
     pod-identity.alibabacloud.com/injection: enabled
 
@@ -11,7 +11,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: demo-sa
-  namespace: rrsa-demo
+  namespace: rrsa-demo-java-sdk
   annotations:
     pod-identity.alibabacloud.com/role-name: test-rrsa-demo
 
@@ -20,17 +20,13 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: demo
-  namespace: rrsa-demo
+  namespace: rrsa-demo-java-sdk
 spec:
   template:
     spec:
       serviceAccountName: demo-sa
       restartPolicy: Never
       containers:
-        - image: registry.cn-hangzhou.aliyuncs.com/acs/ack-ram-tool:1.0.0
+        - image: registry.cn-hangzhou.aliyuncs.com/acs/ack-ram-tool:1.0.0-rrsa-example-java
           imagePullPolicy: "Always"
-          args:
-            - rrsa
-            - demo
-            - --no-loop
           name: test

@@ -24,6 +24,10 @@ type CSClientInterface interface {
 	GetTask(ctx context.Context, taskId string) (*types.ClusterTask, error)
 	GetUserKubeConfig(ctx context.Context, clusterId string, privateIpAddress bool, temporaryDuration time.Duration) (*types.KubeConfig, error)
 	ListClusters(ctx context.Context) ([]types.Cluster, error)
+	GetAddonMetaData(ctx context.Context, clusterId string, name string) (*types.ClusterAddon, error)
+	GetAddonStatus(ctx context.Context, clusterId string, name string) (*types.ClusterAddon, error)
+	InstallAddon(ctx context.Context, clusterId string, addon types.ClusterAddon) error
+	ListAddons(ctx context.Context, clusterId string) ([]types.ClusterAddon, error)
 }
 
 func (c *Client) GetCluster(ctx context.Context, clusterId string) (*types.Cluster, error) {
@@ -130,6 +134,81 @@ func (c *Client) GetUserKubeConfig(ctx context.Context, clusterId string,
 		return nil, err
 	}
 	return ret, nil
+}
+
+func (c *Client) GetAddonMetaData(ctx context.Context, clusterId string, name string) (*types.ClusterAddon, error) {
+	client := c.csClient
+	resp, err := client.DescribeClusterAddonMetadata(
+		tea.String(clusterId), tea.String(name), nil)
+	if err != nil {
+		return nil, err
+	}
+	body := resp.Body
+	return &types.ClusterAddon{
+		Name:        tea.StringValue(body.Name),
+		Version:     tea.StringValue(body.Version),
+		NextVersion: "",
+	}, nil
+}
+
+func (c *Client) GetAddonStatus(ctx context.Context, clusterId string, name string) (*types.ClusterAddon, error) {
+	addons, err := c.ListAddons(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	for _, addon := range addons {
+		addon := addon
+		if addon.Name == name {
+			return &addon, nil
+		}
+	}
+	return nil, nil
+}
+
+func (c *Client) InstallAddon(ctx context.Context, clusterId string, addon types.ClusterAddon) error {
+	client := c.csClient
+	req := &cs.InstallClusterAddonsRequest{
+		Body: []*cs.InstallClusterAddonsRequestBody{
+			{
+				Config:  nil,
+				Name:    tea.String(addon.Name),
+				Version: tea.String(addon.NextVersion),
+			},
+		},
+	}
+	_, err := client.InstallClusterAddons(tea.String(clusterId), req)
+	return err
+}
+
+func (c *Client) ListAddons(ctx context.Context, clusterId string) ([]types.ClusterAddon, error) {
+	client := c.csClient
+	resp, err := client.DescribeClusterAddonsVersion(tea.String(clusterId))
+	if err != nil {
+		return nil, err
+	}
+
+	addons := convertDescribeClusterAddonsVersionResponse(resp)
+	return addons, nil
+}
+
+func convertDescribeClusterAddonsVersionResponse(resp *cs.DescribeClusterAddonsVersionResponse) []types.ClusterAddon {
+	body := resp.Body
+	if body == nil {
+		return nil
+	}
+	var addons []types.ClusterAddon
+
+	for _, value := range body {
+		jsonV, err := json.Marshal(value)
+		if err != nil {
+			continue
+		}
+		var addon types.ClusterAddon
+		if err := json.Unmarshal(jsonV, &addon); err == nil {
+			addons = append(addons, addon)
+		}
+	}
+	return addons
 }
 
 func convertDescribeClusterUserKubeconfigResponse(kubeconfig *types.KubeConfig, resp *cs.DescribeClusterUserKubeconfigResponse) error {
