@@ -4,7 +4,7 @@ package env
 const (
 	envOldSdkAccessKeyID       = "ALICLOUD_ACCESS_KEY"
 	envOldSdkAccessKeySecret   = "ALICLOUD_SECRET_KEY"
-	envOldSdkAccessKeyStsToken = "ALICLOUD_ACCESS_KEY_STS_TOKEN"
+	envOldSdkAccessKeyStsToken = "ALICLOUD_ACCESS_KEY_STS_TOKEN" // #nosec G101
 	//envOldSdkRoleArn               = "ALICLOUD_ROLE_ARN"
 	envOldSdkRoleSessionName = "ALICLOUD_ROLE_SESSION_NAME"
 	//envOldSdkRoleSessionExpiration = "ALICLOUD_ROLE_SESSION_EXPIRATION"
