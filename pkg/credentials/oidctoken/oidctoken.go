@@ -7,6 +7,7 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -49,11 +50,11 @@ type RoleProvider struct {
 }
 
 func NewRoleProvider(providerArn, roleArn, tokenFile, policy, roleSessionName string, sessionDuration time.Duration) (*RoleProvider, error) {
-	f, err := os.Open(tokenFile)
+	f, err := os.Open(filepath.Clean(tokenFile))
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer f.Close() // #nosec G307
 
 	p := &RoleProvider{
 		providerArn:     providerArn,
@@ -188,7 +189,7 @@ func (c *Credential) shouldRefresh(expiryWindow time.Duration) bool {
 	if c == nil {
 		return true
 	}
-	expiryWindow = expiryWindow + time.Duration(rand.Int63n(int64(time.Minute)))
+	expiryWindow = expiryWindow + time.Duration(rand.Int63n(int64(time.Minute))) // #nosec G404
 	return time.Until(c.Expiration) <= expiryWindow
 }
 

@@ -19,3 +19,4 @@
 dist/
 kubeconfig
 /examples/rrsa/go-sdk/go-sdk
+/bin/

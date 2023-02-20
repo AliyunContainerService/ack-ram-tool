@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/aliyun/credentials-go/credentials"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -19,7 +18,6 @@ var (
 
 const (
 	defaultProfileFile = "~/.aliyun/config.json"
-	defaultProfile
 )
 
 type Configuration struct {
@@ -96,7 +94,7 @@ func LoadConfiguration(path string) (*Configuration, error) {
 	if err != nil {
 		return nil, err
 	}
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile(filepath.Clean(path))
 	if err != nil {
 		return nil, err
 	}

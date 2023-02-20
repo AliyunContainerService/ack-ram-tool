@@ -18,6 +18,13 @@ jobs:
       uses: golangci/golangci-lint-action@v3
       with:
         version: v1.51.1
+  Gosec:
+    name: Run Gosec Security Scanner
+    runs-on: ubuntu-latest
+    steps:
+      - uses: securego/gosec@v2.15.0
+        with:
+          args: ./...
 
   releaser-test:
     runs-on: ubuntu-latest

@@ -16,7 +16,7 @@ const (
 	versionV1beta1      = "v1beta1"
 	groupVersionV1      = "client.authentication.k8s.io/v1"
 	groupVersionV1beta1 = "client.authentication.k8s.io/v1beta1"
-	kindExecCredential  = "ExecCredential"
+	kindExecCredential  = "ExecCredential" // #nosec G101
 
 	commandName = "ack-ram-tool"
 )

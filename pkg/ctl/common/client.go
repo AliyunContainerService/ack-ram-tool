@@ -32,7 +32,7 @@ func getCredential(credentialFilePath, aliyuncliConfigFilePath, aliyuncliProfile
 	}
 	if credentialFilePath != "" {
 		if _, err := os.Stat(credentialFilePath); err == nil {
-			os.Setenv(credentials.ENVCredentialFile, credentialFilePath)
+			_ = os.Setenv(credentials.ENVCredentialFile, credentialFilePath)
 		}
 	}
 	return credentials.NewCredential(nil)
