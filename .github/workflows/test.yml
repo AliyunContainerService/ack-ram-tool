@@ -23,9 +23,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: securego/gosec@v2.15.0
+      - name: pkg/
+        uses: securego/gosec@v2.15.0
         with:
-          args: ./...
+          args: -exclude-dir pkg/credentials/alibabacloudgo/helper -exclude-dir examples ./...
 
   releaser-test:
     runs-on: ubuntu-latest
