@@ -1,4 +1,4 @@
-FROM node:18-alpine3.16 as builder
+FROM node:19-alpine3.16 as builder
 # TARGETPLATFORM
 
 RUN npm set registry https://registry.npmmirror.com
@@ -9,7 +9,7 @@ COPY package-lock.json ./
 
 RUN npm install
 
-FROM node:18-alpine3.16
+FROM node:19-alpine3.16
 
 WORKDIR /app
 COPY package.json ./
