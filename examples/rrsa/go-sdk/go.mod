@@ -3,7 +3,7 @@ module github.com/AliyunContainerService/ack-ram-tool/examples/rrsa/go-sdk
 go 1.16
 
 require (
-	github.com/alibabacloud-go/cs-20151215/v3 v3.0.28
+	github.com/alibabacloud-go/cs-20151215/v3 v3.0.32
 	github.com/alibabacloud-go/darabonba-openapi/v2 v2.0.2
 	github.com/alibabacloud-go/tea v1.1.19
 	github.com/alibabacloud-go/tea-utils v1.3.9 // indirect
