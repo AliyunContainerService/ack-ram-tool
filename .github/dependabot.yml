@@ -2,9 +2,77 @@ version: 2
 updates:
   - package-ecosystem: gomod
     directory: /
+    open-pull-requests-limit: 10
     schedule:
       interval: weekly
   - package-ecosystem: github-actions
     directory: /
+    open-pull-requests-limit: 10
     schedule:
       interval: weekly
+  - package-ecosystem: docker
+    directory: /
+    open-pull-requests-limit: 10
+    schedule:
+      interval: weekly
+
+
+  - package-ecosystem: gomod
+    directory: pkg/credentials/alibabacloudgo/helper
+    open-pull-requests-limit: 5
+    schedule:
+      interval: monthly
+  - package-ecosystem: gomod
+    directory: pkg/credentials/alibabacloudsdkgo/helper
+    open-pull-requests-limit: 5
+    schedule:
+      interval: monthly
+  - package-ecosystem: gomod
+    directory: examples/rrsa/builtin-gosdk
+    open-pull-requests-limit: 5
+    schedule:
+      interval: monthly
+
+  - package-ecosystem: gomod
+    directory: examples/rrsa/go-sdk
+    open-pull-requests-limit: 5
+    schedule:
+      interval: monthly
+  - package-ecosystem: docker
+    directory: examples/rrsa/go-sdk
+    open-pull-requests-limit: 5
+    schedule:
+      interval: monthly
+
+  - package-ecosystem: pip
+    directory: examples/rrsa/python3-sdk
+    open-pull-requests-limit: 5
+    schedule:
+      interval: monthly
+  - package-ecosystem: docker
+    directory: examples/rrsa/python3-sdk
+    open-pull-requests-limit: 5
+    schedule:
+      interval: monthly
+
+  - package-ecosystem: npm
+    directory: examples/rrsa/nodejs-sdk
+    open-pull-requests-limit: 5
+    schedule:
+      interval: monthly
+  - package-ecosystem: docker
+    directory: examples/rrsa/nodejs-sdk
+    open-pull-requests-limit: 5
+    schedule:
+      interval: monthly
+
+  - package-ecosystem: maven
+    directory: examples/rrsa/java-sdk
+    open-pull-requests-limit: 5
+    schedule:
+      interval: monthly
+  - package-ecosystem: docker
+    directory: examples/rrsa/java-sdk
+    open-pull-requests-limit: 5
+    schedule:
+      interval: monthly

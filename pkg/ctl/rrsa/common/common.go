@@ -77,9 +77,9 @@ func WaitAddonActionFinished(ctx context.Context, clusterId string, addon types.
 			}
 		}
 
-		jitter := time.Duration(rand.Int63n(int64(time.Second) * n))
+		jitter := time.Duration(rand.Int63n(int64(time.Second) * n)) // #nosec G404
 		if jitter > time.Second*15 {
-			jitter = time.Second*15 + time.Duration(rand.Int63n(int64(time.Second)*10))
+			jitter = time.Second*15 + time.Duration(rand.Int63n(int64(time.Second)*10)) // #nosec G404
 		}
 		time.Sleep(time.Minute + jitter)
 		n++
@@ -121,9 +121,9 @@ func WaitClusterUpdateFinished(ctx context.Context, clusterId, taskId string, cl
 				return nil
 			}
 		}
-		jitter := time.Duration(rand.Int63n(int64(time.Second) * n))
+		jitter := time.Duration(rand.Int63n(int64(time.Second) * n)) // #nosec G404
 		if jitter > time.Second*15 {
-			jitter = time.Second*15 + time.Duration(rand.Int63n(int64(time.Second)*10))
+			jitter = time.Second*15 + time.Duration(rand.Int63n(int64(time.Second)*10)) // #nosec G404
 		}
 		time.Sleep(time.Second*20 + jitter)
 		n++

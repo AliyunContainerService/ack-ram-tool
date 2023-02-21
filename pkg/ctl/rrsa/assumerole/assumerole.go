@@ -3,9 +3,10 @@ package assumerole
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -35,12 +36,12 @@ var cmd = &cobra.Command{
 		oidcArn := opts.oidcArn
 		oidcTokenFile := opts.oidcTokenFile
 		if oidcTokenFile == "-" {
-			token, err = ioutil.ReadAll(os.Stdin)
+			token, err = io.ReadAll(os.Stdin)
 			if err != nil {
 				ctlcommon.ExitByError(fmt.Sprintf("read token from stdin failed: %+v", err))
 			}
 		} else {
-			token, err = ioutil.ReadFile(oidcTokenFile)
+			token, err = os.ReadFile(filepath.Clean(oidcTokenFile))
 			if err != nil {
 				ctlcommon.ExitByError(fmt.Sprintf("read token file failed: %+v", err))
 			}
