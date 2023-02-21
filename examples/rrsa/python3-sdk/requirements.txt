@@ -12,7 +12,7 @@ alibabacloud-tea-xml==0.0.2
 aliyun-python-sdk-core==2.13.36
 aliyun-python-sdk-kms==2.16.0
 async-timeout==4.0.2
-attrs==22.1.0
+attrs==22.2.0
 certifi==2022.9.24
 cffi==1.15.1
 charset-normalizer==2.1.1
