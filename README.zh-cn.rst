@@ -163,14 +163,3 @@ RAM Roles for Service Accounts (RRSA)
 .. code-block:: shell
 
     ack-ram-tool rrsa setup-addon --addon-name kritis-validation-hook -c <clusterId>
-
-
-禁用 RRSA 特性:
-
-.. code-block:: shell
-
-    $ ack-ram-tool rrsa disable -c <clusterId>
-
-    ? Are you sure you want to disable RRSA feature? Yes
-    Disable RRSA feature for cluster c86fdd*** successfully
-

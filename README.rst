@@ -168,14 +168,3 @@ component (needs to be configured before installing the component):
 .. code-block:: shell
 
     ack-ram-tool rrsa setup-addon --addon-name kritis-validation-hook -c <clusterId>
-
-
-Disable RRSA feature:
-
-.. code-block:: shell
-
-    $ ack-ram-tool rrsa disable -c <clusterId>
-
-    ? Are you sure you want to disable RRSA feature? Yes
-    Disable RRSA feature for cluster c86fdd*** successfully
-
