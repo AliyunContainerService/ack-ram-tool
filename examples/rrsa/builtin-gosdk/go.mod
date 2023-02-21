@@ -8,6 +8,6 @@ require (
 	github.com/alibabacloud-go/darabonba-openapi v0.1.15
 	github.com/alibabacloud-go/sts-20150401 v1.1.0
 	github.com/alibabacloud-go/tea v1.1.17
-	github.com/aliyun/alibaba-cloud-sdk-go v1.61.1681
+	github.com/aliyun/alibaba-cloud-sdk-go v1.62.174
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 )
