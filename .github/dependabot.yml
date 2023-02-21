@@ -27,11 +27,11 @@ updates:
     open-pull-requests-limit: 5
     schedule:
       interval: monthly
-  - package-ecosystem: gomod
-    directory: examples/rrsa/builtin-gosdk
-    open-pull-requests-limit: 5
-    schedule:
-      interval: monthly
+#  - package-ecosystem: gomod
+#    directory: examples/rrsa/builtin-gosdk
+#    open-pull-requests-limit: 5
+#    schedule:
+#      interval: monthly
 
   - package-ecosystem: gomod
     directory: examples/rrsa/go-sdk
