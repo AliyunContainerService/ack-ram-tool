@@ -2,7 +2,7 @@ module github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabaclo
 
 go 1.17
 
-require github.com/aliyun/credentials-go v1.2.3
+require github.com/aliyun/credentials-go v1.2.6
 
 require (
 	github.com/alibabacloud-go/debug v0.0.0-20190504072949-9472017b5c68 // indirect
