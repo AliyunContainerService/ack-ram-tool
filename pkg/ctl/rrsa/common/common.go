@@ -65,9 +65,9 @@ func WaitAddonActionFinished(ctx context.Context, clusterId string, addon types.
 		}
 
 		ret, err := client.GetAddonStatus(ctx, clusterId, addon.Name)
-		if err == nil && ret == nil {
+		if err == nil && ret != nil {
 			if addon.NextVersion == "" {
-				if ret.Version != "" {
+				if ret.Installed() {
 					return nil
 				}
 			} else {

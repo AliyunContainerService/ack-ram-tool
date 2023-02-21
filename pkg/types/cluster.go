@@ -115,7 +115,7 @@ func (c *ClusterCredential) LoadKubeConfig(conf *KubeConfig) error {
 }
 
 type ClusterAddon struct {
-	Name        string `json:"name"`
+	Name        string `json:"component_name"`
 	Version     string `json:"version"`
 	NextVersion string `json:"next_version"`
 }
