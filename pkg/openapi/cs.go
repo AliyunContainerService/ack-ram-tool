@@ -224,6 +224,7 @@ func convertDescribeClusterUserKubeconfigResponse(kubeconfig *types.KubeConfig, 
 	}
 
 	rawConf := tea.StringValue(body.Config)
+	kubeconfig.RawData = rawConf
 	if err := yaml.Unmarshal([]byte(rawConf), kubeconfig); err != nil {
 		return err
 	}
