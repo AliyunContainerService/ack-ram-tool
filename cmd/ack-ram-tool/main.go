@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/rbac"
 	"log"
 	"os"
 
@@ -27,6 +28,7 @@ func init() {
 	rrsa.SetupRRSACmd(rootCmd)
 	credentialplugin.SetupCredentialPluginCmd(rootCmd)
 	version.SetupVersionCmd(rootCmd)
+	rbac.SetupCmd(rootCmd)
 
 	rootCmd.PersistentFlags().StringVar(&ctl.GlobalOption.Region, "region-id", "cn-hangzhou", "The region to use")
 	rootCmd.PersistentFlags().BoolVarP(&ctl.GlobalOption.AssumeYes, "assume-yes", "y", false,

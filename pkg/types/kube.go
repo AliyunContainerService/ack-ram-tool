@@ -12,6 +12,7 @@ type KubeConfig struct {
 	Preferences    interface{}    `json:"preferences" yaml:"preferences"`
 
 	Expiration time.Time `json:"-" yaml:"-"`
+	RawData    string    `json:"-" yaml:"-"`
 }
 
 type KubeCluster struct {
