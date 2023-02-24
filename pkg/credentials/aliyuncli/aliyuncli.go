@@ -1,11 +1,10 @@
-package alibabacloudsdkgo
+package aliyuncli
 
 import (
 	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/aliyun/aliyun-cli/cli"
 	"io"
 	"net/http"
 	"os"
@@ -14,6 +13,7 @@ import (
 
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk"
+	"github.com/aliyun/aliyun-cli/cli"
 	"github.com/aliyun/aliyun-cli/config"
 	"github.com/aliyun/credentials-go/credentials"
 )
@@ -25,26 +25,26 @@ type Profile struct {
 	conf *config.Configuration
 }
 
-type AliYunCLICredential struct {
+type CredentialHelper struct {
 	profile *Profile
 	cred    credentials.Credential
 }
 
-func NewAliYunCLICredential(profileName string) (*AliYunCLICredential, error) {
+func NewCredentialHelper(configPath, profileName string) (*CredentialHelper, error) {
 	//profile, err := config.LoadCurrentProfile()
 	//clictx := cli.NewCommandContext(bytes.NewBuffer(nil), bytes.NewBuffer(nil))
 	//profile := cfg.GetCurrentProfile(clictx)
-	conf, profile, err := LoadProfile(config.GetConfigPath()+"/"+configFile, "")
+	if configPath == "" {
+		configPath = config.GetConfigPath() + "/" + configFile
+	}
+	conf, profile, err := LoadProfile(configPath, profileName)
 	if err != nil {
 		return nil, err
-	}
-	if profileName != "" {
-		conf.CurrentProfile = profileName
 	}
 	if err := profile.Validate(); err != nil {
 		return nil, err
 	}
-	c := &AliYunCLICredential{
+	c := &CredentialHelper{
 		profile: &Profile{
 			cp:   profile,
 			conf: conf,
@@ -69,8 +69,8 @@ func LoadProfile(path string, name string) (*config.Configuration, config.Profil
 	return conf, p, nil
 }
 
-func (a AliYunCLICredential) GetCredentials() (credentials.Credential, error) {
-	return a.profile.GetCredentials()
+func (c CredentialHelper) GetCredentials() (credentials.Credential, error) {
+	return c.profile.GetCredentials()
 }
 
 func (p *Profile) GetCredentials() (credentials.Credential, error) {
