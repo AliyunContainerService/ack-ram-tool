@@ -1,6 +1,7 @@
 package env
 
 import (
+	"errors"
 	"os"
 
 	"github.com/aliyun/credentials-go/credentials"
@@ -99,7 +100,7 @@ func NewCredential() (credentials.Credential, error) {
 	} else if roleArn != "" && oidcProviderArn != "" && oidcTokenFile != "" {
 		config.Type = stringPoint("oidc_role_arn")
 	} else {
-		config = nil
+		return nil, errors.New("not found credentials related environment variables")
 	}
 
 	return credentials.NewCredential(config)
