@@ -2,10 +2,11 @@ package common
 
 import (
 	"fmt"
-	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudsdkgo/helper/env"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/utils"
 	"log"
 	"os"
 
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudsdkgo/helper/env"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/aliyuncli"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/openapi"
@@ -33,14 +34,17 @@ func getCredential(credentialFilePath, aliyuncliConfigFilePath, aliyuncliProfile
 			_ = os.Setenv(env.EnvRoleSessionName, sessionName)
 		}
 		if cred, err := env.NewCredential(); err == nil && cred != nil {
-			log.Println("use credentials from env")
+			log.Println("use credentials from environment variables")
 			return cred, err
 		}
+	}
+	if aliyuncliConfigFilePath == "" {
+		aliyuncliConfigFilePath, _ = utils.ExpandPath("~/.aliyun/config.json")
 	}
 
 	acli, err := aliyuncli.NewCredentialHelper(aliyuncliConfigFilePath, aliyuncliProfileName)
 	if err == nil && acli != nil {
-		log.Println("use credentials from aliyun cli")
+		log.Printf("use credentials from aliyun cli (%s)", aliyuncliConfigFilePath)
 		return acli.GetCredentials()
 	}
 
@@ -48,8 +52,13 @@ func getCredential(credentialFilePath, aliyuncliConfigFilePath, aliyuncliProfile
 		if _, err := os.Stat(credentialFilePath); err == nil {
 			_ = os.Setenv(credentials.ENVCredentialFile, credentialFilePath)
 		}
+	} else {
+		path, err := utils.ExpandPath(credentials.PATHCredentialFile)
+		if err == nil {
+			credentialFilePath = path
+		}
 	}
-	log.Println("use default credentials")
+	log.Printf("use default credentials from %s", credentialFilePath)
 	return credentials.NewCredential(nil)
 }
 
