@@ -5,6 +5,7 @@ import (
 	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
 	ram "github.com/alibabacloud-go/ram-20150501/client"
 	"github.com/alibabacloud-go/tea/tea"
+	"github.com/aliyun/credentials-go/credentials"
 	// "github.com/aliyun/credentials-go/credentials"
 )
 
@@ -36,4 +37,8 @@ func NewClient(config *openapi.Config) (*Client, error) {
 		ramClient: ramClient,
 		csClient:  csClient,
 	}, nil
+}
+
+func (c *Client) Credential() credentials.Credential {
+	return c.csClient.Credential
 }
