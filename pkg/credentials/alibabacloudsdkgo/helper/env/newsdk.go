@@ -12,4 +12,5 @@ const (
 	envNewSdkCredentialFile = "ALIBABA_CLOUD_CREDENTIALS_FILE" // #nosec G101
 
 	EnvRoleSessionName = envNewSdkRoleSessionName
+	EnvCredentialsURI  = envNewSdkCredentialsURI // #nosec G101
 )

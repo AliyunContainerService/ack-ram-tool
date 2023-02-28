@@ -1,12 +1,12 @@
 package main
 
 import (
-	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/rbac"
 	"log"
 	"os"
 
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/credentialplugin"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/rbac"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/rrsa"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/version"
 	"github.com/spf13/cobra"

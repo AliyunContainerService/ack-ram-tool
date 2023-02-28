@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudsdkgo/helper/env"
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk"
 	"github.com/aliyun/aliyun-cli/cli"
@@ -204,7 +205,7 @@ func (p *Profile) GetCredentialsByChainableRamRoleArn() (credentials.Credential,
 func (p *Profile) GetCredentialsByExternal() (credentials.Credential, error) {
 	cp := p.cp
 	args := strings.Fields(cp.ProcessCommand)
-	cmd := exec.Command(args[0], args[1:]...)
+	cmd := exec.Command(args[0], args[1:]...) // #nosec G204
 	buf, err := cmd.CombinedOutput()
 	if err != nil {
 		return nil, err
@@ -227,17 +228,17 @@ func (p *Profile) GetCredentialsByCredentialsURI() (credentials.Credential, erro
 	cp := p.cp
 	uri := cp.CredentialsURI
 	if uri == "" {
-		uri = os.Getenv("ALIBABA_CLOUD_CREDENTIALS_URI")
+		uri = os.Getenv(env.EnvCredentialsURI)
 	}
 	if uri == "" {
 		return nil, fmt.Errorf("invalid credentials uri")
 	}
 
-	res, err := http.Get(uri)
+	res, err := http.Get(uri) // #nosec G107
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer res.Body.Close() // #nosec G307
 
 	if res.StatusCode != 200 {
 		return nil, fmt.Errorf("Get Credentials from %s failed, status code %d", uri, res.StatusCode)

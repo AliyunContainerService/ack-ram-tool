@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	tokenPrefixV1 = "k8s-ack-v1."
+	tokenPrefixV1 = "k8s-ack-v1." // #nosec G101
 )
 
 type Token struct {
