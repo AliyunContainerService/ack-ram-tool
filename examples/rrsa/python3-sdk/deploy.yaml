@@ -4,7 +4,7 @@ kind: Namespace
 metadata:
   name: rrsa-demo-python3-sdk
   labels:
-    pod-identity.alibabacloud.com/injection: enabled
+    pod-identity.alibabacloud.com/injection: 'on'
 
 ---
 apiVersion: v1
