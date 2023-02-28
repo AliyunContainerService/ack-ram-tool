@@ -18,6 +18,7 @@ jobs:
       uses: golangci/golangci-lint-action@v3
       with:
         version: v1.51.1
+        args: --timeout=10m
   Gosec:
     name: Run Gosec Security Scanner
     runs-on: ubuntu-latest
