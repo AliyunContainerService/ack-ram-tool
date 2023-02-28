@@ -72,7 +72,6 @@ func (client *Client) StartInstanceWithCallback(request *StartInstanceRequest, c
 type StartInstanceRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	SourceRegionId       string           `position:"Query" name:"SourceRegionId"`
 	InitLocalDisk        requests.Boolean `position:"Query" name:"InitLocalDisk"`
 	DryRun               requests.Boolean `position:"Query" name:"DryRun"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
@@ -92,7 +91,7 @@ func CreateStartInstanceRequest() (request *StartInstanceRequest) {
 	request = &StartInstanceRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("Ecs", "2014-05-26", "StartInstance", "", "")
+	request.InitWithApiInfo("Ecs", "2014-05-26", "StartInstance", "ecs", "openAPI")
 	request.Method = requests.POST
 	return
 }
