@@ -21,10 +21,10 @@ var demoCmd = &cobra.Command{
 	Short: "A demo for using RRSA Token in ACK Cluster when running it as pod container",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		client := common.GetClientOrDie()
 		sleep := time.Second * 30
 		for {
 			log.Println("======= [begin] list ACK clusters with RRSA =======")
+			client := common.GetClientOrDie()
 			cs, err := client.ListClusters(context.Background())
 			if err != nil {
 				if demoOpts.noLoop {

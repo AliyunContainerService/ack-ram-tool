@@ -30,6 +30,81 @@ func TestMakeAssumeRolePolicyStatementWithServiceAccount(t *testing.T) {
 `)
 }
 
+func TestMakeAssumeRolePolicyStatementWithServiceAccount_ns_star(t *testing.T) {
+	policy := MakeAssumeRolePolicyStatementWithServiceAccount(
+		"https://oidc-ack.example.com", "acs:ram::12345:oidc-provider/ack-rrsa-cabce", "*", "oss-reader-sa")
+	assert.JSONEq(t, policy.JSON(), `
+{
+      "Action": "sts:AssumeRole",
+      "Condition": {
+        "StringEquals": {
+          "oidc:aud": "sts.aliyuncs.com",
+          "oidc:iss": "https://oidc-ack.example.com"
+        },
+        "StringLike": {
+          "oidc:sub": "system:serviceaccount:*:oss-reader-sa"
+        }
+      },
+      "Effect": "Allow",
+      "Principal": {
+        "Federated": [
+          "acs:ram::12345:oidc-provider/ack-rrsa-cabce"
+        ]
+      }
+}
+`)
+}
+
+func TestMakeAssumeRolePolicyStatementWithServiceAccount_sa_star(t *testing.T) {
+	policy := MakeAssumeRolePolicyStatementWithServiceAccount(
+		"https://oidc-ack.example.com", "acs:ram::12345:oidc-provider/ack-rrsa-cabce", "depart-1", "*")
+	assert.JSONEq(t, policy.JSON(), `
+{
+      "Action": "sts:AssumeRole",
+      "Condition": {
+        "StringEquals": {
+          "oidc:aud": "sts.aliyuncs.com",
+          "oidc:iss": "https://oidc-ack.example.com"
+        },
+        "StringLike": {
+          "oidc:sub": "system:serviceaccount:depart-1:*"
+        }
+      },
+      "Effect": "Allow",
+      "Principal": {
+        "Federated": [
+          "acs:ram::12345:oidc-provider/ack-rrsa-cabce"
+        ]
+      }
+}
+`)
+}
+
+func TestMakeAssumeRolePolicyStatementWithServiceAccount_ns_sa_star(t *testing.T) {
+	policy := MakeAssumeRolePolicyStatementWithServiceAccount(
+		"https://oidc-ack.example.com", "acs:ram::12345:oidc-provider/ack-rrsa-cabce", "*", "*")
+	assert.JSONEq(t, policy.JSON(), `
+{
+      "Action": "sts:AssumeRole",
+      "Condition": {
+        "StringEquals": {
+          "oidc:aud": "sts.aliyuncs.com",
+          "oidc:iss": "https://oidc-ack.example.com"
+        },
+        "StringLike": {
+          "oidc:sub": "system:serviceaccount:*:*"
+        }
+      },
+      "Effect": "Allow",
+      "Principal": {
+        "Federated": [
+          "acs:ram::12345:oidc-provider/ack-rrsa-cabce"
+        ]
+      }
+}
+`)
+}
+
 func TestAssumeRolePolicyDocument_AppendPolicyIfNotExist(t *testing.T) {
 	type args struct {
 		policy string
