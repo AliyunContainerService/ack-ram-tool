@@ -15,4 +15,5 @@ func SetupCredentialPluginCmd(root *cobra.Command) {
 func init() {
 	setupGetKubeconfigCmd(rootCmd)
 	setupGetCredentialCmdCmd(rootCmd)
+	setupGetTokenCmdCmd(rootCmd)
 }

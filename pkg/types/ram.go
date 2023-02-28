@@ -59,20 +59,36 @@ func MakeRamPolicyDocument(policies []RamPolicyStatement) RamPolicyDocument {
 }
 
 func MakeAssumeRolePolicyStatementWithServiceAccount(oidcIssuer, oidcArn, namespace, serviceAccount string) RamPolicyStatement {
-	return RamPolicyStatement{
-		"Action": "sts:AssumeRole",
-		"Condition": map[string]interface{}{
+	condition := map[string]interface{}{
+		"StringEquals": map[string]string{
+			"oidc:aud": "sts.aliyuncs.com",
+			"oidc:iss": oidcIssuer,
+			"oidc:sub": getRAMSub(namespace, serviceAccount),
+		},
+	}
+	if namespace == "*" || serviceAccount == "*" {
+		condition = map[string]interface{}{
 			"StringEquals": map[string]string{
 				"oidc:aud": "sts.aliyuncs.com",
 				"oidc:iss": oidcIssuer,
-				"oidc:sub": fmt.Sprintf("system:serviceaccount:%s:%s", namespace, serviceAccount),
 			},
-		},
-		"Effect": "Allow",
+			"StringLike": map[string]string{
+				"oidc:sub": getRAMSub(namespace, serviceAccount),
+			},
+		}
+	}
+	return RamPolicyStatement{
+		"Action":    "sts:AssumeRole",
+		"Condition": condition,
+		"Effect":    "Allow",
 		"Principal": map[string]interface{}{
 			"Federated": []string{oidcArn},
 		},
 	}
+}
+
+func getRAMSub(namespace, serviceAccount string) string {
+	return fmt.Sprintf("system:serviceaccount:%s:%s", namespace, serviceAccount)
 }
 
 func (p *RamPolicyDocument) AppendPolicyIfNotExist(policy RamPolicyStatement) error {

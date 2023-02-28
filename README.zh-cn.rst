@@ -1,7 +1,7 @@
 ack-ram-tool
 =============================
 
-一个辅助配置在使用 ACK 过程中涉及的 RAM及访问凭证 相关操作的命令行工具及 Golang 库。
+一个协助您在使用 ACK 过程中便捷执行涉及 RAM、访问凭证、RBAC权限等相关操作的命令行工具。
 
 .. contents::
 
@@ -14,22 +14,10 @@ ack-ram-tool
 配置凭证信息
 -----------
 
-您可以直接使用 aliyun cli 的配置文件 ``~/.aliyun/config.json`` (关于 aliyun cli 的配置文件详情请参考
-  `官方文档 <https://www.alibabacloud.com/help/doc-detail/110341.htm>`__ ) 中配置的凭证信息.
+ack-ram-tool 将通过以下顺序在系统中查找凭证信息：
 
-您也可以通过 ``~/.alibabacloud/credentials`` 文件配置凭证信息（可以通过 ``--profile-file`` 参数指定文件路径）:
-
-.. code-block:: shell
-
-    $ cat ~/.alibabacloud/credentials
-
-    [default]
-    type = access_key
-    access_key_id = foo
-    access_key_secret = bar
-
-您也可以通过环境变量配置凭证信息 （
-注：程序也支持 `aliyun cli 所支持的类似含义的环境变量 <https://github.com/aliyun/aliyun-cli#support-for-environment-variables>`__ ）:
+1. 自动使用环境变量中存在的凭证信息 （
+注：程序也支持 `aliyun cli 所支持的凭证相关环境变量 <https://github.com/aliyun/aliyun-cli#support-for-environment-variables>`__ ）:
 
 .. code-block:: shell
 
@@ -42,6 +30,19 @@ ack-ram-tool
 
     # or use credentials URI: https://github.com/aliyun/aliyun-cli#use-credentials-uri
     $ export ALIBABA_CLOUD_CREDENTIALS_URI=http://localhost:6666/?user=jacksontian
+
+2. 当环境变量中不存在凭证信息时，如果存在 aliyun cli 的配置文件 ``~/.aliyun/config.json`` (关于 aliyun cli 的配置文件详情请参考
+  `官方文档 <https://www.alibabacloud.com/help/doc-detail/110341.htm>`__ ) ，程序将自动使用该配置文件。
+3. 当 aliyun cli 的配置文件不存在时，程序将尝试使用 ``~/.alibabacloud/credentials`` 文件中配置的凭证信息（可以通过 ``--profile-file`` 参数指定文件路径）:
+
+.. code-block:: shell
+
+    $ cat ~/.alibabacloud/credentials
+
+    [default]
+    type = access_key
+    access_key_id = foo
+    access_key_secret = bar
 
 
 使用示例
