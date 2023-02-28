@@ -12,7 +12,7 @@ import (
 )
 
 // scan rbac permissions bound to alibaba cloud users
-type OutputFormat string
+//type OutputFormat string
 
 type Option struct {
 	userId uint64
@@ -20,7 +20,7 @@ type Option struct {
 	clusterId         string
 	privateIpAddress  bool
 	temporaryDuration time.Duration
-	outputFormat      OutputFormat
+	//outputFormat      OutputFormat
 }
 
 var opts = Option{}

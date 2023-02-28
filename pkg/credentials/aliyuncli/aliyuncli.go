@@ -28,7 +28,6 @@ type Profile struct {
 
 type CredentialHelper struct {
 	profile *Profile
-	cred    credentials.Credential
 }
 
 func NewCredentialHelper(configPath, profileName string) (*CredentialHelper, error) {

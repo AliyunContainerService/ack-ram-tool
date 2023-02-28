@@ -12,7 +12,7 @@ import (
 )
 
 type GetTokenOpts struct {
-	clusterId        string
+	//clusterId        string
 	privateIpAddress bool
 	stsEndpoint      string
 
