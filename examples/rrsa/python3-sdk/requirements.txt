@@ -1,6 +1,6 @@
 aiohttp==3.8.3
 aiosignal==1.2.0
-alibabacloud-credentials==0.3.1
+alibabacloud-credentials==0.3.2
 alibabacloud-cs20151215==3.0.20
 alibabacloud-endpoint-util==0.0.3
 alibabacloud-gateway-spi==0.0.1
