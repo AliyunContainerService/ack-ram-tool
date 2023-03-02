@@ -206,13 +206,22 @@ func (p *Profile) GetCredentialsByExternal() (credentials.Credential, error) {
 	args := strings.Fields(cp.ProcessCommand)
 	cmd := exec.Command(args[0], args[1:]...) // #nosec G204
 	buf, err := cmd.CombinedOutput()
+	genmsg := func(err error) string {
+		message := fmt.Sprintf(`run external program to get credentials faild:
+  command: %s
+  output: %s
+  error: %s`,
+			cp.ProcessCommand, string(buf), err.Error())
+		return message
+	}
 	if err != nil {
-		return nil, err
+		message := genmsg(err)
+		return nil, errors.New(message)
 	}
 	var newCP config.Profile
 	err = json.Unmarshal(buf, &newCP)
 	if err != nil {
-		message := fmt.Sprintf("%s\n%s\n%s", cp.ProcessCommand, string(buf), err.Error())
+		message := genmsg(err)
 		return nil, errors.New(message)
 	}
 
