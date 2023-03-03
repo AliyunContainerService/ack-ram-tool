@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
 
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudsdkgo/helper/env"
@@ -212,8 +213,12 @@ func (p *ProfileWrapper) GetCredentialsByExternal() (credentials.Credential, err
 	var newCP Profile
 	err = json.Unmarshal(buf, &newCP)
 	if err != nil {
-		message := genmsg(err)
-		return nil, errors.New(message)
+		if pp := tryToParseProfileFromOutput(string(buf)); pp != nil {
+			newCP = *pp
+		} else {
+			message := genmsg(err)
+			return nil, errors.New(message)
+		}
 	}
 
 	newP := &ProfileWrapper{
@@ -221,6 +226,21 @@ func (p *ProfileWrapper) GetCredentialsByExternal() (credentials.Credential, err
 		conf: p.conf,
 	}
 	return newP.GetCredentials()
+}
+
+var regexpCredJSON = regexp.MustCompile(`{\s*"mode": [^}]+}`)
+
+func tryToParseProfileFromOutput(output string) *Profile {
+	ret := regexpCredJSON.FindAllString(output, 1)
+	if len(ret) < 1 {
+		return nil
+	}
+	credJSON := ret[0]
+	var p Profile
+	if err := json.Unmarshal([]byte(credJSON), &p); err == nil {
+		return &p
+	}
+	return nil
 }
 
 func (p *ProfileWrapper) GetCredentialsByCredentialsURI() (credentials.Credential, error) {
