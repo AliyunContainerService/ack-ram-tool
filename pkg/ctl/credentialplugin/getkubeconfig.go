@@ -61,32 +61,8 @@ func generateExecKubeconfig(clusterId string, config *types.KubeConfig, mode cre
 		Preferences:    config.Preferences,
 	}
 	var users []types.KubeAuthUser
-	var args []string
+	args := getExecArgs(clusterId, mode, getCredentialOpts)
 
-	switch mode {
-	case modeRAMAuthenticatorToken:
-		args = []string{
-			"credential-plugin",
-			"get-token",
-			"--cluster-id",
-			clusterId,
-			"--api-version",
-			getCredentialOpts.apiVersion,
-		}
-		break
-	default:
-		args = []string{
-			"credential-plugin",
-			"get-credential",
-			"--cluster-id",
-			clusterId,
-			"--api-version",
-			getCredentialOpts.apiVersion,
-			"--expiration",
-			"3h",
-		}
-		break
-	}
 	for _, u := range newConf.Users {
 		newU := types.KubeAuthUser{
 			Name: u.Name,
@@ -105,6 +81,31 @@ func generateExecKubeconfig(clusterId string, config *types.KubeConfig, mode cre
 	}
 	newConf.Users = users
 	return newConf
+}
+
+func getExecArgs(clusterId string, mode credentialMode, opt GetCredentialOpts) []string {
+	switch mode {
+	case modeRAMAuthenticatorToken:
+		return []string{
+			"credential-plugin",
+			"get-token",
+			"--cluster-id",
+			clusterId,
+			"--api-version",
+			opt.apiVersion,
+		}
+	default:
+		return []string{
+			"credential-plugin",
+			"get-credential",
+			"--cluster-id",
+			clusterId,
+			"--api-version",
+			getCredentialOpts.apiVersion,
+			"--expiration",
+			"3h",
+		}
+	}
 }
 
 func setupGetKubeconfigCmd(rootCmd *cobra.Command) {
