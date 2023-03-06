@@ -17,9 +17,10 @@ package aliyuncli
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/AliyunContainerService/ack-ram-tool/pkg/utils"
 	"os"
 	"path"
+
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/utils"
 )
 
 const (
@@ -61,16 +62,16 @@ func getDefaultConfigPath() string {
 	return path.Join(dir, configFile)
 }
 
-func LoadConfiguration(path string) (conf *Configuration, err error) {
-	_, statErr := os.Stat(path)
+func LoadConfiguration(inputPath string) (conf *Configuration, err error) {
+	_, statErr := os.Stat(inputPath)
 	if os.IsNotExist(statErr) {
 		conf = NewConfiguration()
 		return
 	}
 
-	bytes, err := os.ReadFile(path)
+	bytes, err := os.ReadFile(path.Clean(inputPath))
 	if err != nil {
-		err = fmt.Errorf("reading config from '%s' failed %v", path, err)
+		err = fmt.Errorf("reading config from '%s' failed %v", inputPath, err)
 		return
 	}
 

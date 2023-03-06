@@ -34,6 +34,10 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&ctl.GlobalOption.AssumeYes, "assume-yes", "y", false,
 		"Automatic yes to prompts; assume \"yes\" as answer to all prompts and run non-interactively")
 	rootCmd.PersistentFlags().StringVar(&ctl.GlobalOption.CredentialFilePath, "profile-file", "", "Path to credential file (default: ~/.alibabacloud/credentials)")
+	rootCmd.PersistentFlags().BoolVar(&ctl.GlobalOption.IgnoreEnv,
+		"ignore-env-credentials", false, "don't try to parse credentials from environment variables")
+	rootCmd.PersistentFlags().BoolVar(&ctl.GlobalOption.IgnoreAliyuncliConfig,
+		"ignore-aliyun-cli-credentials", false, "don't try to parse credentials from config.json of aliyun cli")
 	//rootCmd.PersistentFlags().BoolVarP(&ctl.GlobalOption.InsecureSkipTLSVerify, "insecure-skip-tls-verify", "", false, "Skips the validity check for the server's certificate")
 }
 
