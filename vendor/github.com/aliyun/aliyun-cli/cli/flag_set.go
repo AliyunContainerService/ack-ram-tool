@@ -1,4 +1,4 @@
-// Copyright (c) 2009-present, Alibaba Cloud All rights reserved.
+// Copyright 1999-2019 Alibaba Group Holding Limited
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@ package cli
 
 import (
 	"fmt"
-	"strings"
 )
 
 type FlagSet struct {
@@ -59,9 +58,6 @@ func (fs *FlagSet) AddByName(name string) (*Flag, error) {
 	}
 	f := &Flag{
 		Name: name,
-	}
-	if strings.HasSuffix(name, "-FILE") {
-		f.Aliases = append(f.Aliases, strings.TrimSuffix(name, "-FILE"))
 	}
 	fs.Add(f)
 	return f, nil

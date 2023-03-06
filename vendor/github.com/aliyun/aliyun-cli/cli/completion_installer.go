@@ -1,4 +1,4 @@
-// Copyright (c) 2009-present, Alibaba Cloud All rights reserved.
+// Copyright 1999-2019 Alibaba Group Holding Limited
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,8 +15,7 @@ package cli
 
 import (
 	"fmt"
-	"os"
-	"os/user"
+	"io"
 
 	"github.com/aliyun/aliyun-cli/i18n"
 )
@@ -24,20 +23,6 @@ import (
 var hookGetBinaryPath = func(fn func() (string, error)) func() (string, error) {
 	return fn
 }
-
-func getHomeDir() string {
-	homeDirFromEnv := os.Getenv("MOCK_USER_HOME_DIR")
-	if homeDirFromEnv != "" {
-		os.Mkdir(homeDirFromEnv, os.ModePerm)
-		return homeDirFromEnv
-	}
-	u, err := user.Current()
-	if err != nil {
-		return ""
-	}
-	return u.HomeDir
-}
-
 var uninstallFlag = &Flag{
 	Name:  "uninstall",
 	Short: i18n.T("uninstall auto completion", "卸载自动完成"),
@@ -59,9 +44,9 @@ func NewAutoCompleteCommand() *Command {
 			//	fmt.Printf("zshInstaller: %s\n", f)
 			//}
 			if uninstallFlag.IsAssigned() {
-				uninstallCompletion(ctx, "aliyun")
+				uninstallCompletion(ctx.Writer(), "aliyun")
 			} else {
-				installCompletion(ctx, "aliyun")
+				installCompletion(ctx.Writer(), "aliyun")
 			}
 			return nil
 		},
@@ -70,32 +55,32 @@ func NewAutoCompleteCommand() *Command {
 	return cmd
 }
 
-func installCompletion(ctx *Context, cmd string) {
+func installCompletion(w io.Writer, cmd string) {
 	bin, err := getBinaryPath()
 	if err != nil {
-		Errorf(ctx.Stderr(), "can't get binary path %s", err)
+		Errorf(w, "can't get binary path %s", err)
 		return
 	}
 
 	for _, i := range completionInstallers() {
 		err := i.Install(cmd, bin)
 		if err != nil {
-			Errorf(ctx.Stderr(), "install completion failed for %s %s\n", bin, err)
+			Errorf(w, "install completion failed for %s %s\n", bin, err)
 		}
 	}
 }
 
-func uninstallCompletion(ctx *Context, cmd string) {
+func uninstallCompletion(w io.Writer, cmd string) {
 	bin, err := hookGetBinaryPath(getBinaryPath)()
 	if err != nil {
-		Errorf(ctx.Stderr(), "can't get binary path %s", err)
+		Errorf(w, "can't get binary path %s", err)
 		return
 	}
 
 	for _, i := range completionInstallers() {
 		err := i.Uninstall(cmd, bin)
 		if err != nil {
-			Errorf(ctx.Stderr(), "uninstall %s failed\n", err)
+			Errorf(w, "uninstall %s failed\n", err)
 		}
 	}
 }
@@ -138,14 +123,9 @@ func (z zshInstaller) Install(cmd, bin string) error {
 		return fmt.Errorf("already installed in %s", z.rc)
 	}
 
-	compInit := "autoload -U +X compinit && compinit -i"
-	bashCompInit := "autoload -U +X bashcompinit && bashcompinit -i"
-	if !lineInFile(z.rc, compInit) {
-		if !lineInFile(z.rc, bashCompInit) {
-			completeCmd = compInit + "\n" + bashCompInit + "\n" + completeCmd
-		} else {
-			completeCmd = compInit + "\n" + completeCmd
-		}
+	bashCompInit := "autoload -U +X bashcompinit && bashcompinit"
+	if !lineInFile(z.rc, bashCompInit) {
+		completeCmd = bashCompInit + "\n" + completeCmd
 	}
 
 	return appendToFile(z.rc, completeCmd)

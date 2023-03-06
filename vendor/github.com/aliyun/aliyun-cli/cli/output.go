@@ -1,4 +1,4 @@
-// Copyright (c) 2009-present, Alibaba Cloud All rights reserved.
+// Copyright 1999-2019 Alibaba Group Holding Limited
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,17 +20,12 @@ import (
 )
 
 var (
-	defaultOutput       = NewOutput()
-	defaultWriter       = os.Stdout
-	defaultStderrWriter = os.Stderr
+	defaultOutput = NewOutput()
+	defaultWriter = os.Stdout
 )
 
 func DefaultWriter() io.Writer {
 	return defaultWriter
-}
-
-func DefaultStderrWriter() io.Writer {
-	return defaultStderrWriter
 }
 
 func Print(w io.Writer, a ...interface{}) (n int, err error) {

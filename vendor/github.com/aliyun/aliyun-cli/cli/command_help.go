@@ -1,4 +1,4 @@
-// Copyright (c) 2009-present, Alibaba Cloud All rights reserved.
+// Copyright 1999-2019 Alibaba Group Holding Limited
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -77,8 +77,8 @@ func (c *Command) PrintFlags(ctx *Context) {
 }
 
 func (c *Command) PrintFailed(ctx *Context, err error, suggestion string) {
-	Errorf(ctx.Stderr(), "ERROR: %v\n", err)
-	Printf(ctx.Stderr(), "%s\n", suggestion)
+	Errorf(ctx.Writer(), "ERROR: %v\n", err)
+	Printf(ctx.Writer(), "%s\n", suggestion)
 }
 
 func (c *Command) PrintTail(ctx *Context) {

@@ -1,4 +1,4 @@
-// Copyright (c) 2009-present, Alibaba Cloud All rights reserved.
+// Copyright 1999-2019 Alibaba Group Holding Limited
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"os/user"
 	"path/filepath"
 )
 
@@ -142,6 +143,30 @@ func copyFile(src string, dst string) error {
 	return err
 }
 
+func fishConfigDir() string {
+	configDir := filepath.Join(getConfigHomePath(), "fish")
+	if configDir == "" {
+		return ""
+	}
+	if info, err := os.Stat(configDir); err != nil || !info.IsDir() {
+		return ""
+	}
+	return configDir
+}
+
+func getConfigHomePath() string {
+	u, err := user.Current()
+	if err != nil {
+		return ""
+	}
+
+	configHome := os.Getenv("XDG_CONFIG_HOME")
+	if configHome == "" {
+		return filepath.Join(u.HomeDir, ".config")
+	}
+	return configHome
+}
+
 func getBinaryPath() (string, error) {
 	bin, err := os.Executable()
 	if err != nil {
@@ -151,11 +176,13 @@ func getBinaryPath() (string, error) {
 }
 
 func rcFile(name string) string {
-	path := filepath.Join(getHomeDir(), name)
-	fmt.Println(path)
+	u, err := user.Current()
+	if err != nil {
+		return ""
+	}
+	path := filepath.Join(u.HomeDir, name)
 	if _, err := os.Stat(path); err != nil {
 		return ""
 	}
-
 	return path
 }

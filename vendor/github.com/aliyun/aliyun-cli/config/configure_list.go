@@ -1,4 +1,4 @@
-// Copyright (c) 2009-present, Alibaba Cloud All rights reserved.
+// Copyright 1999-2019 Alibaba Group Holding Limited
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ func NewConfigureListCommand() *cli.Command {
 }
 
 func doConfigureList(w io.Writer) {
-	conf, err := loadConfiguration()
+	conf, err := hookLoadConfiguration(LoadConfiguration)(GetConfigPath()+"/"+configFile, w)
 	if err != nil {
 		cli.Errorf(w, "ERROR: load configure failed: %v\n", err)
 	}
@@ -63,16 +63,8 @@ func doConfigureList(w io.Writer) {
 			cred = "RamRoleArn:" + "***" + GetLastChars(pf.AccessKeyId, 3)
 		case EcsRamRole:
 			cred = "EcsRamRole:" + pf.RamRoleName
-		case RamRoleArnWithEcs:
-			cred = "arn:" + "***" + GetLastChars(pf.AccessKeyId, 3)
-		case ChainableRamRoleArn:
-			cred = "ChainableRamRoleArn:" + pf.SourceProfile + ":" + pf.RamRoleArn
 		case RsaKeyPair:
 			cred = "RsaKeyPair:" + pf.KeyPairName
-		case External:
-			cred = "ProcessCommand:" + pf.ProcessCommand
-		case CredentialsURI:
-			cred = "CredentialsURI:" + pf.CredentialsURI
 		}
 		fmt.Fprintf(tw, "%s\t| %s\t| %s\t| %s\t| %s\n", name, cred, valid, pf.RegionId, pf.Language)
 	}

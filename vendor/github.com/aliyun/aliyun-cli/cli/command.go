@@ -1,4 +1,4 @@
-// Copyright (c) 2009-present, Alibaba Cloud All rights reserved.
+// Copyright 1999-2019 Alibaba Group Holding Limited
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -158,6 +158,7 @@ func (c *Command) executeInner(ctx *Context, args []string) error {
 	if err != nil {
 		return err
 	}
+
 	//
 	// if next arg is help, run help
 	if nextArg == "help" {
@@ -238,14 +239,14 @@ func (c *Command) executeInner(ctx *Context, args []string) error {
 }
 
 func (c *Command) processError(ctx *Context, err error) {
-	Errorf(ctx.Stderr(), "ERROR: %s\n", err.Error())
+	Errorf(ctx.Writer(), "ERROR: %s\n", err.Error())
 	if e, ok := err.(SuggestibleError); ok {
 		PrintSuggestions(ctx, i18n.GetLanguage(), e.GetSuggestions())
 		Exit(2)
 		return
 	}
 	if e, ok := err.(ErrorWithTip); ok {
-		Noticef(ctx.Stderr(), "\n%s\n", e.GetTip(i18n.GetLanguage()))
+		Noticef(ctx.Writer(), "\n%s\n", e.GetTip(i18n.GetLanguage()))
 		Exit(3)
 		return
 	}

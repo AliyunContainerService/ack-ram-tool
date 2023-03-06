@@ -1,4 +1,4 @@
-// Copyright (c) 2009-present, Alibaba Cloud All rights reserved.
+// Copyright 1999-2019 Alibaba Group Holding Limited
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"runtime"
@@ -40,8 +41,8 @@ var hookGetHomePath = func(fn func() string) func() string {
 	return fn
 }
 
-func NewConfiguration() *Configuration {
-	return &Configuration{
+func NewConfiguration() Configuration {
+	return Configuration{
 		CurrentProfile: DefaultConfigProfileName,
 		Profiles: []Profile{
 			NewProfile(DefaultConfigProfileName),
@@ -69,16 +70,6 @@ func (c *Configuration) GetProfile(pn string) (Profile, bool) {
 
 func (c *Configuration) GetCurrentProfile(ctx *cli.Context) Profile {
 	profileName := ProfileFlag(ctx.Flags()).GetStringOrDefault(c.CurrentProfile)
-	if profileName == "" || profileName == "default" {
-		switch {
-		case os.Getenv("ALIBABACLOUD_PROFILE") != "":
-			profileName = os.Getenv("ALIBABACLOUD_PROFILE")
-		case os.Getenv("ALIBABA_CLOUD_PROFILE") != "":
-			profileName = os.Getenv("ALIBABA_CLOUD_PROFILE")
-		case os.Getenv("ALICLOUD_PROFILE") != "":
-			profileName = os.Getenv("ALICLOUD_PROFILE")
-		}
-	}
 	p, _ := c.GetProfile(profileName)
 	p.OverwriteWithFlags(ctx)
 	return p
@@ -94,13 +85,13 @@ func (c *Configuration) PutProfile(profile Profile) {
 	c.Profiles = append(c.Profiles, profile)
 }
 
-func LoadCurrentProfile() (Profile, error) {
-	return LoadProfile(GetConfigPath()+"/"+configFile, "")
+func LoadCurrentProfile(w io.Writer) (Profile, error) {
+	return LoadProfile(GetConfigPath()+"/"+configFile, w, "")
 }
 
-func LoadProfile(path string, name string) (Profile, error) {
+func LoadProfile(path string, w io.Writer, name string) (Profile, error) {
 	var p Profile
-	config, err := hookLoadConfiguration(LoadConfiguration)(path)
+	config, err := hookLoadConfiguration(LoadConfiguration)(path, w)
 	if err != nil {
 		return p, fmt.Errorf("init config failed %v", err)
 	}
@@ -108,7 +99,7 @@ func LoadProfile(path string, name string) (Profile, error) {
 		name = config.CurrentProfile
 	}
 	p, ok := config.GetProfile(name)
-	p.parent = config
+	p.parent = &config
 	if !ok {
 		return p, fmt.Errorf("unknown profile %s, run configure to check", name)
 	}
@@ -116,77 +107,69 @@ func LoadProfile(path string, name string) (Profile, error) {
 }
 
 func LoadProfileWithContext(ctx *cli.Context) (profile Profile, err error) {
-	if os.Getenv("ALIBABACLOUD_IGNORE_PROFILE") == "TRUE" {
-		profile = NewProfile("default")
-		profile.RegionId = "cn-hangzhou"
+	var currentPath string
+	if path, ok := ConfigurePathFlag(ctx.Flags()).GetValue(); ok {
+		currentPath = path
 	} else {
-		var currentPath string
-		if path, ok := ConfigurePathFlag(ctx.Flags()).GetValue(); ok {
-			currentPath = path
-		} else {
-			currentPath = GetConfigPath() + "/" + configFile
-		}
-		if name, ok := ProfileFlag(ctx.Flags()).GetValue(); ok {
-			profile, err = LoadProfile(currentPath, name)
-		} else {
-			profile, err = LoadProfile(currentPath, "")
-		}
-		if err != nil {
-			return
-		}
+		currentPath = GetConfigPath() + "/" + configFile
 	}
+	if name, ok := ProfileFlag(ctx.Flags()).GetValue(); ok {
+		profile, err = LoadProfile(currentPath, ctx.Writer(), name)
 
+	} else {
+		profile, err = LoadProfile(currentPath, ctx.Writer(), "")
+	}
+	if err != nil {
+		return
+	}
 	//Load from flags
 	profile.OverwriteWithFlags(ctx)
 	err = profile.Validate()
 	return
 }
 
-func LoadConfiguration(path string) (conf *Configuration, err error) {
-	_, statErr := os.Stat(path)
-	if os.IsNotExist(statErr) {
-		conf, err = MigrateLegacyConfiguration()
-		if err != nil {
-			return
-		}
-
-		if conf != nil {
-			err = SaveConfiguration(conf)
+func LoadConfiguration(path string, w io.Writer) (Configuration, error) {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		lc := MigrateLegacyConfiguration(w)
+		if lc != nil {
+			err := SaveConfiguration(*lc)
 			if err != nil {
-				err = fmt.Errorf("save failed %v", err)
-				return
+				return *lc, fmt.Errorf("save failed %v", err)
 			}
-			return
+			return *lc, nil
 		}
-		conf = NewConfiguration()
-		return
+		return NewConfiguration(), nil
 	}
 
 	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
-		err = fmt.Errorf("reading config from '%s' failed %v", path, err)
-		return
+		return NewConfiguration(), fmt.Errorf("reading config from '%s' failed %v", path, err)
 	}
 
-	conf, err = NewConfigFromBytes(bytes)
-	return
+	return NewConfigFromBytes(bytes)
 }
 
-func SaveConfiguration(config *Configuration) (err error) {
+func SaveConfiguration(config Configuration) error {
 	// fmt.Printf("conf %v\n", config)
 	bytes, err := json.MarshalIndent(config, "", "\t")
 	if err != nil {
-		return
+		return err
 	}
 	path := GetConfigPath() + "/" + configFile
 	err = ioutil.WriteFile(path, bytes, 0600)
-	return
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func NewConfigFromBytes(bytes []byte) (conf *Configuration, err error) {
-	conf = NewConfiguration()
-	err = json.Unmarshal(bytes, conf)
-	return
+func NewConfigFromBytes(bytes []byte) (Configuration, error) {
+	var conf Configuration
+	err := json.Unmarshal(bytes, &conf)
+	if err != nil {
+		return conf, err
+	}
+	return conf, nil
 }
 
 func GetConfigPath() string {

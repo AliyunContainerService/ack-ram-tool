@@ -1,4 +1,4 @@
-// Copyright (c) 2009-present, Alibaba Cloud All rights reserved.
+// Copyright 1999-2019 Alibaba Group Holding Limited
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ func NewConfigureSetCommand() *cli.Command {
 }
 
 func doConfigureSet(w io.Writer, flags *cli.FlagSet) {
-	config, err := loadConfiguration()
+	config, err := hookLoadConfiguration(LoadConfiguration)(GetConfigPath()+"/"+configFile, w)
 	if err != nil {
 		cli.Errorf(w, "load configuration failed %s", err)
 		return
@@ -71,7 +71,7 @@ func doConfigureSet(w io.Writer, flags *cli.FlagSet) {
 
 	path, ok := ConfigurePathFlag(flags).GetValue()
 	if ok {
-		profile, err = LoadProfile(path, profileName)
+		profile, err = LoadProfile(path, w, profileName)
 		if err != nil {
 			cli.Errorf(w, "load configuration file failed %s", err)
 			return
@@ -93,38 +93,25 @@ func doConfigureSet(w io.Writer, flags *cli.FlagSet) {
 		profile.AccessKeySecret = AccessKeySecretFlag(flags).GetStringOrDefault(profile.AccessKeySecret)
 	case StsToken:
 		profile.AccessKeyId = AccessKeyIdFlag(flags).GetStringOrDefault(profile.AccessKeyId)
-		profile.AccessKeySecret = AccessKeySecretFlag(flags).GetStringOrDefault(profile.AccessKeySecret)
+		profile.AccessKeySecret = AccessKeyIdFlag(flags).GetStringOrDefault(profile.AccessKeySecret)
 		profile.StsToken = StsTokenFlag(flags).GetStringOrDefault(profile.StsToken)
 	case RamRoleArn:
 		profile.AccessKeyId = AccessKeyIdFlag(flags).GetStringOrDefault(profile.AccessKeyId)
 		profile.AccessKeySecret = AccessKeySecretFlag(flags).GetStringOrDefault(profile.AccessKeySecret)
 		profile.RamRoleArn = RamRoleArnFlag(flags).GetStringOrDefault(profile.RamRoleArn)
 		profile.RoleSessionName = RoleSessionNameFlag(flags).GetStringOrDefault(profile.RoleSessionName)
-		profile.ExpiredSeconds = ExpiredSecondsFlag(flags).GetIntegerOrDefault(profile.ExpiredSeconds)
 	case EcsRamRole:
 		profile.RamRoleName = RamRoleNameFlag(flags).GetStringOrDefault(profile.RamRoleName)
-	case RamRoleArnWithEcs:
-		profile.RamRoleName = RamRoleNameFlag(flags).GetStringOrDefault(profile.RamRoleName)
-		profile.RamRoleArn = RamRoleArnFlag(flags).GetStringOrDefault(profile.RamRoleArn)
-		profile.RoleSessionName = RoleSessionNameFlag(flags).GetStringOrDefault(profile.RoleSessionName)
-		profile.ExpiredSeconds = ExpiredSecondsFlag(flags).GetIntegerOrDefault(profile.ExpiredSeconds)
-	case ChainableRamRoleArn:
-		profile.SourceProfile = SourceProfileFlag(flags).GetStringOrDefault(profile.SourceProfile)
-		profile.RamRoleArn = RamRoleArnFlag(flags).GetStringOrDefault(profile.RamRoleArn)
-		profile.RoleSessionName = RoleSessionNameFlag(flags).GetStringOrDefault(profile.RoleSessionName)
-		profile.ExpiredSeconds = ExpiredSecondsFlag(flags).GetIntegerOrDefault(profile.ExpiredSeconds)
 	case RsaKeyPair:
 		profile.PrivateKey = PrivateKeyFlag(flags).GetStringOrDefault(profile.PrivateKey)
 		profile.KeyPairName = KeyPairNameFlag(flags).GetStringOrDefault(profile.KeyPairName)
-	case External:
-		profile.ProcessCommand = ProcessCommandFlag(flags).GetStringOrDefault(profile.ProcessCommand)
 	}
+
 	profile.RegionId = RegionFlag(flags).GetStringOrDefault(profile.RegionId)
 	profile.Language = LanguageFlag(flags).GetStringOrDefault(profile.Language)
 	profile.OutputFormat = "json" // "output", profile.OutputFormat)
 	profile.Site = "china"        // "site", profile.Site)
-	profile.ReadTimeout = ReadTimeoutFlag(flags).GetIntegerOrDefault(profile.ReadTimeout)
-	profile.ConnectTimeout = ConnectTimeoutFlag(flags).GetIntegerOrDefault(profile.ConnectTimeout)
+	profile.RetryTimeout = RetryTimeoutFlag(flags).GetIntegerOrDefault(profile.RetryTimeout)
 	profile.RetryCount = RetryCountFlag(flags).GetIntegerOrDefault(profile.RetryCount)
 
 	err = profile.Validate()

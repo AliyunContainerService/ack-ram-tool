@@ -59,8 +59,9 @@ github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests
 github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses
 github.com/aliyun/alibaba-cloud-sdk-go/sdk/utils
 github.com/aliyun/alibaba-cloud-sdk-go/services/ecs
-# github.com/aliyun/aliyun-cli v0.0.0-20230222034944-224f3a2cad91
-## explicit; go 1.18
+github.com/aliyun/alibaba-cloud-sdk-go/services/sts
+# github.com/aliyun/aliyun-cli v3.0.25+incompatible
+## explicit
 github.com/aliyun/aliyun-cli/cli
 github.com/aliyun/aliyun-cli/config
 github.com/aliyun/aliyun-cli/i18n
@@ -168,6 +169,8 @@ github.com/modern-go/reflect2
 # github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822
 ## explicit
 github.com/munnerz/goautoneg
+# github.com/onsi/ginkgo v1.16.5
+## explicit; go 1.16
 # github.com/opentracing/opentracing-go v1.2.1-0.20220228012449-10b1cf09e00b
 ## explicit; go 1.14
 github.com/opentracing/opentracing-go

@@ -1,4 +1,4 @@
-// Copyright (c) 2009-present, Alibaba Cloud All rights reserved.
+// Copyright 1999-2019 Alibaba Group Holding Limited
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
 package config
 
 import (
+	"io"
+
 	"github.com/aliyun/aliyun-cli/cli"
 	"github.com/aliyun/aliyun-cli/i18n"
 )
@@ -22,25 +24,25 @@ func NewConfigureDeleteCommand() *cli.Command {
 	cmd := &cli.Command{
 		Name:  "delete",
 		Usage: "delete --profile <profileName>",
-		Short: i18n.T("delete the specified profile", "删除指定配置"),
+		Short: i18n.T("Delete the specified profile", "删除指定配置"),
 		Run: func(c *cli.Context, args []string) error {
 			profileName, ok := ProfileFlag(c.Flags()).GetValue()
 			if !ok {
-				cli.Errorf(c.Stderr(), "missing --profile <profileName>\n")
-				cli.Noticef(c.Stderr(), "\nusage:\n  aliyun configure delete --profile <profileName>\n")
+				cli.Errorf(c.Writer(), "missing --profile <profileName>\n")
+				cli.Noticef(c.Writer(), "\nusage:\n  aliyun configure delete --profile <profileName>\n")
 				return nil
 			}
-			doConfigureDelete(c, profileName)
+			doConfigureDelete(c.Writer(), profileName)
 			return nil
 		},
 	}
 	return cmd
 }
 
-func doConfigureDelete(ctx *cli.Context, profileName string) {
-	conf, err := loadConfiguration()
+func doConfigureDelete(w io.Writer, profileName string) {
+	conf, err := hookLoadConfiguration(LoadConfiguration)(GetConfigPath()+"/"+configFile, w)
 	if err != nil {
-		cli.Errorf(ctx.Stderr(), "ERROR: load configure failed: %v\n", err)
+		cli.Errorf(w, "ERROR: load configure failed: %v\n", err)
 	}
 	deleted := false
 	r := make([]Profile, 0)
@@ -53,7 +55,7 @@ func doConfigureDelete(ctx *cli.Context, profileName string) {
 	}
 
 	if !deleted {
-		cli.Errorf(ctx.Stderr(), "Error: configuration profile `%s` not found\n", profileName)
+		cli.Errorf(w, "Error: configuration profile `%s` not found\n", profileName)
 		return
 	}
 
@@ -68,6 +70,6 @@ func doConfigureDelete(ctx *cli.Context, profileName string) {
 
 	err = hookSaveConfiguration(SaveConfiguration)(conf)
 	if err != nil {
-		cli.Errorf(ctx.Stderr(), "Error: save configuration failed %s\n", err)
+		cli.Errorf(w, "Error: save configuration failed %s\n", err)
 	}
 }

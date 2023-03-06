@@ -1,4 +1,4 @@
-// Copyright (c) 2009-present, Alibaba Cloud All rights reserved.
+// Copyright 1999-2019 Alibaba Group Holding Limited
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,6 +20,36 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/aliyun-cli/cli"
 )
+
+type Region struct {
+	RegionId  string
+	LocalName string
+}
+
+func GetRegions(ctx *cli.Context, profile *Profile) ([]Region, error) {
+	client, err := profile.GetClient(ctx)
+
+	regions := make([]Region, 0)
+	if err != nil {
+		return regions, err
+	}
+
+	request := ecs.CreateDescribeRegionsRequest()
+	response := ecs.CreateDescribeRegionsResponse()
+	if vendorEnv, ok := os.LookupEnv("ALIBABA_CLOUD_VENDOR"); ok {
+		client.AppendUserAgent("vendor", vendorEnv)
+	}
+	client.AppendUserAgent("Aliyun-CLI", cli.GetVersion())
+	err = client.DoAction(request, response)
+
+	for _, region := range response.Regions.Region {
+		regions = append(regions, Region{
+			RegionId:  region.RegionId,
+			LocalName: region.LocalName,
+		})
+	}
+	return regions, nil
+}
 
 func DoHello(ctx *cli.Context, profile *Profile) {
 	w := ctx.Writer()

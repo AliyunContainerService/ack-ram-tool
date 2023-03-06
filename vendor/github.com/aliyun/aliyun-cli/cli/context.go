@@ -1,4 +1,4 @@
-// Copyright (c) 2009-present, Alibaba Cloud All rights reserved.
+// Copyright 1999-2019 Alibaba Group Holding Limited
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,15 +44,13 @@ type Context struct {
 	command      *Command
 	completion   *Completion
 	writer       io.Writer
-	stderr       io.Writer
 }
 
-func NewCommandContext(w io.Writer, stderr io.Writer) *Context {
+func NewCommandContext(w io.Writer) *Context {
 	return &Context{
 		flags:        NewFlagSet(),
 		unknownFlags: nil,
 		writer:       w,
-		stderr:       stderr,
 	}
 }
 
@@ -78,10 +76,6 @@ func (ctx *Context) Flags() *FlagSet {
 
 func (ctx *Context) Writer() io.Writer {
 	return ctx.writer
-}
-
-func (ctx *Context) Stderr() io.Writer {
-	return ctx.stderr
 }
 
 func (ctx *Context) UnknownFlags() *FlagSet {

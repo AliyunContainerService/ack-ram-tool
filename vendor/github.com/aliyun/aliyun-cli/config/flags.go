@@ -1,4 +1,4 @@
-// Copyright (c) 2009-present, Alibaba Cloud All rights reserved.
+// Copyright 1999-2019 Alibaba Group Holding Limited
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,23 +24,17 @@ const (
 	AccessKeyIdFlagName     = "access-key-id"
 	AccessKeySecretFlagName = "access-key-secret"
 	StsTokenFlagName        = "sts-token"
-	StsRegionFlagName       = "sts-region"
 	RamRoleNameFlagName     = "ram-role-name"
 	RamRoleArnFlagName      = "ram-role-arn"
 	RoleSessionNameFlagName = "role-session-name"
-	SourceProfileFlagName   = "source-profile"
 	PrivateKeyFlagName      = "private-key"
 	KeyPairNameFlagName     = "key-pair-name"
 	RegionFlagName          = "region"
-	RegionIdFlagName        = "RegionId"
 	LanguageFlagName        = "language"
-	ReadTimeoutFlagName     = "read-timeout"
-	ConnectTimeoutFlagName  = "connect-timeout"
+	RetryTimeoutFlagName    = "retry-timeout"
 	RetryCountFlagName      = "retry-count"
 	SkipSecureVerifyName    = "skip-secure-verify"
 	ConfigurePathFlagName   = "config-path"
-	ExpiredSecondsFlagName  = "expired-seconds"
-	ProcessCommandFlagName  = "process-command"
 )
 
 func AddFlags(fs *cli.FlagSet) {
@@ -48,27 +42,18 @@ func AddFlags(fs *cli.FlagSet) {
 	fs.Add(NewProfileFlag())
 	fs.Add(NewLanguageFlag())
 	fs.Add(NewRegionFlag())
-	fs.Add(NewRegionIdFlag())
 	fs.Add(NewConfigurePathFlag())
 	fs.Add(NewAccessKeyIdFlag())
 	fs.Add(NewAccessKeySecretFlag())
 	fs.Add(NewStsTokenFlag())
-	fs.Add(NewStsRegionFlag())
 	fs.Add(NewRamRoleNameFlag())
 	fs.Add(NewRamRoleArnFlag())
 	fs.Add(NewRoleSessionNameFlag())
 	fs.Add(NewPrivateKeyFlag())
 	fs.Add(NewKeyPairNameFlag())
-	fs.Add(NewReadTimeoutFlag())
-	fs.Add(NewConnectTimeoutFlag())
+	fs.Add(NewRetryTimeoutFlag())
 	fs.Add(NewRetryCountFlag())
 	fs.Add(NewSkipSecureVerify())
-	fs.Add(NewExpiredSecondsFlag())
-	fs.Add(NewProcessCommandFlag())
-}
-
-func ConnectTimeoutFlag(fs *cli.FlagSet) *cli.Flag {
-	return fs.Get(ConnectTimeoutFlagName)
 }
 
 func ProfileFlag(fs *cli.FlagSet) *cli.Flag {
@@ -91,20 +76,12 @@ func StsTokenFlag(fs *cli.FlagSet) *cli.Flag {
 	return fs.Get(StsTokenFlagName)
 }
 
-func StsRegionFlag(fs *cli.FlagSet) *cli.Flag {
-	return fs.Get(StsRegionFlagName)
-}
-
 func RamRoleNameFlag(fs *cli.FlagSet) *cli.Flag {
 	return fs.Get(RamRoleNameFlagName)
 }
 
 func RamRoleArnFlag(fs *cli.FlagSet) *cli.Flag {
 	return fs.Get(RamRoleArnFlagName)
-}
-
-func SourceProfileFlag(fs *cli.FlagSet) *cli.Flag {
-	return fs.Get(SourceProfileFlagName)
 }
 
 func RoleSessionNameFlag(fs *cli.FlagSet) *cli.Flag {
@@ -123,16 +100,12 @@ func RegionFlag(fs *cli.FlagSet) *cli.Flag {
 	return fs.Get(RegionFlagName)
 }
 
-func RegionIdFlag(fs *cli.FlagSet) *cli.Flag {
-	return fs.Get(RegionIdFlagName)
-}
-
 func LanguageFlag(fs *cli.FlagSet) *cli.Flag {
 	return fs.Get(LanguageFlagName)
 }
 
-func ReadTimeoutFlag(fs *cli.FlagSet) *cli.Flag {
-	return fs.Get(ReadTimeoutFlagName)
+func RetryTimeoutFlag(fs *cli.FlagSet) *cli.Flag {
+	return fs.Get(RetryTimeoutFlagName)
 }
 
 func RetryCountFlag(fs *cli.FlagSet) *cli.Flag {
@@ -144,12 +117,6 @@ func SkipSecureVerify(fs *cli.FlagSet) *cli.Flag {
 }
 func ConfigurePathFlag(fs *cli.FlagSet) *cli.Flag {
 	return fs.Get(ConfigurePathFlagName)
-}
-func ExpiredSecondsFlag(fs *cli.FlagSet) *cli.Flag {
-	return fs.Get(ExpiredSecondsFlagName)
-}
-func ProcessCommandFlag(fs *cli.FlagSet) *cli.Flag {
-	return fs.Get(ProcessCommandFlagName)
 }
 
 //var OutputFlag = &cli.Flag{Category: "config",
@@ -177,8 +144,8 @@ func NewModeFlag() *cli.Flag {
 		Category: "config",
 		Name:     ModeFlagName, DefaultValue: "AK", Persistent: true,
 		Short: i18n.T(
-			"use `--mode {AK|StsToken|RamRoleArn|EcsRamRole|RsaKeyPair|RamRoleArnWithRoleName}` to assign authenticate mode",
-			"使用 `--mode {AK|StsToken|RamRoleArn|EcsRamRole|RsaKeyPair|RamRoleArnWithRoleName}` 指定认证方式")}
+			"use `--mode {AK|StsToken|RamRoleArn|EcsRamRole|RsaKeyPair}` to assign authenticate mode",
+			"使用 `--mode {AK|StsToken|RamRoleArn|EcsRamRole|RsaKeyPair}` 指定认证方式")}
 }
 
 func NewAccessKeyIdFlag() *cli.Flag {
@@ -211,16 +178,6 @@ func NewStsTokenFlag() *cli.Flag {
 			"使用 `--sts-token <StsToken>` 指定StsToken")}
 }
 
-func NewStsRegionFlag() *cli.Flag {
-	return &cli.Flag{
-		Category:     "config",
-		Name:         StsRegionFlagName,
-		AssignedMode: cli.AssignedOnce,
-		Short: i18n.T(
-			"use `--sts-region <StsRegion>` to assign StsRegion",
-			"使用 `--sts-region <StsRegion>` 指定StsRegion")}
-}
-
 func NewRamRoleNameFlag() *cli.Flag {
 	return &cli.Flag{
 		Category:     "config",
@@ -250,15 +207,7 @@ func NewRoleSessionNameFlag() *cli.Flag {
 			"use `--role-session-name <RoleSessionName>` to assign RoleSessionName",
 			"使用 `--role-session-name <RoleSessionName>` 指定RoleSessionName")}
 }
-func NewExpiredSecondsFlag() *cli.Flag {
-	return &cli.Flag{
-		Category:     "config",
-		Name:         ExpiredSecondsFlagName,
-		AssignedMode: cli.AssignedOnce,
-		Short: i18n.T(
-			"use `--expired-seconds <seconds>` to specify expiration time",
-			"使用 `--expired-seconds <seconds>` 指定凭证过期时间")}
-}
+
 func NewPrivateKeyFlag() *cli.Flag {
 	return &cli.Flag{Category: "config",
 		Name:         PrivateKeyFlagName,
@@ -277,18 +226,6 @@ func NewKeyPairNameFlag() *cli.Flag {
 			"使用 `--key-pair-name <KeyPairName>` 指定KeyPairName")}
 }
 
-func NewProcessCommandFlag() *cli.Flag {
-	return &cli.Flag{
-		Category:     "config",
-		Name:         ProcessCommandFlagName,
-		AssignedMode: cli.AssignedOnce,
-		Short: i18n.T(
-			"use `--process-command <ProcessCommand>` to specify external program execution command",
-			"使用 `--process-command <ProcessCommand>` 指定外部程序运行命令",
-		),
-	}
-}
-
 func NewRegionFlag() *cli.Flag {
 	return &cli.Flag{Category: "config",
 		Name:         RegionFlagName,
@@ -296,14 +233,6 @@ func NewRegionFlag() *cli.Flag {
 		Short: i18n.T(
 			"use `--region <regionId>` to assign region",
 			"使用 `--region <regionId>` 来指定访问大区")}
-}
-
-func NewRegionIdFlag() *cli.Flag {
-	return &cli.Flag{Category: "config",
-		Name:         RegionIdFlagName,
-		AssignedMode: cli.AssignedOnce,
-		Hidden:       true,
-	}
 }
 
 func NewLanguageFlag() *cli.Flag {
@@ -327,26 +256,14 @@ func NewConfigurePathFlag() *cli.Flag {
 		),
 	}
 }
-func NewReadTimeoutFlag() *cli.Flag {
+func NewRetryTimeoutFlag() *cli.Flag {
 	return &cli.Flag{
 		Category:     "caller",
-		Name:         ReadTimeoutFlagName,
-		AssignedMode: cli.AssignedOnce,
-		Aliases:      []string{"retry-timeout"},
-		Short: i18n.T(
-			"use `--read-timeout <seconds>` to set I/O timeout(seconds)",
-			"使用 `--read-timeout <seconds>` 指定I/O超时时间(秒)"),
-	}
-}
-
-func NewConnectTimeoutFlag() *cli.Flag {
-	return &cli.Flag{
-		Category:     "caller",
-		Name:         ConnectTimeoutFlagName,
+		Name:         RetryTimeoutFlagName,
 		AssignedMode: cli.AssignedOnce,
 		Short: i18n.T(
-			"use `--connect-timeout <seconds>` to set connect timeout(seconds)",
-			"使用 `--connect-timeout <seconds>` 指定请求连接超时时间(秒)"),
+			"use `--retry-timeout <seconds>` to set retry timeout(seconds)",
+			"使用 `--retry-timeout <seconds>` 指定请求超时时间(秒)"),
 	}
 }
 
@@ -366,10 +283,11 @@ func NewSkipSecureVerify() *cli.Flag {
 		Category:     "caller",
 		Name:         SkipSecureVerifyName,
 		AssignedMode: cli.AssignedNone,
+		Hidden:       true,
 		Persistent:   true,
 		Short: i18n.T(
-			"use `--skip-secure-verify` to skip https certification validate [Not recommended]",
-			"使用 `--skip-secure-verify` 跳过https的证书校验 [不推荐使用]",
+			"use `--skip-secure-verify` to skip https certification validate",
+			"使用 `--skip-secure-verify` 跳过https的证书校验",
 		),
 	}
 }
