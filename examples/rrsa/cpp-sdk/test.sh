@@ -4,7 +4,7 @@ set -e
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
 CLUSTER_ID="$1"
 KUBECONFIG_PATH="${SCRIPT_DIR}/kubeconfig"
-NAMESPACE="rrsa-demo-golang-sdk"
+NAMESPACE="rrsa-demo-cpp-sdk"
 
 trap cleanup EXIT
 
@@ -71,6 +71,7 @@ function main() {
   enable_rrsa
   install_helper
   setup_role
+  sleep 60
   deploy_demo
   get_logs
 }
