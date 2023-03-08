@@ -36,8 +36,8 @@ kubectl --kubeconfig ./kubeconfig apply -f deploy.yaml
 5. Get logs:
 
 ```
-kubectl --kubeconfig ./kubeconfig -n rrsa-demo-cpp-sdk wait --for=condition=complete job/demo --timeout=240s
-kubectl --kubeconfig ./kubeconfig -n rrsa-demo-cpp-sdk logs job/demo
+kubectl --kubeconfig ./kubeconfig -n rrsa-demo-aliyun-cli wait --for=condition=complete job/demo --timeout=240s
+kubectl --kubeconfig ./kubeconfig -n rrsa-demo-aliyun-cli logs job/demo
 ```
 
 Outputs:

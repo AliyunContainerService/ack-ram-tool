@@ -36,16 +36,16 @@ kubectl --kubeconfig ./kubeconfig apply -f deploy.yaml
 5. Get logs:
 
 ```
-kubectl --kubeconfig ./kubeconfig -n rrsa-demo-cpp-sdk wait --for=condition=complete job/demo --timeout=240s
-kubectl --kubeconfig ./kubeconfig -n rrsa-demo-cpp-sdk logs job/demo
+kubectl --kubeconfig ./kubeconfig -n rrsa-demo-ossutil wait --for=condition=complete job/demo --timeout=240s
+kubectl --kubeconfig ./kubeconfig -n rrsa-demo-ossutil logs job/demo -c test
 ```
 
 Outputs:
 
 ```
-call cs.describeClusters via oidc token
+oss://foo-***
+oss://bar-**
+Bucket Number is: 2
 
-cluster id: c4db8***, cluster name: foo***
-cluster id: cc20c***, cluster name: bar***
-
+0.634557(s) elapsed
 ```

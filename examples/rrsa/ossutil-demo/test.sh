@@ -5,6 +5,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
 CLUSTER_ID="$1"
 KUBECONFIG_PATH="${SCRIPT_DIR}/kubeconfig"
 NAMESPACE="rrsa-demo-ossutil"
+POLICY_NAME="AliyunOSSReadOnlyAccess"
 
 trap cleanup EXIT
 
@@ -32,7 +33,7 @@ function setup_role() {
     --service-account demo-sa \
     --role-name test-rrsa-demo \
     --create-role-if-not-exist \
-    --attach-system-policy AliyunCSReadOnlyAccess
+    --attach-system-policy ${POLICY_NAME}
 }
 
 function deploy_demo() {
@@ -46,7 +47,7 @@ function get_logs() {
   bar_tip "wait demo and get logs"
 
   kubectl --kubeconfig ${KUBECONFIG_PATH} -n "${NAMESPACE}" wait --for=condition=complete job/demo --timeout=240s
-  kubectl --kubeconfig ${KUBECONFIG_PATH} -n "${NAMESPACE}" logs job/demo
+  kubectl --kubeconfig ${KUBECONFIG_PATH} -n "${NAMESPACE}" logs job/demo -c test
 }
 
 function cleanup() {
