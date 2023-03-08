@@ -22,6 +22,10 @@ An example for how to use OIDC token to assume RAM Role via Alibaba Could Python
 
 An example for how to use OIDC token to assume RAM Role via Alibaba Could Node.js/TypeScript SDK.
 
+## aws-cpp-sdk
+
+An example for how to use OIDC token to assume RAM Role via AWS C++ SDK. You can use this example to shift from AWS S3 (Access with AssumeRole) to Alibaba Cloud OSS (access with RRSA) without changing SDK.
+
 
 ## e2e-test
 
