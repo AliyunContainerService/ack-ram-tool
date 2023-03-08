@@ -1,6 +1,7 @@
 package aliyuncli
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -197,8 +198,7 @@ func (p *ProfileWrapper) GetCredentialsByExternal() (credentials.Credential, err
 	cp := p.cp
 	args := strings.Fields(cp.ProcessCommand)
 	cmd := exec.Command(args[0], args[1:]...) // #nosec G204
-	buf, err := cmd.CombinedOutput()
-	genmsg := func(err error) string {
+	genmsg := func(buf []byte, err error) string {
 		message := fmt.Sprintf(`run external program to get credentials faild:
   command: %s
   output: %s
@@ -206,17 +206,25 @@ func (p *ProfileWrapper) GetCredentialsByExternal() (credentials.Credential, err
 			cp.ProcessCommand, string(buf), err.Error())
 		return message
 	}
+	stdout := bytes.Buffer{}
+	stderr := bytes.Buffer{}
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+	allOutput := stderr.String() + "\n" + stdout.String()
 	if err != nil {
-		message := genmsg(err)
+		message := genmsg([]byte(allOutput), err)
 		return nil, errors.New(message)
 	}
+
+	buf := stdout.Bytes()
 	var newCP Profile
 	err = json.Unmarshal(buf, &newCP)
 	if err != nil {
 		if pp := tryToParseProfileFromOutput(string(buf)); pp != nil {
 			newCP = *pp
 		} else {
-			message := genmsg(err)
+			message := genmsg([]byte(allOutput), err)
 			return nil, errors.New(message)
 		}
 	}
