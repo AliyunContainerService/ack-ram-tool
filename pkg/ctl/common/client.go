@@ -81,6 +81,9 @@ func getCredential(opt getCredentialOption) (credentials.Credential, error) {
 			log.Logger.Infof("use credentials from aliyun cli (%s) with profile name %s",
 				utils.ShortHomePath(aliyuncliConfigFilePath), acli.ProfileName())
 			return acli.GetCredentials()
+		} else {
+			log.Logger.Warnf("use credentials from aliyun cli (%s) failed: %+v",
+				utils.ShortHomePath(aliyuncliConfigFilePath), err)
 		}
 	}
 

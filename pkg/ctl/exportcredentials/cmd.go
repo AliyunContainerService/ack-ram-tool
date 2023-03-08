@@ -28,11 +28,13 @@ var opt = option{}
 var (
 	formatAliyunCLIConfigJSON = "aliyun-cli-config-json"
 	formatAliyunCLIURIJSON    = "aliyun-cli-uri-json"
-	formatCredentialFileIni   = "credential-file-ini"
+	formatECSMetadataJSON     = "ecs-metadata-json"
+	formatCredentialFileIni   = "credential-file-ini" // #nosec G101
 )
 var formats = []string{
 	formatAliyunCLIConfigJSON,
 	formatAliyunCLIURIJSON,
+	formatECSMetadataJSON,
 	formatCredentialFileIni,
 }
 
@@ -72,7 +74,7 @@ func startCredServer(client *openapi.Client) error {
 		fmt.Fprint(w, output)
 	})
 
-	return http.ListenAndServe(opt.serve, mux)
+	return http.ListenAndServe(opt.serve, mux) // #nosec G114
 }
 
 // TODO: add cache
@@ -103,7 +105,7 @@ func getCredOutput(client *openapi.Client) (string, error) {
 	switch opt.format {
 	case formatCredentialFileIni:
 		output = toCredentialFileIni(cred)
-	case formatAliyunCLIURIJSON:
+	case formatAliyunCLIURIJSON, formatECSMetadataJSON:
 		output = toAliyunCLIURIBody(cred)
 	default:
 		output = toAliyunCLIConfigJSON(cred)

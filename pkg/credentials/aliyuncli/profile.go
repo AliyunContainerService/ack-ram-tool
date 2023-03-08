@@ -17,8 +17,6 @@ package aliyuncli
 import (
 	"fmt"
 	openapi "github.com/alibabacloud-go/darabonba-openapi/client"
-	"regexp"
-
 	sts "github.com/alibabacloud-go/sts-20150401/client"
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/credentials-go/credentials"
@@ -75,14 +73,6 @@ func NewProfile(name string) Profile {
 }
 
 func (cp *Profile) Validate() error {
-	if cp.RegionId == "" {
-		return fmt.Errorf("region can't be empty")
-	}
-
-	if !IsRegion(cp.RegionId) {
-		return fmt.Errorf("invalid region %s", cp.RegionId)
-	}
-
 	if cp.Mode == "" {
 		return fmt.Errorf("profile %s is not configure yet, run `aliyun configure --profile %s` first", cp.Name, cp.Name)
 	}
@@ -153,13 +143,6 @@ func (cp *Profile) ValidateAK() error {
 		return fmt.Errorf("invaild access_key_secret: %s", cp.AccessKeySecret)
 	}
 	return nil
-}
-
-func IsRegion(region string) bool {
-	if match, _ := regexp.MatchString("^[-a-zA-Z0-9]+$", region); !match {
-		return false
-	}
-	return true
 }
 
 func (cp *Profile) GetSessionCredential(client *sts.Client) (*sts.AssumeRoleResponseBodyCredentials, error) {

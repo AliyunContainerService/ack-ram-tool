@@ -26,6 +26,7 @@ var (
 
 More info: https://github.com/AliyunContainerService/ack-ram-tool`,
 		PersistentPreRun: func(_ *cobra.Command, _ []string) {
+			ctl.GlobalOption.UpdateValues()
 			err := log.SetupLogger(logLevel, log.DefaultLogLevelKey, log.DefaultLogLevelEncoder)
 			if err != nil {
 				golog.Println(err)
@@ -46,7 +47,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&ctl.GlobalOption.AssumeYes, "assume-yes", "y", false,
 		"Automatic yes to prompts; assume \"yes\" as answer to all prompts and run non-interactively")
 	rootCmd.PersistentFlags().StringVar(&ctl.GlobalOption.CredentialFilePath, "profile-file", "",
-		"Path to credential file (default: ~/.alibabacloud/credentials or ~/.aliyun/config.json)")
+		"Path to credential file (default: ~/.aliyun/config.json or ~/.alibabacloud/credentials)")
 	rootCmd.PersistentFlags().StringVar(&ctl.GlobalOption.ProfileName, "profile-name", "",
 		"using this named profile when parse credentials from config.json of aliyun cli")
 	rootCmd.PersistentFlags().BoolVar(&ctl.GlobalOption.IgnoreEnv,

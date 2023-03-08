@@ -8,7 +8,8 @@ type globalOption struct {
 	UseVPCEndpoint        bool
 	InsecureSkipTLSVerify bool
 
-	CredentialFilePath string
+	UseSpecifiedCredentialFile bool
+	CredentialFilePath         string
 
 	ProfileName           string
 	IgnoreEnv             bool
@@ -21,6 +22,16 @@ var GlobalOption = &globalOption{}
 
 func (g globalOption) GetRegion() string {
 	return g.Region
+}
+
+func (g *globalOption) UpdateValues() {
+	if g.CredentialFilePath != "" {
+		g.UseSpecifiedCredentialFile = true
+	}
+	if g.GetCredentialFilePath() != "" {
+		g.IgnoreAliyuncliConfig = true
+		g.IgnoreEnv = true
+	}
 }
 
 func (g globalOption) GetCredentialFilePath() string {
