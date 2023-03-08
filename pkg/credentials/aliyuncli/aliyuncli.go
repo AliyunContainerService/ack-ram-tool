@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudsdkgo/helper/env"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/credentials-go/credentials"
 )
@@ -37,6 +38,7 @@ func NewCredentialHelper(configPath, profileName string) (*CredentialHelper, err
 	if err := profile.Validate(); err != nil {
 		return nil, err
 	}
+	log.Logger.Debugf("use profile name: %s", profile.Name)
 	c := &CredentialHelper{
 		profile: &ProfileWrapper{
 			cp:   profile,
@@ -289,7 +291,7 @@ func (p *ProfileWrapper) GetCredentialsByCredentialsURI() (credentials.Credentia
 	}
 
 	if response.Code != "Success" {
-		return nil, fmt.Errorf("Get sts token err, Code is not Success")
+		return nil, fmt.Errorf("get sts token err, Code is not Success")
 	}
 	conf := &credentials.Config{
 		Type:            tea.String("sts"),
@@ -299,4 +301,8 @@ func (p *ProfileWrapper) GetCredentialsByCredentialsURI() (credentials.Credentia
 	}
 	cred, err := credentials.NewCredential(conf)
 	return cred, err
+}
+
+func (c CredentialHelper) ProfileName() string {
+	return c.profile.cp.Name
 }

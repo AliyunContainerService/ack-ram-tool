@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	golog "log"
 	"os"
 
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
@@ -10,7 +10,12 @@ import (
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/rbac"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/rrsa"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/version"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
 	"github.com/spf13/cobra"
+)
+
+var (
+	logLevel = "INFO"
 )
 
 var (
@@ -21,6 +26,11 @@ var (
 
 More info: https://github.com/AliyunContainerService/ack-ram-tool`,
 		PersistentPreRun: func(_ *cobra.Command, _ []string) {
+			err := log.SetupLogger(logLevel, log.DefaultLogLevelKey, log.DefaultLogLevelEncoder)
+			if err != nil {
+				golog.Println(err)
+				os.Exit(1)
+			}
 		},
 	}
 )
@@ -43,12 +53,14 @@ func init() {
 		"ignore-env-credentials", false, "don't try to parse credentials from environment variables")
 	rootCmd.PersistentFlags().BoolVar(&ctl.GlobalOption.IgnoreAliyuncliConfig,
 		"ignore-aliyun-cli-credentials", false, "don't try to parse credentials from config.json of aliyun cli")
+	rootCmd.PersistentFlags().StringVar(&logLevel, "log-level", logLevel,
+		"log level: INFO, DEBUG, WARNING, ERROR")
 	//rootCmd.PersistentFlags().BoolVarP(&ctl.GlobalOption.InsecureSkipTLSVerify, "insecure-skip-tls-verify", "", false, "Skips the validity check for the server's certificate")
 }
 
 func main() {
 	if err := rootCmd.Execute(); err != nil {
-		log.Println(err)
+		golog.Println(err)
 		os.Exit(1)
 	}
 }

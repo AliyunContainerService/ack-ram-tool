@@ -3,14 +3,14 @@ package setupaddon
 import (
 	"context"
 	"fmt"
-	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
-	"log"
 	"strings"
 
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
 	ctlcommon "github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/common"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/rrsa/associaterole"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/rrsa/common"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/rrsa/setupaddon/addon"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/openapi"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/types"
 	"github.com/spf13/cobra"
@@ -46,24 +46,24 @@ var cmd = &cobra.Command{
 		}
 
 		policy := addon.RamPolicy()
-		log.Printf("start to ensure RAM policy(%q) is exist and be configured", policy.PolicyName)
+		log.Logger.Infof("start to ensure RAM policy(%q) is exist and be configured", policy.PolicyName)
 		if err := ensureRamPolicy(ctx, addon, c, client); err != nil {
 			ctlcommon.ExitIfError(err)
 		}
 
 		roleName := addon.RoleName(c.ClusterId)
-		log.Printf("start to ensure RAM role(%q) is exist and be configured", roleName)
+		log.Logger.Infof("start to ensure RAM role(%q) is exist and be configured", roleName)
 		if err := associaterole.AssociateRole(ctx, c, client, roleName,
 			addon.NameSpace(), addon.ServiceAccountName(), true); err != nil {
 			ctlcommon.ExitIfError(err)
 		}
 
 		ap := addon.RamPolicy()
-		log.Printf("start to attach RAM polciy(%q) to role(%q)", ap.PolicyName, roleName)
+		log.Logger.Infof("start to attach RAM polciy(%q) to role(%q)", ap.PolicyName, roleName)
 		if err := ensureAttachPolicyToRamRole(ctx, addon, c, client, rrsaConfig, roleName); err != nil {
 			ctlcommon.ExitIfError(err)
 		}
-		log.Printf("attach RAM polciy(%q) to role(%q) is successful", ap.PolicyName, roleName)
+		log.Logger.Infof("attach RAM polciy(%q) to role(%q) is successful", ap.PolicyName, roleName)
 	},
 }
 
@@ -97,7 +97,7 @@ func ensureAttachPolicyToRamRole(ctx context.Context, addon addon.Meta, c *types
 		}
 	}
 	if attached {
-		log.Printf("the policy(%q) has already been attached to the role(%q)",
+		log.Logger.Infof("the policy(%q) has already been attached to the role(%q)",
 			ap.PolicyName, roleName)
 		return nil
 	}

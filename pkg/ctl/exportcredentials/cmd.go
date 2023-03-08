@@ -2,12 +2,12 @@ package exportcredentials
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 	"time"
 
 	ctlcommon "github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/common"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/openapi"
 	"github.com/spf13/cobra"
 )
@@ -50,7 +50,7 @@ var cmd = &cobra.Command{
 			return
 		}
 
-		log.Printf("Serving HTTP on %s", opt.serve)
+		log.Logger.Warnf("Serving HTTP on %s", opt.serve)
 		if err := startCredServer(client); err != http.ErrServerClosed {
 			ctlcommon.ExitIfError(err)
 		}
@@ -60,7 +60,7 @@ var cmd = &cobra.Command{
 func startCredServer(client *openapi.Client) error {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		log.Println("handel new request")
+		log.Logger.Info("handel new request")
 		output, err := getCredOutput(client)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -75,6 +75,7 @@ func startCredServer(client *openapi.Client) error {
 	return http.ListenAndServe(opt.serve, mux)
 }
 
+// TODO: add cache
 func getCredOutput(client *openapi.Client) (string, error) {
 	cc := client.Credential()
 	ak, err := cc.GetAccessKeyId()

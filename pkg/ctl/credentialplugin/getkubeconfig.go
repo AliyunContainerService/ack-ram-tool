@@ -85,6 +85,7 @@ func generateExecKubeconfig(clusterId string, config *types.KubeConfig, mode cre
 }
 
 func fillGlobalFlags(args []string) []string {
+	args = append(args, "--log-level", "ERROR")
 	if ctl.GlobalOption.ProfileName != "" {
 		args = append(args, []string{"--profile-name", ctl.GlobalOption.ProfileName}...)
 	}

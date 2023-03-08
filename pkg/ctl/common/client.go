@@ -2,12 +2,12 @@ package common
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudsdkgo/helper/env"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/aliyuncli"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/openapi"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/utils"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/version"
@@ -66,7 +66,7 @@ func getCredential(opt getCredentialOption) (credentials.Credential, error) {
 		}
 		if !ignoreEnv {
 			if cred, err := env.NewCredential(); err == nil && cred != nil {
-				log.Println("use credentials from environment variables")
+				log.Logger.Info("use credentials from environment variables")
 				return cred, err
 			}
 		}
@@ -78,7 +78,8 @@ func getCredential(opt getCredentialOption) (credentials.Credential, error) {
 	if !ignoreAliyuncli {
 		acli, err := aliyuncli.NewCredentialHelper(aliyuncliConfigFilePath, aliyuncliProfileName)
 		if err == nil && acli != nil {
-			log.Printf("use credentials from aliyun cli (%s)", aliyuncliConfigFilePath)
+			log.Logger.Infof("use credentials from aliyun cli (%s) with profile name %s",
+				utils.ShortHomePath(aliyuncliConfigFilePath), acli.ProfileName())
 			return acli.GetCredentials()
 		}
 	}
@@ -93,7 +94,7 @@ func getCredential(opt getCredentialOption) (credentials.Credential, error) {
 			credentialFilePath = path
 		}
 	}
-	log.Printf("use default credentials from %s", credentialFilePath)
+	log.Logger.Infof("use default credentials from %s", utils.ShortHomePath(credentialFilePath))
 	return credentials.NewCredential(nil)
 }
 

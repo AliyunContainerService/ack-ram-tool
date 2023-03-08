@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"os"
 	"path/filepath"
 	"sync"
 	"time"
 
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/version"
 	openapi "github.com/alibabacloud-go/darabonba-openapi/client"
 	sts "github.com/alibabacloud-go/sts-20150401/client"
@@ -106,7 +106,7 @@ loop:
 		case <-ticket.C:
 			_, err := p.GetCredential(context.TODO())
 			if err != nil {
-				log.Printf("refresh credential failed: %+v", err)
+				log.Logger.Errorf("refresh credential failed: %+v", err)
 			}
 		}
 	}

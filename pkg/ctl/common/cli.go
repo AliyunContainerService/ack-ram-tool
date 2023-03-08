@@ -1,12 +1,12 @@
 package common
 
 import (
-	"github.com/spf13/cobra"
-	"log"
 	"os"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
+	"github.com/spf13/cobra"
 )
 
 func YesOrExit(msg string) {
@@ -19,7 +19,7 @@ func YesOrExit(msg string) {
 	}
 	_ = survey.AskOne(prompt, &promptRet)
 	if !promptRet {
-		log.Println("Canceled! Bye bye~")
+		log.Logger.Infoln("Canceled! Bye bye~")
 		os.Exit(0)
 	}
 }

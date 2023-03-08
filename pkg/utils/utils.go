@@ -62,3 +62,8 @@ func ExpandPath(path string) (string, error) {
 	}
 	return path, nil
 }
+
+func ShortHomePath(path string) string {
+	home, _ := os.UserHomeDir()
+	return strings.Replace(path, home, "~", 1)
+}

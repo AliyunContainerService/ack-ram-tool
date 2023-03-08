@@ -2,9 +2,10 @@ package common
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strings"
+
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
 )
 
 func ExitIfError(err error) {
@@ -23,6 +24,6 @@ func ExitByError(msg string) {
 	} else if strings.Contains(msg, "init client failed: No credential found") {
 		msg = fmt.Sprintf("%s. %s", msg, suffix)
 	}
-	log.Println("error: " + msg)
+	log.Logger.Error("error: " + msg)
 	os.Exit(1)
 }

@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"log"
 
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/types"
 	ram "github.com/alibabacloud-go/ram-20150501/client"
 	"github.com/alibabacloud-go/tea/tea"
@@ -170,7 +170,7 @@ func convertGetRoleResponse(r *types.RamRole, resp *ram.GetRoleResponse) {
 	if role.AssumeRolePolicyDocument != nil {
 		policy := &types.RamPolicyDocument{}
 		if err := json.Unmarshal([]byte(*role.AssumeRolePolicyDocument), policy); err != nil {
-			log.Printf("unmarshal AssumeRolePolicyDocument failed: %+v: \n%s\n", *role.AssumeRolePolicyDocument, err)
+			log.Logger.Errorf("unmarshal AssumeRolePolicyDocument failed: %+v: \n%s\n", *role.AssumeRolePolicyDocument, err)
 		}
 		r.AssumeRolePolicyDocument = policy
 	}
@@ -194,7 +194,7 @@ func convertUpdateRoleResponse(r *types.RamRole, resp *ram.UpdateRoleResponse) {
 	if role.AssumeRolePolicyDocument != nil {
 		policy := &types.RamPolicyDocument{}
 		if err := json.Unmarshal([]byte(*role.AssumeRolePolicyDocument), policy); err != nil {
-			log.Printf("unmarshal AssumeRolePolicyDocument failed: %+v: \n%s\n", *role.AssumeRolePolicyDocument, err)
+			log.Logger.Errorf("unmarshal AssumeRolePolicyDocument failed: %+v: \n%s\n", *role.AssumeRolePolicyDocument, err)
 		}
 		r.AssumeRolePolicyDocument = policy
 	}
@@ -218,7 +218,7 @@ func convertCreateRoleResponse(r *types.RamRole, resp *ram.CreateRoleResponse) {
 	if role.AssumeRolePolicyDocument != nil {
 		policy := &types.RamPolicyDocument{}
 		if err := json.Unmarshal([]byte(*role.AssumeRolePolicyDocument), policy); err != nil {
-			log.Printf("unmarshal AssumeRolePolicyDocument failed: %+v: \n%s\n", *role.AssumeRolePolicyDocument, err)
+			log.Logger.Errorf("unmarshal AssumeRolePolicyDocument failed: %+v: \n%s\n", *role.AssumeRolePolicyDocument, err)
 		}
 		r.AssumeRolePolicyDocument = policy
 	}
@@ -271,7 +271,7 @@ func convertGetRamPolicyResponse(r *types.RamPolicy, resp *ram.GetPolicyResponse
 	if p.PolicyDocument != nil {
 		policy := &types.RamPolicyDocument{}
 		if err := json.Unmarshal([]byte(*p.PolicyDocument), policy); err != nil {
-			log.Printf("unmarshal PolicyDocument failed: %+v: \n%s\n", *p.PolicyDocument, err)
+			log.Logger.Errorf("unmarshal PolicyDocument failed: %+v: \n%s\n", *p.PolicyDocument, err)
 		}
 		r.PolicyDocument = policy
 	}
