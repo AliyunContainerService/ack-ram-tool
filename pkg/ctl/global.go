@@ -1,5 +1,7 @@
 package ctl
 
+import "strings"
+
 type globalOption struct {
 	AssumeYes             bool
 	Region                string
@@ -8,10 +10,9 @@ type globalOption struct {
 
 	CredentialFilePath string
 
-	AliyuncliConfigFilePath string
-	ProfileName             string
-	IgnoreEnv               bool
-	IgnoreAliyuncliConfig   bool
+	ProfileName           string
+	IgnoreEnv             bool
+	IgnoreAliyuncliConfig bool
 
 	ClusterId string
 }
@@ -23,11 +24,17 @@ func (g globalOption) GetRegion() string {
 }
 
 func (g globalOption) GetCredentialFilePath() string {
+	if strings.HasSuffix(g.CredentialFilePath, ".json") {
+		return ""
+	}
 	return g.CredentialFilePath
 }
 
 func (g globalOption) GetAliyuncliConfigFilePath() string {
-	return g.AliyuncliConfigFilePath
+	if strings.HasSuffix(g.CredentialFilePath, ".json") {
+		return g.CredentialFilePath
+	}
+	return ""
 }
 
 func (g globalOption) GetProfileName() string {

@@ -62,6 +62,7 @@ func generateExecKubeconfig(clusterId string, config *types.KubeConfig, mode cre
 	}
 	var users []types.KubeAuthUser
 	args := getExecArgs(clusterId, mode, getCredentialOpts)
+	args = fillGlobalFlags(args)
 
 	for _, u := range newConf.Users {
 		newU := types.KubeAuthUser{
@@ -81,6 +82,19 @@ func generateExecKubeconfig(clusterId string, config *types.KubeConfig, mode cre
 	}
 	newConf.Users = users
 	return newConf
+}
+
+func fillGlobalFlags(args []string) []string {
+	if ctl.GlobalOption.ProfileName != "" {
+		args = append(args, []string{"--profile-name", ctl.GlobalOption.ProfileName}...)
+	}
+	if ctl.GlobalOption.IgnoreAliyuncliConfig {
+		args = append(args, "--ignore-aliyun-cli-credentials")
+	}
+	if ctl.GlobalOption.IgnoreEnv {
+		args = append(args, "--ignore-env-credentials")
+	}
+	return args
 }
 
 func getExecArgs(clusterId string, mode credentialMode, opt GetCredentialOpts) []string {
