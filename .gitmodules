@@ -1,0 +1,3 @@
+[submodule "examples/rrsa/cpp-sdk/aliyun-openapi-cpp-sdk"]
+	path = examples/rrsa/cpp-demo/cpp-sdk/aliyun-openapi-cpp-sdk
+	url = https://github.com/aliyun/aliyun-openapi-cpp-sdk.git

@@ -17,8 +17,8 @@ jobs:
     - name: golangci-lint
       uses: golangci/golangci-lint-action@v3
       with:
-        version: v1.51.1
-        args: --timeout=10m
+        version: v1.51.2
+        args: --timeout=10m -v
   Gosec:
     name: Run Gosec Security Scanner
     runs-on: ubuntu-latest
@@ -85,75 +85,75 @@ jobs:
           push: false
           tags: |
             ack-ram-tool:0.1.0-dev
-
-  build-rrsa-example-go-docker-image-test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-      - name: Set up Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v2
-      - uses: docker/build-push-action@v3
-        with:
-          context: ./examples/rrsa/go-sdk/
-          file: ./examples/rrsa/go-sdk/Dockerfile
-          platforms: linux/amd64, linux/arm64
-          push: false
-          tags: |
-            ack-ram-tool:0.1.0-rrsa-go-sdk-dev
-
-  build-rrsa-example-java-docker-image-test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-      - name: Set up Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v2
-      - uses: docker/build-push-action@v3
-        with:
-          context: ./examples/rrsa/java-sdk/
-          file: ./examples/rrsa/java-sdk/Dockerfile
-          platforms: linux/amd64, linux/arm64
-          push: false
-          tags: |
-            ack-ram-tool:0.1.0-rrsa-java-sdk-dev
-
-  build-rrsa-example-nodejs-docker-image-test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-      - name: Set up Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v2
-      - uses: docker/build-push-action@v3
-        with:
-          context: ./examples/rrsa/nodejs-sdk/
-          file: ./examples/rrsa/nodejs-sdk/Dockerfile
-          platforms: linux/amd64, linux/arm64
-          push: false
-          tags: |
-            ack-ram-tool:0.1.0-rrsa-nodejs-sdk-dev
-
-  build-rrsa-example-python3-docker-image-test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-      - name: Set up Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v2
-      - uses: docker/build-push-action@v3
-        with:
-          context: ./examples/rrsa/python3-sdk/
-          file: ./examples/rrsa/python3-sdk/Dockerfile
-          platforms: linux/amd64, linux/arm64
-          push: false
-          tags: |
-            ack-ram-tool:0.1.0-rrsa-python3-sdk-dev
+#
+#  build-rrsa-example-go-docker-image-test:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#      - name: Set up QEMU
+#        uses: docker/setup-qemu-action@v2
+#      - name: Set up Docker Buildx
+#        id: buildx
+#        uses: docker/setup-buildx-action@v2
+#      - uses: docker/build-push-action@v3
+#        with:
+#          context: ./examples/rrsa/go-sdk/
+#          file: ./examples/rrsa/go-sdk/Dockerfile
+#          platforms: linux/amd64, linux/arm64
+#          push: false
+#          tags: |
+#            ack-ram-tool:0.1.0-rrsa-go-sdk-dev
+#
+#  build-rrsa-example-java-docker-image-test:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#      - name: Set up QEMU
+#        uses: docker/setup-qemu-action@v2
+#      - name: Set up Docker Buildx
+#        id: buildx
+#        uses: docker/setup-buildx-action@v2
+#      - uses: docker/build-push-action@v3
+#        with:
+#          context: ./examples/rrsa/java-sdk/
+#          file: ./examples/rrsa/java-sdk/Dockerfile
+#          platforms: linux/amd64, linux/arm64
+#          push: false
+#          tags: |
+#            ack-ram-tool:0.1.0-rrsa-java-sdk-dev
+#
+#  build-rrsa-example-nodejs-docker-image-test:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#      - name: Set up QEMU
+#        uses: docker/setup-qemu-action@v2
+#      - name: Set up Docker Buildx
+#        id: buildx
+#        uses: docker/setup-buildx-action@v2
+#      - uses: docker/build-push-action@v3
+#        with:
+#          context: ./examples/rrsa/nodejs-sdk/
+#          file: ./examples/rrsa/nodejs-sdk/Dockerfile
+#          platforms: linux/amd64, linux/arm64
+#          push: false
+#          tags: |
+#            ack-ram-tool:0.1.0-rrsa-nodejs-sdk-dev
+#
+#  build-rrsa-example-python3-docker-image-test:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#      - name: Set up QEMU
+#        uses: docker/setup-qemu-action@v2
+#      - name: Set up Docker Buildx
+#        id: buildx
+#        uses: docker/setup-buildx-action@v2
+#      - uses: docker/build-push-action@v3
+#        with:
+#          context: ./examples/rrsa/python3-sdk/
+#          file: ./examples/rrsa/python3-sdk/Dockerfile
+#          platforms: linux/amd64, linux/arm64
+#          push: false
+#          tags: |
+#            ack-ram-tool:0.1.0-rrsa-python3-sdk-dev

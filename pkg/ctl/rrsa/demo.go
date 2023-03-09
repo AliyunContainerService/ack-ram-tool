@@ -3,10 +3,10 @@ package rrsa
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/common"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
 	"github.com/spf13/cobra"
 )
 
@@ -23,26 +23,26 @@ var demoCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		sleep := time.Second * 30
 		for {
-			log.Println("======= [begin] list ACK clusters with RRSA =======")
+			log.Logger.Info("======= [begin] list ACK clusters with RRSA =======")
 			client := common.GetClientOrDie()
 			cs, err := client.ListClusters(context.Background())
 			if err != nil {
 				if demoOpts.noLoop {
 					common.ExitByError(err.Error())
 				} else {
-					log.Println(err)
+					log.Logger.Error(err)
 				}
 			} else {
 				fmt.Println("clusters:")
 				for _, c := range cs {
 					fmt.Printf("cluster id: %s, cluster name: %s\n", c.ClusterId, c.Name)
 				}
-				log.Println("======= [end]   list ACK clusters with RRSA =======")
+				log.Logger.Info("======= [end]   list ACK clusters with RRSA =======")
 				if demoOpts.noLoop {
 					break
 				}
 			}
-			log.Println("will try again after 30 seconds")
+			log.Logger.Info("will try again after 30 seconds")
 			time.Sleep(sleep)
 		}
 	},

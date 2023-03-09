@@ -4,13 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
 	ctlcommon "github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/common"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/rrsa/common"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/openapi"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/types"
 	"github.com/briandowns/spinner"
@@ -38,7 +38,7 @@ var cmd = &cobra.Command{
 		}
 
 		var err error
-		log.Printf("Start to install %s", addonName)
+		log.Logger.Infof("Start to install %s", addonName)
 		addon := types.ClusterAddon{Name: addonName}
 		spin := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
 		spin.Start()
@@ -46,7 +46,7 @@ var cmd = &cobra.Command{
 		if err = installAddon(ctx, clusterId, addon, client); err != nil {
 			spin.Stop()
 			if err == errAlreadyInstalled {
-				log.Printf("Install %s for cluster %s successfully", addonName, clusterId)
+				log.Logger.Infof("Install %s for cluster %s successfully", addonName, clusterId)
 				return
 			}
 			ctlcommon.ExitByError(
@@ -62,7 +62,7 @@ var cmd = &cobra.Command{
 		}
 
 		spin.Stop()
-		log.Printf("Install %s for cluster %s successfully", addonName, clusterId)
+		log.Logger.Infof("Install %s for cluster %s successfully", addonName, clusterId)
 	},
 }
 

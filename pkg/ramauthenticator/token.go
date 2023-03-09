@@ -31,7 +31,7 @@ func GenerateToken(clusterId, stsEndpoint string, cred credentials.Credential) (
 }
 
 func (t *Token) String() string {
-	return tokenPrefixV1 + base64.RawURLEncoding.EncodeToString([]byte(t.preSignedURLString))
+	return tokenPrefixV1 + base64.StdEncoding.EncodeToString([]byte(t.preSignedURLString))
 }
 
 func generateGetCallerIdentityURL(clusterId, stsEndpoint string, cred credentials.Credential) (string, error) {

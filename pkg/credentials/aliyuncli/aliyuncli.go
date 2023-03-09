@@ -9,33 +9,27 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
 
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudsdkgo/helper/env"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
 	"github.com/alibabacloud-go/tea/tea"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk"
-	"github.com/aliyun/aliyun-cli/cli"
-	"github.com/aliyun/aliyun-cli/config"
 	"github.com/aliyun/credentials-go/credentials"
 )
 
-const configFile = "config.json"
-
-type Profile struct {
-	cp   config.Profile
-	conf *config.Configuration
+type ProfileWrapper struct {
+	cp   Profile
+	conf *Configuration
 }
 
 type CredentialHelper struct {
-	profile *Profile
+	profile *ProfileWrapper
 }
 
 func NewCredentialHelper(configPath, profileName string) (*CredentialHelper, error) {
-	//profile, err := config.LoadCurrentProfile()
-	//clictx := cli.NewCommandContext(bytes.NewBuffer(nil), bytes.NewBuffer(nil))
-	//profile := cfg.GetCurrentProfile(clictx)
 	if configPath == "" {
-		configPath = config.GetConfigPath() + "/" + configFile
+		configPath = getDefaultConfigPath()
 	}
 	conf, profile, err := LoadProfile(configPath, profileName)
 	if err != nil {
@@ -44,8 +38,9 @@ func NewCredentialHelper(configPath, profileName string) (*CredentialHelper, err
 	if err := profile.Validate(); err != nil {
 		return nil, err
 	}
+	log.Logger.Debugf("use profile name: %s", profile.Name)
 	c := &CredentialHelper{
-		profile: &Profile{
+		profile: &ProfileWrapper{
 			cp:   profile,
 			conf: conf,
 		},
@@ -53,9 +48,9 @@ func NewCredentialHelper(configPath, profileName string) (*CredentialHelper, err
 	return c, nil
 }
 
-func LoadProfile(path string, name string) (*config.Configuration, config.Profile, error) {
-	var p config.Profile
-	conf, err := config.LoadConfiguration(path)
+func LoadProfile(path string, name string) (*Configuration, Profile, error) {
+	var p Profile
+	conf, err := LoadConfiguration(path)
 	if err != nil {
 		return nil, p, fmt.Errorf("init config failed %v", err)
 	}
@@ -73,34 +68,34 @@ func (c CredentialHelper) GetCredentials() (credentials.Credential, error) {
 	return c.profile.GetCredentials()
 }
 
-func (p *Profile) GetCredentials() (credentials.Credential, error) {
+func (p *ProfileWrapper) GetCredentials() (credentials.Credential, error) {
 	cp := p.cp
 
 	switch cp.Mode {
-	case config.AK:
+	case AK:
 		return p.GetCredentialsByAK()
-	case config.StsToken:
+	case StsToken:
 		return p.GetCredentialsBySts()
-	case config.RamRoleArn:
+	case RamRoleArn:
 		return p.GetCredentialsByRoleArn()
-	case config.EcsRamRole:
+	case EcsRamRole:
 		return p.GetCredentialsByEcsRamRole()
 	//case config.RsaKeyPair:
 	//	return p.GetCredentialsByPrivateKey()
-	case config.RamRoleArnWithEcs:
+	case RamRoleArnWithEcs:
 		return p.GetCredentialsByRamRoleArnWithEcs()
-	case config.ChainableRamRoleArn:
+	case ChainableRamRoleArn:
 		return p.GetCredentialsByChainableRamRoleArn()
-	case config.External:
+	case External:
 		return p.GetCredentialsByExternal()
-	case config.CredentialsURI:
+	case CredentialsURI:
 		return p.GetCredentialsByCredentialsURI()
 	default:
 		return nil, fmt.Errorf("unexcepted certificate mode: %s", cp.Mode)
 	}
 }
 
-func (p *Profile) GetCredentialsByAK() (credentials.Credential, error) {
+func (p *ProfileWrapper) GetCredentialsByAK() (credentials.Credential, error) {
 	cp := p.cp
 	conf := &credentials.Config{
 		Type:            tea.String("access_key"),
@@ -111,7 +106,7 @@ func (p *Profile) GetCredentialsByAK() (credentials.Credential, error) {
 	return cred, err
 }
 
-func (p *Profile) GetCredentialsBySts() (credentials.Credential, error) {
+func (p *ProfileWrapper) GetCredentialsBySts() (credentials.Credential, error) {
 	cp := p.cp
 	conf := &credentials.Config{
 		Type:            tea.String("sts"),
@@ -123,7 +118,7 @@ func (p *Profile) GetCredentialsBySts() (credentials.Credential, error) {
 	return cred, err
 }
 
-func (p *Profile) GetCredentialsByRoleArn() (credentials.Credential, error) {
+func (p *ProfileWrapper) GetCredentialsByRoleArn() (credentials.Credential, error) {
 	cp := p.cp
 	conf := &credentials.Config{
 		Type:            tea.String("ram_role_arn"),
@@ -139,7 +134,7 @@ func (p *Profile) GetCredentialsByRoleArn() (credentials.Credential, error) {
 	return cred, err
 }
 
-func (p *Profile) GetCredentialsByEcsRamRole() (credentials.Credential, error) {
+func (p *ProfileWrapper) GetCredentialsByEcsRamRole() (credentials.Credential, error) {
 	cp := p.cp
 	conf := &credentials.Config{
 		Type:     tea.String("ecs_ram_role"),
@@ -149,31 +144,31 @@ func (p *Profile) GetCredentialsByEcsRamRole() (credentials.Credential, error) {
 	return cred, err
 }
 
-//func (p *Profile) GetCredentialsByPrivateKey() (credentials.Credential, error) {
+//func (p *ProfileWrapper) GetCredentialsByPrivateKey() (credentials.Credential, error) {
 //
 //}
 
-func (p *Profile) GetCredentialsByRamRoleArnWithEcs() (credentials.Credential, error) {
+func (p *ProfileWrapper) GetCredentialsByRamRoleArnWithEcs() (credentials.Credential, error) {
 	cp := p.cp
-	client, err := cp.GetClientByEcsRamRole(sdk.NewConfig())
+	client, err := cp.GetSTSClientByEcsRamRole()
 	if err != nil {
 		return nil, err
 	}
-	accessKeyID, accessKeySecret, StsToken, err := cp.GetSessionCredential(client)
+	resp, err := cp.GetSessionCredential(client)
 	if err != nil {
 		return nil, err
 	}
 	conf := &credentials.Config{
 		Type:            tea.String("sts"),
-		AccessKeyId:     tea.String(accessKeyID),
-		AccessKeySecret: tea.String(accessKeySecret),
-		SecurityToken:   tea.String(StsToken),
+		AccessKeyId:     resp.AccessKeyId,
+		AccessKeySecret: resp.AccessKeySecret,
+		SecurityToken:   resp.SecurityToken,
 	}
 	cred, err := credentials.NewCredential(conf)
 	return cred, err
 }
 
-func (p *Profile) GetCredentialsByChainableRamRoleArn() (credentials.Credential, error) {
+func (p *ProfileWrapper) GetCredentialsByChainableRamRoleArn() (credentials.Credential, error) {
 	cp := p.cp
 	profileName := cp.SourceProfile
 
@@ -183,47 +178,82 @@ func (p *Profile) GetCredentialsByChainableRamRoleArn() (credentials.Credential,
 		return nil, fmt.Errorf("can not load the source profile: " + profileName)
 	}
 
-	client, err := source.GetClient(cli.NewCommandContext(bytes.NewBuffer(nil), bytes.NewBuffer(nil)))
+	client, err := source.GetSTSClientByEcsRamRole()
 	if err != nil {
 		return nil, err
 	}
-	accessKeyID, accessKeySecret, StsToken, err := cp.GetSessionCredential(client)
+	resp, err := cp.GetSessionCredential(client)
 	if err != nil {
 		return nil, err
 	}
 	conf := &credentials.Config{
 		Type:            tea.String("sts"),
-		AccessKeyId:     tea.String(accessKeyID),
-		AccessKeySecret: tea.String(accessKeySecret),
-		SecurityToken:   tea.String(StsToken),
+		AccessKeyId:     resp.AccessKeyId,
+		AccessKeySecret: resp.AccessKeySecret,
+		SecurityToken:   resp.SecurityToken,
 	}
 	cred, err := credentials.NewCredential(conf)
 	return cred, err
 }
 
-func (p *Profile) GetCredentialsByExternal() (credentials.Credential, error) {
+func (p *ProfileWrapper) GetCredentialsByExternal() (credentials.Credential, error) {
 	cp := p.cp
 	args := strings.Fields(cp.ProcessCommand)
 	cmd := exec.Command(args[0], args[1:]...) // #nosec G204
-	buf, err := cmd.CombinedOutput()
-	if err != nil {
-		return nil, err
+	genmsg := func(buf []byte, err error) string {
+		message := fmt.Sprintf(`run external program to get credentials faild:
+  command: %s
+  output: %s
+  error: %s`,
+			cp.ProcessCommand, string(buf), err.Error())
+		return message
 	}
-	var newCP config.Profile
-	err = json.Unmarshal(buf, &newCP)
+	stdout := bytes.Buffer{}
+	stderr := bytes.Buffer{}
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+	allOutput := stderr.String() + "\n" + stdout.String()
 	if err != nil {
-		message := fmt.Sprintf("%s\n%s\n%s", cp.ProcessCommand, string(buf), err.Error())
+		message := genmsg([]byte(allOutput), err)
 		return nil, errors.New(message)
 	}
 
-	newP := &Profile{
+	buf := stdout.Bytes()
+	var newCP Profile
+	err = json.Unmarshal(buf, &newCP)
+	if err != nil {
+		if pp := tryToParseProfileFromOutput(string(buf)); pp != nil {
+			newCP = *pp
+		} else {
+			message := genmsg([]byte(allOutput), err)
+			return nil, errors.New(message)
+		}
+	}
+
+	newP := &ProfileWrapper{
 		cp:   newCP,
 		conf: p.conf,
 	}
 	return newP.GetCredentials()
 }
 
-func (p *Profile) GetCredentialsByCredentialsURI() (credentials.Credential, error) {
+var regexpCredJSON = regexp.MustCompile(`{\s*"mode": [^}]+}`)
+
+func tryToParseProfileFromOutput(output string) *Profile {
+	ret := regexpCredJSON.FindAllString(output, 1)
+	if len(ret) < 1 {
+		return nil
+	}
+	credJSON := ret[0]
+	var p Profile
+	if err := json.Unmarshal([]byte(credJSON), &p); err == nil {
+		return &p
+	}
+	return nil
+}
+
+func (p *ProfileWrapper) GetCredentialsByCredentialsURI() (credentials.Credential, error) {
 	cp := p.cp
 	uri := cp.CredentialsURI
 	if uri == "" {
@@ -261,7 +291,7 @@ func (p *Profile) GetCredentialsByCredentialsURI() (credentials.Credential, erro
 	}
 
 	if response.Code != "Success" {
-		return nil, fmt.Errorf("Get sts token err, Code is not Success")
+		return nil, fmt.Errorf("get sts token err, Code is not Success")
 	}
 	conf := &credentials.Config{
 		Type:            tea.String("sts"),
@@ -271,4 +301,8 @@ func (p *Profile) GetCredentialsByCredentialsURI() (credentials.Credential, erro
 	}
 	cred, err := credentials.NewCredential(conf)
 	return cred, err
+}
+
+func (c CredentialHelper) ProfileName() string {
+	return c.profile.cp.Name
 }

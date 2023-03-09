@@ -3,12 +3,12 @@ package disable
 import (
 	"context"
 	"fmt"
-	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
-	"log"
 	"time"
 
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
 	ctlcommon "github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/common"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/rrsa/common"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/openapi"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/types"
 	"github.com/briandowns/spinner"
@@ -27,13 +27,13 @@ var cmd = &cobra.Command{
 		clusterId := ctl.GlobalOption.ClusterId
 		c := common.AllowRRSAFeatureOrDie(ctx, clusterId, client)
 		if !c.MetaData.RRSAConfig.Enabled {
-			log.Println("RRSA feature is already disabled")
+			log.Logger.Info("RRSA feature is already disabled")
 			return
 		}
 
 		var task *types.ClusterTask
 		var err error
-		log.Println("Start to disable RRSA feature")
+		log.Logger.Info("Start to disable RRSA feature")
 		spin := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
 		spin.Start()
 		if task, err = disableRRSA(ctx, clusterId, client); err != nil {
@@ -47,7 +47,7 @@ var cmd = &cobra.Command{
 			ctlcommon.ExitByError(fmt.Sprintf("Failed to disable RRSA feature for cluster %s: %+v", clusterId, err))
 		}
 		spin.Stop()
-		log.Printf("Disable RRSA feature for cluster %s successfully\n", clusterId)
+		log.Logger.Infof("Disable RRSA feature for cluster %s successfully\n", clusterId)
 	},
 }
 

@@ -3,12 +3,12 @@ package enable
 import (
 	"context"
 	"fmt"
-	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
-	"log"
 	"time"
 
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
 	ctlcommon "github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/common"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/rrsa/common"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/openapi"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/types"
 	"github.com/briandowns/spinner"
@@ -27,13 +27,13 @@ var cmd = &cobra.Command{
 		clusterId := ctl.GlobalOption.ClusterId
 		c := common.AllowRRSAFeatureOrDie(ctx, clusterId, client)
 		if c.MetaData.RRSAConfig.Enabled {
-			log.Println("RRSA feature is already enabled.")
+			log.Logger.Info("RRSA feature is already enabled.")
 			return
 		}
 
 		var task *types.ClusterTask
 		var err error
-		log.Println("Start to enable RRSA feature")
+		log.Logger.Info("Start to enable RRSA feature")
 		spin := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
 		spin.Start()
 
@@ -49,7 +49,7 @@ var cmd = &cobra.Command{
 		}
 
 		spin.Stop()
-		log.Printf("Enable RRSA feature for cluster %s successfully", clusterId)
+		log.Logger.Infof("Enable RRSA feature for cluster %s successfully", clusterId)
 	},
 }
 

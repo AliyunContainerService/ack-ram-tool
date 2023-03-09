@@ -59,10 +59,6 @@ func newTokenExecCredential(token *ramauthenticator.Token) (*types.ExecCredentia
 			APIVersion: version,
 		},
 		Spec: types.ExecCredentialSpec{
-			//Cluster: &types.ExecCluster{
-			//	Server:                   config.Server,
-			//	CertificateAuthorityData: base64.StdEncoding.EncodeToString([]byte(config.CertificateAuthorityData)),
-			//},
 			Interactive: false,
 		},
 		Status: &types.ExecCredentialStatus{

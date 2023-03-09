@@ -3,9 +3,9 @@ package types
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"reflect"
 
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/utils"
 )
 
@@ -120,7 +120,7 @@ func (p *RamPolicyDocument) AppendPolicy(policy RamPolicyStatement) error {
 func (p *RamPolicyDocument) IncludePolicy(policy RamPolicyStatement) (bool, error) {
 	policies, err := p.policies()
 	if err != nil {
-		log.Printf("parse statements failed: %+v", err)
+		log.Logger.Errorf("parse statements failed: %+v", err)
 		return false, err
 	}
 
@@ -136,7 +136,7 @@ func (p *RamPolicyDocument) IncludePolicy(policy RamPolicyStatement) (bool, erro
 func (p *RamPolicyDocument) JSON() string {
 	data, err := json.MarshalIndent(p, " ", " ")
 	if err != nil {
-		log.Printf("errro: %+v\n", err)
+		log.Logger.Errorf("errro: %+v", err)
 	}
 	return string(data)
 }
@@ -151,12 +151,12 @@ func (p *RamPolicyDocument) policies() ([]RamPolicyStatement, error) {
 	}
 	statementsJson, err := json.Marshal(statements)
 	if err != nil {
-		log.Printf("parse statements failed: %+v", err)
+		log.Logger.Errorf("parse statements failed: %+v", err)
 		return nil, err
 	}
 	var policies []RamPolicyStatement
 	if err := json.Unmarshal(statementsJson, &policies); err != nil {
-		log.Printf("parse statements failed: %+v", err)
+		log.Logger.Errorf("parse statements failed: %+v", err)
 		return nil, err
 	}
 	return policies, nil

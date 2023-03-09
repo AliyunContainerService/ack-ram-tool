@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
 	ctlcommon "github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/common"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/openapi"
 	"github.com/spf13/cobra"
 )
@@ -60,7 +60,7 @@ var cmd = &cobra.Command{
 		if err != nil {
 			ctlcommon.ExitByError(fmt.Sprintf("Assume RAM Role failed: %+v", err))
 		}
-		log.Println("Retrieved a STS token:")
+		log.Logger.Info("Retrieved a STS token:")
 		fmt.Printf("AccessKeyId:       %s\n", cred.AccessKeyId)
 		fmt.Printf("AccessKeySecret:   %s\n", cred.AccessKeySecret)
 		fmt.Printf("SecurityToken:     %s\n", cred.SecurityToken)

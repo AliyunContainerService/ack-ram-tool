@@ -3,6 +3,7 @@ package credentialplugin
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/common"
@@ -21,6 +22,14 @@ const (
 	commandName = "ack-ram-tool"
 )
 
+type credentialMode string
+
+var (
+	modeRAMAuthenticatorToken credentialMode = "ram-authenticator-token"
+	modeCertificate           credentialMode = "certificate"
+	selectedMode              string
+)
+
 var getKubeconfigCmd = &cobra.Command{
 	Use:   "get-kubeconfig",
 	Short: "Get a kubeconfig with exec credential plugin format.",
@@ -33,7 +42,7 @@ var getKubeconfigCmd = &cobra.Command{
 		kubeconfig, err := client.GetUserKubeConfig(ctx, clusterId,
 			getCredentialOpts.privateIpAddress, getCredentialOpts.temporaryDuration)
 		common.ExitIfError(err)
-		newConf := generateExecKubeconfig(clusterId, kubeconfig)
+		newConf := generateExecKubeconfig(clusterId, kubeconfig, credentialMode(selectedMode))
 
 		d, err := yaml.Marshal(newConf)
 		common.ExitIfError(err)
@@ -41,7 +50,7 @@ var getKubeconfigCmd = &cobra.Command{
 	},
 }
 
-func generateExecKubeconfig(clusterId string, config *types.KubeConfig) *types.KubeConfig {
+func generateExecKubeconfig(clusterId string, config *types.KubeConfig, mode credentialMode) *types.KubeConfig {
 	newConf := &types.KubeConfig{
 		Kind:           config.Kind,
 		APIVersion:     config.APIVersion,
@@ -52,16 +61,9 @@ func generateExecKubeconfig(clusterId string, config *types.KubeConfig) *types.K
 		Preferences:    config.Preferences,
 	}
 	var users []types.KubeAuthUser
-	args := []string{
-		"credential-plugin",
-		"get-credential",
-		"--cluster-id",
-		clusterId,
-		"--api-version",
-		getCredentialOpts.apiVersion,
-		"--expiration",
-		"3h",
-	}
+	args := getExecArgs(clusterId, mode, getCredentialOpts)
+	args = fillGlobalFlags(args)
+
 	for _, u := range newConf.Users {
 		newU := types.KubeAuthUser{
 			Name: u.Name,
@@ -82,12 +84,53 @@ func generateExecKubeconfig(clusterId string, config *types.KubeConfig) *types.K
 	return newConf
 }
 
+func fillGlobalFlags(args []string) []string {
+	args = append(args, "--log-level", "ERROR")
+	if ctl.GlobalOption.ProfileName != "" {
+		args = append(args, []string{"--profile-name", ctl.GlobalOption.ProfileName}...)
+	}
+	if ctl.GlobalOption.IgnoreAliyuncliConfig {
+		args = append(args, "--ignore-aliyun-cli-credentials")
+	}
+	if ctl.GlobalOption.IgnoreEnv {
+		args = append(args, "--ignore-env-credentials")
+	}
+	return args
+}
+
+func getExecArgs(clusterId string, mode credentialMode, opt GetCredentialOpts) []string {
+	switch mode {
+	case modeRAMAuthenticatorToken:
+		return []string{
+			"credential-plugin",
+			"get-token",
+			"--cluster-id",
+			clusterId,
+			"--api-version",
+			opt.apiVersion,
+		}
+	default:
+		return []string{
+			"credential-plugin",
+			"get-credential",
+			"--cluster-id",
+			clusterId,
+			"--api-version",
+			getCredentialOpts.apiVersion,
+			"--expiration",
+			"3h",
+		}
+	}
+}
+
 func setupGetKubeconfigCmd(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(getKubeconfigCmd)
 	common.SetupClusterIdFlag(getKubeconfigCmd)
 
 	//getKubeconfigCmd.Flags().DurationVar(&getCredentialOpts.temporaryDuration, "expiration", time.Hour, "The credential expiration")
 	getKubeconfigCmd.Flags().BoolVar(&getCredentialOpts.privateIpAddress, "private-address", getCredentialOpts.privateIpAddress, "Use private ip as api-server address")
+	getKubeconfigCmd.Flags().StringVarP(&selectedMode, "mode", "m", string(modeCertificate),
+		fmt.Sprintf("credential mode: %s", strings.Join([]string{string(modeCertificate), string(modeRAMAuthenticatorToken)}, " or ")))
 	//getKubeconfigCmd.Flags().StringVar(&getCredentialOpts.apiVersion, "api-version", "v1beta1", "v1 or v1beta1")
 	//getKubeconfigCmd.Flags().StringVar(&getCredentialOpts.cacheDir, "credential-cache-dir", defaultCacheDir, "Directory to cache credential")
 	//getcredentialCmd.Flags().BoolVar(&getCredentialOpts.disableCache, "disable-credential-cache", false, "disable credential cache")

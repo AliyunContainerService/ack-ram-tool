@@ -3,12 +3,12 @@ package associaterole
 import (
 	"context"
 	"fmt"
-	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
-	"log"
 	"strings"
 
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
 	ctlcommon "github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/common"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/rrsa/common"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/openapi"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/types"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/utils"
@@ -56,7 +56,7 @@ var cmd = &cobra.Command{
 				roleName, serviceAccount, namespace, err))
 			return
 		}
-		log.Printf("Associate RAM Role %q to service account %q (namespace: %q) successfully",
+		log.Logger.Infof("Associate RAM Role %q to service account %q (namespace: %q) successfully",
 			roleName, serviceAccount, namespace)
 
 		attachPolices(ctx, client, roleName)
@@ -92,7 +92,7 @@ func createRole(ctx context.Context, client *openapi.Client, rrsac types.RRSACon
 		return err
 	}
 
-	log.Printf("will create RAM Role %q with blow AssumeRole Policy:\n%s\n",
+	log.Logger.Infof("will create RAM Role %q with blow AssumeRole Policy:\n%s\n",
 		roleName, assumeRolePolicyDocument.JSON())
 	ctlcommon.YesOrExit(fmt.Sprintf("Are you sure you want to create RAM Role %q?", roleName))
 
@@ -111,7 +111,7 @@ func updateRole(ctx context.Context, client *openapi.Client, role *types.RamRole
 	if exist, err := assumeRolePolicyDocument.IncludePolicy(policy); err != nil {
 		return err
 	} else if exist {
-		log.Printf("Already associated RAM Role %q to service account %q (namespace: %q)",
+		log.Logger.Infof("Already associated RAM Role %q to service account %q (namespace: %q)",
 			roleName, serviceAccount, namespace)
 		return nil
 	}
@@ -122,7 +122,7 @@ func updateRole(ctx context.Context, client *openapi.Client, role *types.RamRole
 	newDocument := assumeRolePolicyDocument.JSON()
 	diff := utils.DiffPrettyText(oldDocument, newDocument)
 
-	log.Printf("will change the AssumeRole Policy of RAM Role %q with blow content:\n%s\n",
+	log.Logger.Infof("will change the AssumeRole Policy of RAM Role %q with blow content:\n%s\n",
 		roleName, diff)
 	ctlcommon.YesOrExit(fmt.Sprintf(
 		"Are you sure you want to associate RAM Role %q to service account %q (namespace: %q)?",
@@ -139,7 +139,7 @@ func attachPolices(ctx context.Context, client *openapi.Client, roleName string)
 		return
 	}
 
-	log.Println("Start to attach policies")
+	log.Logger.Info("Start to attach policies")
 	if opts.attachSystemPolicy != "" {
 		policyName := opts.attachSystemPolicy
 		if err := attachPolicy(ctx, client, roleName, policyName, types.RamPolicyTypeSystem); err != nil {
@@ -154,11 +154,11 @@ func attachPolices(ctx context.Context, client *openapi.Client, roleName string)
 			return
 		}
 	}
-	log.Println("Attach policies successfully")
+	log.Logger.Info("Attach policies successfully")
 }
 
 func attachPolicy(ctx context.Context, client *openapi.Client, roleName, policyName, policyType string) error {
-	log.Printf("Start to attach the %s policy %s to the Role %s", policyType, policyName, roleName)
+	log.Logger.Infof("Start to attach the %s policy %s to the Role %s", policyType, policyName, roleName)
 	ctlcommon.YesOrExit(fmt.Sprintf(
 		"Are you sure you want to attach the %s policy %s to the Role %s?", policyType, policyName, roleName))
 

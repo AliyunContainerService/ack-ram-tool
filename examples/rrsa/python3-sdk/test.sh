@@ -71,6 +71,7 @@ function main() {
   enable_rrsa
   install_helper
   setup_role
+  sleep 60
   deploy_demo
   get_logs
 }
