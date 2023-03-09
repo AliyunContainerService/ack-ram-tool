@@ -54,7 +54,7 @@ github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors
 github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests
 github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses
 github.com/aliyun/alibaba-cloud-sdk-go/sdk/utils
-# github.com/aliyun/credentials-go v1.2.6
+# github.com/aliyun/credentials-go v1.2.7
 ## explicit; go 1.14
 github.com/aliyun/credentials-go/credentials
 github.com/aliyun/credentials-go/credentials/request
