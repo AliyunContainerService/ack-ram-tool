@@ -32,7 +32,7 @@ var (
 )
 
 func runUserCommands(ctx context.Context, cred Credentials, args []string, stdout io.Writer, stderr io.Writer) error {
-	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
+	cmd := exec.CommandContext(ctx, args[0], args[1:]...) // #nosec G204
 	if stdout == nil {
 		stdout = os.Stdout
 	}

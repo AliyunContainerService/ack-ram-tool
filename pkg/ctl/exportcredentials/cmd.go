@@ -37,7 +37,6 @@ var cmd = &cobra.Command{
 	Short: "Export credentials in various formats",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Logger.Infof("args: %#v", args)
 		client := ctlcommon.GetClientOrDie()
 
 		if opt.serve == "" {
