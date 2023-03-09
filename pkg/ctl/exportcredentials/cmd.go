@@ -2,6 +2,7 @@ package exportcredentials
 
 import (
 	"fmt"
+	"math/rand"
 	"net/http"
 	"strings"
 	"time"
@@ -92,7 +93,7 @@ func getCredOutput(client *openapi.Client) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	exp := time.Now().Add(time.Second * 3000) // 50 minutes
+	exp := getExpirationWithJitter(time.Now())
 
 	cred := Credentials{
 		AccessKeyId:     *ak,
@@ -111,6 +112,13 @@ func getCredOutput(client *openapi.Client) (string, error) {
 		output = toAliyunCLIConfigJSON(cred)
 	}
 	return output, nil
+}
+
+func getExpirationWithJitter(t time.Time) time.Time {
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))      // #nosec G404
+	jitter := time.Duration(r.Int63n(int64(time.Minute) * 4)) // #nosec G404
+	exp := t.Add(time.Minute*8 + jitter)                      // 8 + [0, 4) minutes
+	return exp
 }
 
 func SetupCmd(rootCmd *cobra.Command) {
