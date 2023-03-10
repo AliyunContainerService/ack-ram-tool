@@ -36,12 +36,16 @@ kubectl --kubeconfig ./kubeconfig apply -f deploy.yaml
 5. Get logs:
 
 ```
-kubectl --kubeconfig ./kubeconfig -n rrsa-demo-aliyun-cli wait --for=condition=complete job/demo --timeout=240s
-kubectl --kubeconfig ./kubeconfig -n rrsa-demo-aliyun-cli logs job/demo
+kubectl --kubeconfig ./kubeconfig -n rrsa-demo-aliyunlog-cli wait --for=condition=complete job/demo --timeout=240s
+kubectl --kubeconfig ./kubeconfig -n rrsa-demo-aliyunlog-cli logs job/demo
 ```
 
 Outputs:
 
 ```
-
+{"count": 1, "projects": [
+{"createTime": "1676282996", "description": "k8s log project, ***",
+ "lastModifyTime": "1676282996", "owner": "", "projectName": "k8s-log-c0edc***", 
+ "region": "cn-hangzhou", "resourceGroupId": "rg-***", "status": "Normal"}],
+  "total": 24}
 ```

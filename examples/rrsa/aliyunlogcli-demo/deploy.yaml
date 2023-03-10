@@ -31,6 +31,12 @@ spec:
           imagePullPolicy: "Always"
           name: test
           command:
-            - sh
-            - -c
-            - 'sleep 102400'
+            - ack-ram-tool
+            - export-credentials
+            - --format=environment-variables
+            - --
+            - aliyunlog
+            - log
+            - list_project
+            - --region-endpoint=cn-hangzhou.log.aliyuncs.com
+            - --size=1
