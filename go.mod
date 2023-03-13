@@ -31,7 +31,7 @@ require (
 	github.com/alibabacloud-go/tea-utils v1.4.5
 	github.com/go-logr/zapr v1.2.3
 	go.uber.org/zap v1.24.0
-	k8s.io/klog/v2 v2.80.1
+	k8s.io/klog/v2 v2.90.1
 )
 
 require (
