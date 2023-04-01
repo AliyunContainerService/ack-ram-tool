@@ -7,7 +7,7 @@ require (
 	github.com/alibabacloud-go/darabonba-openapi/v2 v2.0.4
 	github.com/alibabacloud-go/tea v1.1.20
 	github.com/alibabacloud-go/tea-utils v1.3.9 // indirect
-	github.com/aliyun/aliyun-oss-go-sdk v2.2.6+incompatible
+	github.com/aliyun/aliyun-oss-go-sdk v2.2.7+incompatible
 	github.com/aliyun/credentials-go v1.2.6
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
