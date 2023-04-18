@@ -9,8 +9,8 @@ const (
 	EnvAssumeYes                  = "ACK_RAM_TOOL_ASSUME_YES"
 	EnvProfileFile                = "ACK_RAM_TOOL_PROFILE_FILE"
 	EnvProfileName                = "ACK_RAM_TOOL_PROFIL_ENAME"
-	EnvIgnoreEnvCredentials       = "ACK_RAM_TOOL_IGNORE_ENV_CREDENTIALS"
-	EnvIgnoreAliyunCliCredentials = "ACK_RAM_TOOL_IGNORE_ALIYUN_CLI_CREDENTIALS"
+	EnvIgnoreEnvCredentials       = "ACK_RAM_TOOL_IGNORE_ENV_CREDENTIALS"        // #nosec G101
+	EnvIgnoreAliyunCliCredentials = "ACK_RAM_TOOL_IGNORE_ALIYUN_CLI_CREDENTIALS" // #nosec G101
 	EnvLogLevel                   = "ACK_RAM_TOOL_LOG_LEVEL"
 	EnvRegionId                   = "ACK_RAM_TOOL_REGION_ID"
 
