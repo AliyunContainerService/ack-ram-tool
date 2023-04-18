@@ -1,15 +1,13 @@
 package exportcredentials
 
 import (
+	"context"
 	"fmt"
-	"math/rand"
 	"net/http"
 	"strings"
-	"time"
 
 	ctlcommon "github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/common"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
-	"github.com/AliyunContainerService/ack-ram-tool/pkg/openapi"
 	"github.com/spf13/cobra"
 )
 
@@ -18,25 +16,20 @@ type option struct {
 	serve  string
 }
 
-type Credentials struct {
-	AccessKeyId     string
-	AccessKeySecret string
-	SecurityToken   string
-	Expiration      string
-}
-
 var opt = option{}
 var (
-	formatAliyunCLIConfigJSON = "aliyun-cli-config-json"
-	formatAliyunCLIURIJSON    = "aliyun-cli-uri-json"
-	formatECSMetadataJSON     = "ecs-metadata-json"
-	formatCredentialFileIni   = "credential-file-ini" // #nosec G101
+	formatAliyunCLIConfigJSON  = "aliyun-cli-config-json"
+	formatAliyunCLIURIJSON     = "aliyun-cli-uri-json"
+	formatECSMetadataJSON      = "ecs-metadata-json"
+	formatCredentialFileIni    = "credential-file-ini" // #nosec G101
+	formatEnvironmentVariables = "environment-variables"
 )
 var formats = []string{
 	formatAliyunCLIConfigJSON,
 	formatAliyunCLIURIJSON,
 	formatECSMetadataJSON,
 	formatCredentialFileIni,
+	formatEnvironmentVariables,
 }
 
 var cmd = &cobra.Command{
@@ -47,8 +40,16 @@ var cmd = &cobra.Command{
 		client := ctlcommon.GetClientOrDie()
 
 		if opt.serve == "" {
-			output, err := getCredOutput(client)
+			cred, err := getCredentials(client)
 			ctlcommon.ExitIfError(err)
+
+			if opt.format == formatEnvironmentVariables && len(args) > 0 {
+				err = runUserCommands(context.Background(), *cred, args, nil, nil)
+				ctlcommon.ExitIfError(err)
+				return
+			}
+
+			output := cred.Format(opt.format)
 			fmt.Printf("%s\n", output)
 			return
 		}
@@ -58,67 +59,6 @@ var cmd = &cobra.Command{
 			ctlcommon.ExitIfError(err)
 		}
 	},
-}
-
-func startCredServer(client *openapi.Client) error {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		log.Logger.Info("handel new request")
-		output, err := getCredOutput(client)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprint(w, err.Error())
-			return
-		}
-
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprint(w, output)
-	})
-
-	return http.ListenAndServe(opt.serve, mux) // #nosec G114
-}
-
-// TODO: add cache
-func getCredOutput(client *openapi.Client) (string, error) {
-	cc := client.Credential()
-	ak, err := cc.GetAccessKeyId()
-	if err != nil {
-		return "", err
-	}
-	as, err := cc.GetAccessKeySecret()
-	if err != nil {
-		return "", err
-	}
-	st, err := cc.GetSecurityToken()
-	if err != nil {
-		return "", err
-	}
-	exp := getExpirationWithJitter(time.Now())
-
-	cred := Credentials{
-		AccessKeyId:     *ak,
-		AccessKeySecret: *as,
-		SecurityToken:   *st,
-		Expiration:      exp.UTC().Format("2006-01-02T15:04:05Z"),
-	}
-
-	output := ""
-	switch opt.format {
-	case formatCredentialFileIni:
-		output = toCredentialFileIni(cred)
-	case formatAliyunCLIURIJSON, formatECSMetadataJSON:
-		output = toAliyunCLIURIBody(cred)
-	default:
-		output = toAliyunCLIConfigJSON(cred)
-	}
-	return output, nil
-}
-
-func getExpirationWithJitter(t time.Time) time.Time {
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))      // #nosec G404
-	jitter := time.Duration(r.Int63n(int64(time.Minute) * 4)) // #nosec G404
-	exp := t.Add(time.Minute*8 + jitter)                      // 8 + [0, 4) minutes
-	return exp
 }
 
 func SetupCmd(rootCmd *cobra.Command) {

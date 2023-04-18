@@ -1,0 +1,42 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rrsa-demo-aliyunlog-cli
+  labels:
+    pod-identity.alibabacloud.com/injection: 'on'
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: demo-sa
+  namespace: rrsa-demo-aliyunlog-cli
+  annotations:
+    pod-identity.alibabacloud.com/role-name: test-rrsa-demo
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: demo
+  namespace: rrsa-demo-aliyunlog-cli
+spec:
+  template:
+    spec:
+      serviceAccountName: demo-sa
+      restartPolicy: Never
+      containers:
+        - image: registry.cn-hangzhou.aliyuncs.com/acs/ack-ram-tool:0.13.0-dev-rrsa-example-aliyunlog-cli
+          imagePullPolicy: "Always"
+          name: test
+          command:
+            - ack-ram-tool
+            - export-credentials
+            - --format=environment-variables
+            - --
+            - aliyunlog
+            - log
+            - list_project
+            - --region-endpoint=cn-hangzhou.log.aliyuncs.com
+            - --size=1
