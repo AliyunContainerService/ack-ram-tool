@@ -66,7 +66,7 @@ func getCredential(opt getCredentialOption) (credentials.Credential, error) {
 		}
 		if !ignoreEnv {
 			if cred, err := env.NewCredential(); err == nil && cred != nil {
-				log.Logger.Info("use credentials from environment variables")
+				log.Logger.Debugf("use credentials from environment variables")
 				return cred, err
 			}
 		}
@@ -78,7 +78,7 @@ func getCredential(opt getCredentialOption) (credentials.Credential, error) {
 	if !ignoreAliyuncli {
 		acli, err := aliyuncli.NewCredentialHelper(aliyuncliConfigFilePath, aliyuncliProfileName)
 		if err == nil && acli != nil {
-			log.Logger.Infof("use credentials from aliyun cli (%s) with profile name %s",
+			log.Logger.Debugf("use credentials from aliyun cli (%s) with profile name %s",
 				utils.ShortHomePath(aliyuncliConfigFilePath), acli.ProfileName())
 			return acli.GetCredentials()
 		} else {
@@ -97,7 +97,7 @@ func getCredential(opt getCredentialOption) (credentials.Credential, error) {
 			credentialFilePath = path
 		}
 	}
-	log.Logger.Infof("use default credentials from %s", utils.ShortHomePath(credentialFilePath))
+	log.Logger.Debugf("use default credentials from %s", utils.ShortHomePath(credentialFilePath))
 	return credentials.NewCredential(nil)
 }
 

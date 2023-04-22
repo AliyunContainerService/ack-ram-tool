@@ -55,6 +55,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&ctl.GlobalOption.LogLevel, "log-level", "",
 		fmt.Sprintf("log level: info, debug, error (default \"%s\")", ctl.DefaultLogLevel))
 	//rootCmd.PersistentFlags().BoolVarP(&ctl.GlobalOption.InsecureSkipTLSVerify, "insecure-skip-tls-verify", "", false, "Skips the validity check for the server's certificate")
+	rootCmd.PersistentFlags().BoolVarP(&ctl.GlobalOption.Verbose, "verbose", "v", false, "Make the operation more talkative")
 }
 
 func main() {
