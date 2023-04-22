@@ -39,7 +39,9 @@ func runUserCommands(ctx context.Context, cred Credentials, args []string, stdou
 	if stderr == nil {
 		stderr = os.Stderr
 	}
-	cmd.Env = getCredentialsEnvsWithCurrentEnvs(cred)
+	envs := getCredentialsEnvsWithCurrentEnvs(cred)
+	envs = append(envs, "ALIBABACLOUD_IGNORE_PROFILE=TRUE")
+	cmd.Env = envs
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
 
