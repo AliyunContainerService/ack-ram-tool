@@ -26,6 +26,13 @@ var (
 	DefaultLogLevelEncoder = "capital"
 )
 
+const (
+	LogLevelInfo  = "info"
+	LogLevelWarn  = "warn"
+	LogLevelError = "error"
+	LogLevelDebug = "debug"
+)
+
 func init() {
 	Logger, _ = newLogger(DefaultLogLevel, DefaultLogLevelKey, DefaultLogLevelEncoder)
 }

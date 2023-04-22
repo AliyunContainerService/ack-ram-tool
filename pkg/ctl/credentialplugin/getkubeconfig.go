@@ -3,12 +3,14 @@ package credentialplugin
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/common"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/types"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
-	"strings"
 )
 
 const (
@@ -84,14 +86,14 @@ func generateExecKubeconfig(clusterId string, config *types.KubeConfig, mode cre
 }
 
 func fillGlobalFlags(args []string) []string {
-	args = append(args, "--log-level", "ERROR")
-	if ctl.GlobalOption.ProfileName != "" {
+	args = append(args, "--log-level", log.LogLevelError)
+	if ctl.GlobalOption.GetProfileName() != "" {
 		args = append(args, []string{"--profile-name", ctl.GlobalOption.ProfileName}...)
 	}
-	if ctl.GlobalOption.IgnoreAliyuncliConfig {
+	if ctl.GlobalOption.GetIgnoreAliyuncliConfig() {
 		args = append(args, "--ignore-aliyun-cli-credentials")
 	}
-	if ctl.GlobalOption.IgnoreEnv {
+	if ctl.GlobalOption.GetIgnoreEnv() {
 		args = append(args, "--ignore-env-credentials")
 	}
 	return args
