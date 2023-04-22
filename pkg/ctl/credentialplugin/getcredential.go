@@ -21,10 +21,11 @@ type GetCredentialOpts struct {
 	apiVersion string
 	cacheDir   string
 	//disableCache bool
+	//expirationDelta time.Duration
 }
 
 var getCredentialOpts = GetCredentialOpts{
-	temporaryDuration: time.Hour,
+	temporaryDuration: time.Hour * 3,
 	privateIpAddress:  false,
 	apiVersion:        versionV1beta1,
 	cacheDir:          defaultCacheDir,
@@ -105,7 +106,7 @@ func setupGetCredentialCmdCmd(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(getCredentialCmd)
 	common.SetupClusterIdFlag(getCredentialCmd)
 
-	getCredentialCmd.Flags().DurationVar(&getCredentialOpts.temporaryDuration, "expiration", time.Hour, "The credential expiration")
+	getCredentialCmd.Flags().DurationVar(&getCredentialOpts.temporaryDuration, "expiration", getCredentialOpts.temporaryDuration, "The credential expiration")
 	//getCredentialCmd.Flags().BoolVar(&getCredentialOpts.privateIpAddress, "private-address", getCredentialOpts.privateIpAddress, "Use private ip as api-server address")
 	getCredentialCmd.Flags().StringVar(&getCredentialOpts.apiVersion, "api-version", getCredentialOpts.apiVersion, "v1 or v1beta1")
 	getCredentialCmd.Flags().StringVar(&getCredentialOpts.cacheDir, "credential-cache-dir", getCredentialOpts.cacheDir, "Directory to cache credential")
