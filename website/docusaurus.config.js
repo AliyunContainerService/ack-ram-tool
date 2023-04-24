@@ -70,6 +70,10 @@ const config = {
           //   position: 'right',
           // },
           {
+            type: 'docsVersionDropdown',
+            position: 'right',
+          },
+          {
             href: 'https://github.com/AliyunContainerService/ack-ram-tool',
             label: 'GitHub',
             position: 'right',
