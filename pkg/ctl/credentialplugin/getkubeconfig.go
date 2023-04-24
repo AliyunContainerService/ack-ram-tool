@@ -7,6 +7,7 @@ import (
 
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/common"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/types"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
@@ -85,14 +86,14 @@ func generateExecKubeconfig(clusterId string, config *types.KubeConfig, mode cre
 }
 
 func fillGlobalFlags(args []string) []string {
-	args = append(args, "--log-level", "ERROR")
-	if ctl.GlobalOption.ProfileName != "" {
+	args = append(args, "--log-level", log.LogLevelError)
+	if ctl.GlobalOption.GetProfileName() != "" {
 		args = append(args, []string{"--profile-name", ctl.GlobalOption.ProfileName}...)
 	}
-	if ctl.GlobalOption.IgnoreAliyuncliConfig {
+	if ctl.GlobalOption.GetIgnoreAliyuncliConfig() {
 		args = append(args, "--ignore-aliyun-cli-credentials")
 	}
-	if ctl.GlobalOption.IgnoreEnv {
+	if ctl.GlobalOption.GetIgnoreEnv() {
 		args = append(args, "--ignore-env-credentials")
 	}
 	return args
@@ -116,9 +117,11 @@ func getExecArgs(clusterId string, mode credentialMode, opt GetCredentialOpts) [
 			"--cluster-id",
 			clusterId,
 			"--api-version",
-			getCredentialOpts.apiVersion,
+			opt.apiVersion,
 			"--expiration",
-			"3h",
+			fmt.Sprintf("%v", opt.temporaryDuration),
+			"--credential-cache-dir",
+			opt.cacheDir,
 		}
 	}
 }
@@ -127,11 +130,11 @@ func setupGetKubeconfigCmd(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(getKubeconfigCmd)
 	common.SetupClusterIdFlag(getKubeconfigCmd)
 
-	//getKubeconfigCmd.Flags().DurationVar(&getCredentialOpts.temporaryDuration, "expiration", time.Hour, "The credential expiration")
+	getKubeconfigCmd.Flags().DurationVar(&getCredentialOpts.temporaryDuration, "expiration", getCredentialOpts.temporaryDuration, "The certificate expiration")
 	getKubeconfigCmd.Flags().BoolVar(&getCredentialOpts.privateIpAddress, "private-address", getCredentialOpts.privateIpAddress, "Use private ip as api-server address")
 	getKubeconfigCmd.Flags().StringVarP(&selectedMode, "mode", "m", string(modeCertificate),
 		fmt.Sprintf("credential mode: %s", strings.Join([]string{string(modeCertificate), string(modeRAMAuthenticatorToken)}, " or ")))
-	//getKubeconfigCmd.Flags().StringVar(&getCredentialOpts.apiVersion, "api-version", "v1beta1", "v1 or v1beta1")
-	//getKubeconfigCmd.Flags().StringVar(&getCredentialOpts.cacheDir, "credential-cache-dir", defaultCacheDir, "Directory to cache credential")
+	getKubeconfigCmd.Flags().StringVar(&getCredentialOpts.apiVersion, "api-version", "v1beta1", "v1 or v1beta1")
+	getKubeconfigCmd.Flags().StringVar(&getCredentialOpts.cacheDir, "credential-cache-dir", getCredentialOpts.cacheDir, "Directory to cache certificate")
 	//getcredentialCmd.Flags().BoolVar(&getCredentialOpts.disableCache, "disable-credential-cache", false, "disable credential cache")
 }

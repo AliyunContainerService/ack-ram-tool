@@ -4,15 +4,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/AliyunContainerService/ack-ram-tool/pkg/types"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/types"
 )
 
 const (
-	expirationDelta time.Duration = time.Minute * 5
+	minExpirationDelta = time.Minute * 10
 )
 
 var defaultCacheDir = filepath.Join("~", ".kube", "cache", "ack-ram-tool", "credential-plugin")
@@ -22,13 +24,22 @@ var (
 )
 
 type CredentialCache struct {
-	cacheFilePath string
+	cacheFilePath   string
+	expirationDelta time.Duration
 }
 
 func NewCredentialCache(cacheDir string, opts GetCredentialOpts) *CredentialCache {
-	return &CredentialCache{
+	c := &CredentialCache{
 		cacheFilePath: getCacheFilePath(cacheDir, opts),
+		//expirationDelta: opts.expirationDelta,
 	}
+	expirationDelta := time.Duration(int64(float64(opts.temporaryDuration) * 0.2))
+	if expirationDelta < minExpirationDelta {
+		expirationDelta = minExpirationDelta
+	}
+	log.Logger.Debugf("will use %s as expirationDelta", expirationDelta)
+	c.expirationDelta = expirationDelta
+	return c
 }
 
 func (c *CredentialCache) GetCredential() (*types.ExecCredential, error) {
@@ -41,12 +52,12 @@ func (c *CredentialCache) GetCredential() (*types.ExecCredential, error) {
 	}
 	var cred types.ExecCredential
 	if err := json.Unmarshal(data, &cred); err != nil {
-		return nil, err
+		return nil, errNoValidCache
 	}
 	remain := time.Until(cred.Status.ExpirationTimestamp.Time)
 	if remain <= 0 {
 		return nil, errNoValidCache
-	} else if remain <= expirationDelta {
+	} else if remain <= c.expirationDelta {
 		return nil, errNeedRefreshCache
 	}
 	return &cred, nil

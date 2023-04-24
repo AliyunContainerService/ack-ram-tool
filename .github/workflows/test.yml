@@ -68,7 +68,7 @@ jobs:
     - name: Test
       run: make test
 
-  build-ack-ram-tool-docker-image-test:
+  build-cli-docker-image-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

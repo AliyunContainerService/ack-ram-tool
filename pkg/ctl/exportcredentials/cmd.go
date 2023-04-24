@@ -66,7 +66,7 @@ func SetupCmd(rootCmd *cobra.Command) {
 
 	cmd.Flags().StringVarP(&opt.format, "format", "f", formatAliyunCLIConfigJSON,
 		fmt.Sprintf("The output format to display credentials (%s)",
-			strings.Join(formats, " or ")))
+			strings.Join(formats, ", ")))
 	cmd.Flags().StringVarP(&opt.serve, "serve", "s", "",
 		"start a server to export credentials")
 }

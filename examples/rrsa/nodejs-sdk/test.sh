@@ -27,12 +27,28 @@ function install_helper() {
 function setup_role() {
   bar_tip "setup ram role"
 
+  aliyun ram CreatePolicy --PolicyName cs-describe-clusters --PolicyDocument '{
+  "Version": "1",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "cs:DescribeClusters"
+      ],
+      "Resource": [
+        "*"
+      ],
+      "Condition": {}
+    }
+  ]
+}' || true
+
   ack-ram-tool rrsa associate-role --cluster-id "${CLUSTER_ID}" \
     --namespace "${NAMESPACE}" \
     --service-account demo-sa \
     --role-name test-rrsa-demo \
     --create-role-if-not-exist \
-    --attach-system-policy AliyunCSReadOnlyAccess
+    --attach-custom-policy cs-describe-clusters
 }
 
 function deploy_demo() {

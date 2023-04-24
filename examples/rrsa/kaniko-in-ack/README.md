@@ -1,5 +1,10 @@
 # Running kaniko in ACK
 
+Running kaniko in ACK:
+
+* build image with kaniko
+* push image to the ACR with RRSA
+
 ## Usage
 
 1. Enable RRSA:
@@ -15,7 +20,30 @@ ack-ram-tool rrsa enable --cluster-id "${CLUSTER_ID}"
 ack-ram-tool rrsa install-helper-addon --cluster-id "${CLUSTER_ID}"
 ```
 
-3. Create a RAM Role and attach a system policy to the role:
+3. Create an RAM Policy:
+
+```
+aliyun ram CreatePolicy --PolicyName kaniko-using-cr --PolicyDocument '{
+  "Version": "1",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+         "cr:GetAuthorizationToken",
+         "cr:PullRepository",
+         "cr:PushRepository",
+         "cr:ListInstance"
+      ],
+      "Resource": [
+        "*"
+      ],
+      "Condition": {}
+    }
+  ]
+}'
+```
+
+4. Associate an RAM Role to the service account and attach the policy to the role:
 
 ```
 ack-ram-tool rrsa associate-role --cluster-id "${CLUSTER_ID}" \
@@ -23,20 +51,21 @@ ack-ram-tool rrsa associate-role --cluster-id "${CLUSTER_ID}" \
     --service-account demo-sa \
     --role-name test-rrsa-demo \
     --create-role-if-not-exist \
-    --attach-system-policy AliyunContainerRegistryFullAccess
+    --attach-custom-policy kaniko-using-cr
 ```
 
-4. Deploy demo job:
+5. Deploy demo job:
 
 ```
 export DEST_IMAGE="<image>"
+
 ack-ram-tool credential-plugin get-kubeconfig --cluster-id "${CLUSTER_ID}" > kubeconfig
 sed "s#DEST_IMAGE#${DEST_IMAGE}#g" deploy.yaml.tpl | \
     sed "s#REGISTRY_DOMAIN#`echo ${DEST_IMAGE}| cut -d '/' -f 1`#g"> deploy.yaml
 kubectl --kubeconfig ./kubeconfig apply -f deploy.yaml
 ```
 
-5. Get logs:
+6. Get logs:
 
 ```
 kubectl --kubeconfig ./kubeconfig -n rrsa-demo-kaniko wait --for=condition=complete job/demo --timeout=240s

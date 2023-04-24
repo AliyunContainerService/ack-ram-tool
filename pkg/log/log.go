@@ -26,6 +26,13 @@ var (
 	DefaultLogLevelEncoder = "capital"
 )
 
+const (
+	LogLevelInfo  = "info"
+	LogLevelWarn  = "warn"
+	LogLevelError = "error"
+	LogLevelDebug = "debug"
+)
+
 func init() {
 	Logger, _ = newLogger(DefaultLogLevel, DefaultLogLevelKey, DefaultLogLevelEncoder)
 }
@@ -59,6 +66,7 @@ func newLogger(logLevel string, logLevelKey string, logLevelEncoder string) (*za
 		enc := zapcore.NewConsoleEncoder(eCfg)
 
 		zlog = zap.New(zapcore.NewCore(enc, sink, lvl))
+		zlog = zlog.WithOptions(zap.AddCaller())
 		logger := zapr.NewLogger(zlog)
 		klog.SetLogger(logger)
 	case "WARN", "WARNING", "ERROR":
@@ -77,6 +85,7 @@ func newLogger(logLevel string, logLevelKey string, logLevelEncoder string) (*za
 		enc := zapcore.NewConsoleEncoder(eCfg)
 
 		zlog = zap.New(zapcore.NewCore(enc, sink, lvl))
+		//zlog = zlog.WithOptions(zap.AddCaller())
 		logger := zapr.NewLogger(zlog)
 		klog.SetLogger(logger)
 	}
@@ -99,7 +108,9 @@ func setLoggerForProduction(logLevelKey string, encoder zapcore.LevelEncoder) *z
 		zap.WrapCore(func(core zapcore.Core) zapcore.Core {
 			return zapcore.NewSamplerWithOptions(core, time.Second, 100, 100)
 		}),
-		zap.AddCallerSkip(1), zap.ErrorOutput(sink))
+		zap.AddCallerSkip(1), zap.ErrorOutput(sink),
+		//zap.AddCaller(),
+	)
 
 	zlog := zap.New(zapcore.NewCore(enc, sink, lvl))
 	zlog = zlog.WithOptions(opts...)
