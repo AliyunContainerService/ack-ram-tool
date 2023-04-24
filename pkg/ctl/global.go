@@ -16,6 +16,7 @@ const (
 
 	DefaultRegion   = "cn-hangzhou"
 	DefaultLogLevel = "info"
+	debugLogLevel   = "debug"
 )
 
 type globalOption struct {
@@ -33,6 +34,7 @@ type globalOption struct {
 
 	LogLevel  string
 	ClusterId string
+	Verbose   bool
 }
 
 var GlobalOption = &globalOption{}
@@ -76,6 +78,9 @@ func (g *globalOption) UpdateValues() {
 	if g.GetCredentialFilePath() != "" {
 		g.IgnoreAliyuncliConfig = true
 		g.IgnoreEnv = true
+	}
+	if g.Verbose {
+		g.LogLevel = debugLogLevel
 	}
 }
 

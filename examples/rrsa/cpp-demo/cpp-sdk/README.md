@@ -15,7 +15,7 @@ ack-ram-tool rrsa enable --cluster-id "${CLUSTER_ID}"
 ack-ram-tool rrsa install-helper-addon --cluster-id "${CLUSTER_ID}"
 ```
 
-3. Create a RAM Role and attach a system policy to the role:
+3. Create a RAM Role and attach a policy to the role:
 
 ```
 ack-ram-tool rrsa associate-role --cluster-id "${CLUSTER_ID}" \

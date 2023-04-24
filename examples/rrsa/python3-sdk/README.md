@@ -15,7 +15,28 @@ ack-ram-tool rrsa enable --cluster-id "${CLUSTER_ID}"
 ack-ram-tool rrsa install-helper-addon --cluster-id "${CLUSTER_ID}"
 ```
 
-3. Create a RAM Role and attach a system policy to the role:
+3. Create an RAM Policy:
+
+```
+aliyun ram CreatePolicy --PolicyName cs-describe-clusters --PolicyDocument '{
+  "Version": "1",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "cs:DescribeClusters",
+        "cs:GetClusters"
+      ],
+      "Resource": [
+        "*"
+      ],
+      "Condition": {}
+    }
+  ]
+}'
+```
+
+4. Associate an RAM Role to the service account and attach the policy to the role:
 
 ```
 ack-ram-tool rrsa associate-role --cluster-id "${CLUSTER_ID}" \
@@ -23,17 +44,17 @@ ack-ram-tool rrsa associate-role --cluster-id "${CLUSTER_ID}" \
     --service-account demo-sa \
     --role-name test-rrsa-demo \
     --create-role-if-not-exist \
-    --attach-system-policy AliyunCSReadOnlyAccess
+    --attach-custom-policy cs-describe-clusters
 ```
 
-4. Deploy demo job:
+5. Deploy demo job:
 
 ```
 ack-ram-tool credential-plugin get-kubeconfig --cluster-id "${CLUSTER_ID}" > kubeconfig
 kubectl --kubeconfig ./kubeconfig apply -f deploy.yaml
 ```
 
-5. Get logs:
+6. Get logs:
 
 ```
 kubectl --kubeconfig ./kubeconfig -n rrsa-demo-python3-sdk wait --for=condition=complete job/demo --timeout=240s
