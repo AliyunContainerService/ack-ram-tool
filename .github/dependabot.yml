@@ -15,7 +15,7 @@ updates:
     open-pull-requests-limit: 5
     schedule:
       interval: monthly
-  - pacage-ecosystem: npm
+  - package-ecosystem: npm
     directory: website
     open-pull-requests-limit: 5
     schedule:
