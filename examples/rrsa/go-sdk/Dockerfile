@@ -11,7 +11,7 @@ COPY main.go ./
 RUN go build
 
 
-FROM alpine:3.17.2
+FROM alpine:3.17.3
 
 WORKDIR /usr/bin/
 
