@@ -16,6 +16,7 @@ You can download the latest release from `Releases <https://github.com/AliyunCon
 Credential
 -------------
 
+https://aliyuncontainerservice.github.io/ack-ram-tool/#credentials
 
 
 Usage
@@ -109,4 +110,4 @@ auto create an RAM Role when it doesn't exist):
 Documentation
 ---------------
 
-
+For more information, refer to the `document <https://aliyuncontainerservice.github.io/ack-ram-tool/>`__.
