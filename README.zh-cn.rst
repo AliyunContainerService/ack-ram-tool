@@ -14,7 +14,7 @@ ack-ram-tool
 配置凭证信息
 -----------
 
-详见`文档 <https://aliyuncontainerservice.github.io/ack-ram-tool/zh-CN/getting-started#%E5%87%AD%E8%AF%81%E4%BF%A1%E6%81%AF`__
+详见 `文档 <https://aliyuncontainerservice.github.io/ack-ram-tool/zh-CN/getting-started#%E5%87%AD%E8%AF%81%E4%BF%A1%E6%81%AF>`__
 
 使用示例
 --------
@@ -104,5 +104,5 @@ RAM Roles for Service Accounts (RRSA)
 文档
 --------
 
-更多信息详见`文档 <https://aliyuncontainerservice.github.io/ack-ram-tool/>`__
+更多信息详见 `文档 <https://aliyuncontainerservice.github.io/ack-ram-tool/>`__
 
