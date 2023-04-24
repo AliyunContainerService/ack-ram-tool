@@ -14,36 +14,6 @@ ack-ram-tool
 配置凭证信息
 -----------
 
-ack-ram-tool 将通过以下顺序在系统中查找凭证信息：
-
-1. 自动使用环境变量中存在的凭证信息 （
-注：程序也支持 `aliyun cli 所支持的凭证相关环境变量 <https://github.com/aliyun/aliyun-cli#support-for-environment-variables>`__ ）:
-
-.. code-block:: shell
-
-    # access key id
-    $ export ALIBABA_CLOUD_ACCESS_KEY_ID=foo
-    # access key secret
-    $ export ALIBABA_CLOUD_ACCESS_KEY_SECRET=bar
-    # sts token (可选)
-    $ export ALIBABA_CLOUD_SECURITY_TOKEN=foobar
-
-    # or use credentials URI: https://github.com/aliyun/aliyun-cli#use-credentials-uri
-    $ export ALIBABA_CLOUD_CREDENTIALS_URI=http://localhost:6666/?user=jacksontian
-
-2. 当环境变量中不存在凭证信息时，如果存在 aliyun cli 的配置文件 ``~/.aliyun/config.json`` (关于 aliyun cli 的配置文件详情请参考
-  `官方文档 <https://www.alibabacloud.com/help/doc-detail/110341.htm>`__ ) ，程序将自动使用该配置文件。
-3. 当 aliyun cli 的配置文件不存在时，程序将尝试使用 ``~/.alibabacloud/credentials`` 文件中配置的凭证信息（可以通过 ``--profile-file`` 参数指定文件路径）:
-
-.. code-block:: shell
-
-    $ cat ~/.alibabacloud/credentials
-
-    [default]
-    type = access_key
-    access_key_id = foo
-    access_key_secret = bar
-
 
 使用示例
 --------
@@ -74,7 +44,6 @@ kubectl/client-go 认证插件
     rm ~/.kube/cache/ack-ram-tool/credential-plugin/*.json
 
 
-
 RAM Roles for Service Accounts (RRSA)
 ++++++++++++++++++++++++++++++++++++++++
 
@@ -82,31 +51,18 @@ RAM Roles for Service Accounts (RRSA)
 
 .. code-block:: shell
 
-    $ ack-ram-tool rrsa enable -c <clusterId>
+    $ ack-ram-tool rrsa enable --cluster-id <clusterId>
 
     ? Are you sure you want to enable RRSA feature? Yes
     Enable RRSA feature for cluster c86fdd*** successfully
 
-
-检查当前集群是否已启用 RRSA 特性:
-
-.. code-block:: shell
-
-    $ ack-ram-tool rrsa status -c <clusterId>
-
-    RRSA feature:          enabled
-    OIDC Provider Name:    ack-rrsa-c86fdd***
-    OIDC Provider Arn:     acs:ram::18***:oidc-provider/ack-rrsa-c86fdd***
-    OIDC Token Issuer:     https://oidc-ack-***/c86fdd***
-
-
-为 RAM 角色关联一个 Service Account（允许使用这个 Service Account 的 OIDC Token 来扮演此 RAM 角色。
-通过指定 ``--create-role-if-not-exist`` 参数实现在角色不存在时自动创建对应的 RAM 角色）:
+为 RAM 角色关联一个 Service Account（允许使用这个 Service Account 的 OIDC Token 来扮演此 RAM 角色:
 
 .. code-block:: shell
 
-    $ ack-ram-tool rrsa associate-role -c <clusterId> --create-role-if-not-exist \
-        -r <roleName> -n <namespace> -s <serviceAccount>
+    $ ack-ram-tool rrsa associate-role --cluster-id <clusterId> \
+        --namespace <namespce> --service-account <serviceAccountName> \
+        --role-name <roleName>
 
     ? Are you sure you want to associate RAM Role test-rrsa to service account test-serviceaccount (namespace: test-namespace)? Yes
     Will change the assumeRolePolicyDocument of RAM Role test-rrsa with blow content:
@@ -144,23 +100,7 @@ RAM Roles for Service Accounts (RRSA)
     ? Are you sure you want to associate RAM Role test-rrsa to service account test-serviceaccount (namespace: test-namespace)? Yes
     Associate RAM Role test-rrsa to service account test-serviceaccount (namespace: test-namespace) successfully
 
-
-测试使用指定的 OIDC token 扮演 RAM 角色获取 STS Token:
-
-.. code-block:: shell
-
-    $ ack-ram-tool rrsa assume-role -r <roleArn> -p <oidcProviderArn> -t <oidcTokenFile>
-
-    Retrieved a STS token:
-    AccessKeyId:       STS.***
-    AccessKeySecret:   7UVy***
-    SecurityToken:     CAIS***
-    Expiration:        2021-12-03T05:51:37Z
+文档
+--------
 
 
-可以通过 ``setup-addon`` 命令快速配置集群组件使用 RRSA 特性时所需要的 RAM 相关配置。
-比如配置 ``kritis-validation-hook`` 组件所需的 RAM 配置（需要在安装组件前进行配置）:
-
-.. code-block:: shell
-
-    ack-ram-tool rrsa setup-addon --addon-name kritis-validation-hook -c <clusterId>
