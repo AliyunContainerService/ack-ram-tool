@@ -54,15 +54,17 @@ users:
 preferences: {}
 
 $ ack-ram-tool credential-plugin get-kubeconfig --cluster-id c5e*** > kubeconfig
-$ proxy_ack kubectl --kubeconfig kubeconfig get ns
+$ kubectl --kubeconfig kubeconfig get ns
 NAME                         STATUS   AGE
 default                      Active   6d3h
 kube-node-lease              Active   6d3h
 kube-public                  Active   6d3h
 kube-system                  Active   6d3h
+```
 
 ### --mode ram-authenticator-token
 
+```
 $ ack-ram-tool credential-plugin get-kubeconfig --mode ram-authenticator-token --cluster-id c5e***
 
 kind: Config

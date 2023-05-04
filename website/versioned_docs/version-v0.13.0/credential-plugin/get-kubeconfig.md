@@ -5,15 +5,15 @@ sidebar_position: 1
 
 # get-kubeconfig
 
-获取使用 ack-ram-tool 作为 [credential plugin](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#client-go-credential-plugins) 的 kubeconfig。
+Obtain a kubeconfig file that uses ack-ram-tool as the [credential plugin](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#client-go-credential-plugins).
 
-包含如下特性：
+It has the following features:
 
-* 证书过期前将自动获取新的证书
-* 支持使用临时证书
-* 集成 ack-ram-authenticator
+* Automatically obtains a new certificate before the certificate expires
+* Supports using temporary certificate
+* Integrate ack-ram-authenticator
 
-## 使用示例
+## Usage
 
 ```shell
 $ ack-ram-tool credential-plugin get-kubeconfig --cluster-id c5e***
@@ -53,15 +53,17 @@ users:
 preferences: {}
 
 $ ack-ram-tool credential-plugin get-kubeconfig --cluster-id c5e*** > kubeconfig
-$ proxy_ack kubectl --kubeconfig kubeconfig get ns
+$ kubectl --kubeconfig kubeconfig get ns
 NAME                         STATUS   AGE
 default                      Active   6d3h
 kube-node-lease              Active   6d3h
 kube-public                  Active   6d3h
 kube-system                  Active   6d3h
+```
 
 ### --mode ram-authenticator-token
 
+```
 $ ack-ram-tool credential-plugin get-kubeconfig --mode ram-authenticator-token --cluster-id c5e***
 
 kind: Config
@@ -98,7 +100,7 @@ preferences: {}
 
 ```
 
-## 命令行参数
+## Flags
 
 ```
 Usage:
