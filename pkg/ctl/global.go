@@ -2,6 +2,7 @@ package ctl
 
 import (
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -44,7 +45,7 @@ func (g globalOption) GetRegion() string {
 }
 
 func (g *globalOption) UpdateValues() {
-	if os.Getenv(EnvAssumeYes) == "true" {
+	if v, err := strconv.ParseBool(os.Getenv(EnvAssumeYes)); err == nil && v {
 		g.AssumeYes = true
 	}
 	if g.CredentialFilePath == "" {
@@ -53,10 +54,10 @@ func (g *globalOption) UpdateValues() {
 	if g.ProfileName == "" {
 		g.ProfileName = os.Getenv(EnvProfileName)
 	}
-	if os.Getenv(EnvIgnoreEnvCredentials) == "true" {
+	if v, err := strconv.ParseBool(os.Getenv(EnvIgnoreEnvCredentials)); err == nil && v {
 		g.IgnoreEnv = true
 	}
-	if os.Getenv(EnvIgnoreAliyunCliCredentials) == "true" {
+	if v, err := strconv.ParseBool(os.Getenv(EnvIgnoreAliyunCliCredentials)); err == nil && v {
 		g.IgnoreAliyuncliConfig = true
 	}
 	if g.LogLevel == "" {
