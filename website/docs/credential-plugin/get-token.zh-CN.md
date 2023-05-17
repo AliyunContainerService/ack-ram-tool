@@ -6,7 +6,7 @@ sidebar_position: 3
 
 # get-token
 
-集成 ack-ram-authenticator，获取用于访问 api server 的 ExecCredential token。
+集成 ack-ram-authenticator，获取用于访问 api server 的 [ExecCredential](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#client-go-credential-plugins) token。
 
 ## 使用示例
 

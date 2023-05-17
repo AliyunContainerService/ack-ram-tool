@@ -17,7 +17,7 @@ sidebar_position: 2
 ## 使用示例
 
 ```shell
-$ ack-ram-tool credential-plugin get-token --cluster-id <clusterId>
+$ ack-ram-tool credential-plugin get-credential --cluster-id <clusterId>
 
 {
  "kind": "ExecCredential",

@@ -19,7 +19,8 @@ sidebar_position: 1
 ack-ram-tool 将按照以下顺序在系统中查找凭证信息：
 
 1. 自动使用环境变量中存在的凭证信息 （
-   注：本工具也支持aliyun cli 所支持的凭证相关[环境变量](https://github.com/aliyun/aliyun-cli#support-for-environment-variables) ）:
+   包含 aliyun sdk 和 aliyun cli 所支持的凭证相关[环境变量](https://github.com/aliyun/aliyun-cli#support-for-environment-variables)）。
+   可以通过命令行参数 `--ignore-env-credentials` 禁用使用环境变量中存在的凭证信息。
 
 | 环境变量                                                                                                                                                                       | 含义                                                                          |
 |----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------|
@@ -34,8 +35,9 @@ ack-ram-tool 将按照以下顺序在系统中查找凭证信息：
 
 2. 当环境变量中不存在凭证信息时，如果存在 aliyun cli 的配置文件 ``~/.aliyun/config.json`` (关于 aliyun cli 的配置文件详情请参考
    [官方文档](https://www.alibabacloud.com/help/doc-detail/110341.htm) ) ，程序将自动使用该配置文件。
+   可以通过命令行参数 `--ignore-aliyun-cli-credentials` 禁用使用 aliyun cli 的配置文件。
 
-3. 当 aliyun cli 的配置文件不存在时，程序将尝试使用 ``~/.alibabacloud/credentials`` 文件中配置的凭证信息（可以通过 ``--profile-file`` 参数指定文件路径）:
+3. 当 aliyun cli 的配置文件不存在时，程序将尝试使用 ``~/.alibabacloud/credentials`` 文件中配置的凭证信息。可以通过 ``--profile-file`` 参数指定文件路径）:
 
 ```
 $ cat ~/.alibabacloud/credentials

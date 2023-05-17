@@ -10,9 +10,9 @@ sidebar_position: 1
 
 包含如下特性：
 
-* 证书过期前将自动获取新的证书
-* 支持使用临时证书
-* 集成 ack-ram-authenticator
+* 证书过期前将自动获取新的证书。
+* 支持使用临时证书。
+* 集成 ack-ram-authenticator。
 
 ## 使用示例
 
