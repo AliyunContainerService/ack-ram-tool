@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 	"path"
 	"time"
 
@@ -52,7 +53,12 @@ func (p *ossCredentialsProvider) GetCredentials() oss.Credentials {
 }
 
 func NewClient(endpoint string) (*oss.Client, error) {
-	cred, err := credentials.NewCredential(nil)
+	cred, err := credentials.NewCredential(&credentials.Config{
+		Type:            tea.String("sts"),
+		AccessKeyId:     tea.String(os.Getenv("ALIBABA_CLOUD_ACCESS_KEY_ID")),
+		AccessKeySecret: tea.String(os.Getenv("ALIBABA_CLOUD_ACCESS_KEY_SECRET")),
+		SecurityToken:   tea.String(os.Getenv("ALIBABA_CLOUD_SECURITY_TOKEN")),
+	})
 	if err != nil {
 		return nil, err
 	}
