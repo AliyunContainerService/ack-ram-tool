@@ -6,14 +6,14 @@ slug: global-flags
 
 ```
 Global Flags:
-  -y, --assume-yes                      Automatic yes to prompts; assume "yes" as answer to all prompts and run non-interactively
-      --ignore-aliyun-cli-credentials   don't try to parse credentials from config.json of aliyun cli
-      --ignore-env-credentials          don't try to parse credentials from environment variables
-      --log-level string                log level: info, debug, error (default "info")
-      --profile-file string             Path to credential file (default: ~/.aliyun/config.json or ~/.alibabacloud/credentials)
-      --profile-name string             using this named profile when parse credentials from config.json of aliyun cli
-      --region-id string                The region to use (default "cn-hangzhou")
-      -v, --verbose                     Make the operation more talkative
+  -y, --assume-yes                      Automatic yes to prompts; assume "yes" as answer to all prompts and run non-interactively (env: "ACK_RAM_TOOL_ASSUME_YES")
+      --ignore-aliyun-cli-credentials   don't try to parse credentials from config.json of aliyun cli (env: "ACK_RAM_TOOL_IGNORE_ALIYUN_CLI_CREDENTIALS")
+      --ignore-env-credentials          don't try to parse credentials from environment variables (env: "ACK_RAM_TOOL_IGNORE_ENV_CREDENTIALS")
+      --log-level string                log level: info, debug, error (default "info") (env: "ACK_RAM_TOOL_LOG_LEVEL")
+      --profile-file string             Path to credential file (default: ~/.aliyun/config.json or ~/.alibabacloud/credentials) (env: "ACK_RAM_TOOL_PROFILE_FILE")
+      --profile-name string             using this named profile when parse credentials from config.json of aliyun cli (env: "ACK_RAM_TOOL_PROFIL_ENAME")
+      --region-id string                The region to use (default "cn-hangzhou") (env: "ACK_RAM_TOOL_REGION_ID")
+  -v, --verbose                         Make the operation more talkative
 ```
 
 ## 参数说明

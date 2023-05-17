@@ -9,9 +9,9 @@ Obtain a kubeconfig file that uses ack-ram-tool as the [credential plugin](https
 
 It has the following features:
 
-* Automatically obtains a new certificate before the certificate expires
-* Supports using temporary certificate
-* Integrate ack-ram-authenticator
+* Automatically obtains a new certificate before the certificate expires.
+* Supports using temporary certificate.
+* Integrate ack-ram-authenticator.
 
 ## Usage
 
