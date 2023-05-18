@@ -23,15 +23,15 @@ ack-ram-tool will search for credential information in the system in the followi
    Note: This tool also supports the credential-related environment variables supported by [aliyun cli](https://github.com/aliyun/aliyun-cli#support-for-environment-variables) ）:
 
 
-| environment variables                                                                                                                                                      | description                                                                 |
-|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------|
-| `ALIBABA_CLOUD_ACCESS_KEY_ID`、`ALICLOUD_ACCESS_KEY`、`ALIBABACLOUD_ACCESS_KEY_ID`、`ALICLOUD_ACCESS_KEY_ID`、`ALIBABACLOUD_ACCESS_KEY_ID`、`ACCESS_KEY_ID`                     | access key id                                                               |
-| `ALIBABA_CLOUD_ACCESS_KEY_SECRET`、`ALICLOUD_SECRET_KEY`、`ALIBABACLOUD_ACCESS_KEY_SECRET`、`ALICLOUD_ACCESS_KEY_SECRET`、`ALIBABACLOUD_ACCESS_KEY_SECRET`、`ACCESS_KEY_SECRET` | access key secret                                                           |
-| `ALIBABA_CLOUD_SECURITY_TOKEN`、`ALICLOUD_ACCESS_KEY_STS_TOKEN`、`ALIBABACLOUD_SECURITY_TOKEN`、`ALICLOUD_SECURITY_TOKEN`、`ALIBABACLOUD_SECURITY_TOKEN`、`SECURITY_TOKEN`      | sts token                                                                   |
-| `ALIBABA_CLOUD_CREDENTIALS_URI`                                                                                                                                            | [credentials URI](https://github.com/aliyun/aliyun-cli#use-credentials-uri) |
-| `ALIBABA_CLOUD_ROLE_ARN`                                                                                                                                                   | RAM Role ARN                                                                |
-| `ALIBABA_CLOUD_OIDC_PROVIDER_ARN`                                                                                                                                          | OIDC Provider ARN                                                           |
-| `ALIBABA_CLOUD_OIDC_TOKEN_FILE`                                                                                                                                            | OIDC Token File                                                             |
+| environment variables                                                                                                                                                 | description                                                                 |
+|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------|
+| `ALIBABA_CLOUD_ACCESS_KEY_ID`、`ALICLOUD_ACCESS_KEY`、`ALIBABACLOUD_ACCESS_KEY_ID`、`ALICLOUD_ACCESS_KEY_ID`、`ALIBABACLOUD_ACCESS_KEY_ID`、`ACCESS_KEY_ID`                | access key id                                                               |
+| `ALIBABA_CLOUD_ACCESS_KEY_SECRET`、`ALICLOUD_SECRET_KEY`、`ALIBABACLOUD_ACCESS_KEY_SECRET`、`ALICLOUD_ACCESS_KEY_SECRET`、`ACCESS_KEY_SECRET`                             | access key secret                                                           |
+| `ALIBABA_CLOUD_SECURITY_TOKEN`、`ALICLOUD_ACCESS_KEY_STS_TOKEN`、`ALIBABACLOUD_SECURITY_TOKEN`、`ALICLOUD_SECURITY_TOKEN`、`ALIBABACLOUD_SECURITY_TOKEN`、`SECURITY_TOKEN` | sts token                                                                   |
+| `ALIBABA_CLOUD_CREDENTIALS_URI`                                                                                                                                       | [credentials URI](https://github.com/aliyun/aliyun-cli#use-credentials-uri) |
+| `ALIBABA_CLOUD_ROLE_ARN`                                                                                                                                              | RAM Role ARN                                                                |
+| `ALIBABA_CLOUD_OIDC_PROVIDER_ARN`                                                                                                                                     | OIDC Provider ARN                                                           |
+| `ALIBABA_CLOUD_OIDC_TOKEN_FILE`                                                                                                                                       | OIDC Token File                                                             |
 
 
 2. When credential information does not exist in the environment variables, if there is an aliyun cli configuration file

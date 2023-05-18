@@ -9,14 +9,14 @@ Get the ExecCredential certificate data used to access the API server.
 
 It has the following features:
 
-* Automatically obtains a new certificate before the certificate expires
-* Supports using temporary certificate
+* Automatically obtains a new certificate before the certificate expires.
+* Supports using temporary certificate.
 
 
 ## Usage
 
 ```shell
-$ ack-ram-tool credential-plugin get-token --cluster-id <clusterId>
+$ ack-ram-tool credential-plugin get-credential --cluster-id <clusterId>
 
 {
  "kind": "ExecCredential",

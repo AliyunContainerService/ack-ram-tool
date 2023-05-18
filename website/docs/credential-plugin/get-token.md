@@ -5,7 +5,7 @@ sidebar_position: 3
 
 # get-token
 
-Integrate ack-ram-authenticator to obtain the ExecCredential token used to access the API server.
+Integrate ack-ram-authenticator to obtain the [ExecCredential](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#client-go-credential-plugins) token used to access the API server.
 
 ## Usage
 

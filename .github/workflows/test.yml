@@ -26,10 +26,12 @@ jobs:
       - uses: actions/checkout@v3
       - uses: securego/gosec@v2.15.0
         with:
-          args: -exclude-dir pkg/credentials/alibabacloudgo/helper -exclude-dir pkg/credentials/alibabacloudsdkgo/helper -exclude-dir examples ./...
+          args: -exclude-dir pkg/credentials/alibabacloudgo/helper -exclude-dir pkg/credentials/alibabacloudsdkgo/helper -exclude-dir ci/ossutil -exclude-dir examples ./...
 
   releaser-test:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write # This is required for requesting the JWT
     steps:
       - uses: actions/checkout@v3
 
@@ -46,9 +48,24 @@ jobs:
           # either 'goreleaser' (default) or 'goreleaser-pro'
           distribution: goreleaser
           version: latest
-          args: release --snapshot --rm-dist --skip-publish
+          args: release --snapshot --skip-publish
         env:
           GOPATH: ${{ env.HOME }}
+
+      - uses: 'mozillazg/alibabacloud-oidc-auth@v1'
+        with:
+          role-arn-to-assume: '${{ secrets.ALIBABA_CLOUD_RAM_ROLE_ARN }}'
+          oidc-provider-arn: '${{ secrets.ALIBABA_CLOUD_RAM_OIDC_ARN }}'
+          export-environment-variables: 'true'
+      - run: |
+          set -e
+          cd ci/ossutil && go build && \
+            chmod +x ossutil && cp ossutil ../../cputil && cd ../../
+          ./cputil --endpoint=oss-cn-hangzhou.aliyuncs.com \
+                   --bucket '${{ secrets.OSS_BUCKET_NAME }}' \
+                   --objectdir '${{ secrets.OSS_OBJECT_DIR }}/${{ github.ref_name }}' \
+                   dist/ack-ram-tool*.tar.gz dist/checksums.txt
+
 
   build:
     runs-on: ubuntu-latest

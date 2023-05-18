@@ -21,3 +21,5 @@ kubeconfig
 /examples/rrsa/go-sdk/go-sdk
 /bin/
 /examples/rrsa/kaniko-in-ack/deploy.yaml
+/ci/ossutil/ossutil
+/cputil
