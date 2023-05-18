@@ -64,7 +64,7 @@ jobs:
           ./cputil --endpoint=oss-cn-hangzhou.aliyuncs.com \
                    --bucket '${{ secrets.OSS_BUCKET_NAME }}' \
                    --objectdir '${{ secrets.OSS_OBJECT_DIR }}/${{ github.ref_name }}' \
-                   dist/ack-ram-tool*.tar.gz
+                   dist/ack-ram-tool*.tar.gz dist/checksums.txt
 
 
   build:
