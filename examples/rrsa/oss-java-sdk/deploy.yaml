@@ -27,6 +27,6 @@ spec:
       serviceAccountName: demo-sa
       restartPolicy: Never
       containers:
-        - image: registry.cn-hangzhou.aliyuncs.com/acs/ack-ram-tool:0.13.2-rrsa-example-java
+        - image: registry.cn-hangzhou.aliyuncs.com/acs/ack-ram-tool:0.13.2-rrsa-example-oss-java
           imagePullPolicy: "Always"
           name: test

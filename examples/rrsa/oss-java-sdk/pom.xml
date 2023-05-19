@@ -9,16 +9,17 @@
     <version>1.0-SNAPSHOT</version>
 
     <dependencies>
-        <dependency>
-            <groupId>com.aliyun</groupId>
-            <artifactId>cs20151215</artifactId>
-            <version>3.0.28</version>
-        </dependency>
 
         <dependency>
             <groupId>com.aliyun</groupId>
             <artifactId>credentials-java</artifactId>
             <version>0.2.10</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.aliyun.oss</groupId>
+            <artifactId>aliyun-sdk-oss</artifactId>
+            <version>3.16.1</version>
         </dependency>
 
     </dependencies>

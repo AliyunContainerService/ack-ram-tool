@@ -4,9 +4,9 @@ set -e
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
 CLUSTER_ID="$1"
 KUBECONFIG_PATH="${SCRIPT_DIR}/kubeconfig"
-NAMESPACE="rrsa-demo-java-sdk"
+NAMESPACE="rrsa-demo-oss-java-sdk"
 ROLE_NAME="test-rrsa-demo"
-POLICY_NAME="test-cs-describe-clusters"
+POLICY_NAME="test-oss-list-buckets"
 
 trap cleanup EXIT
 
@@ -36,8 +36,7 @@ function setup_role() {
     {
       "Effect": "Allow",
       "Action": [
-        "cs:DescribeClusters",
-        "cs:GetClusters"
+        "oss:ListBuckets"
       ],
       "Resource": [
         "*"
