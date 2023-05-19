@@ -41,6 +41,15 @@ func testOpenAPISDK() {
 	}
 }
 
+func newCredential() credentials.Credential {
+	// https://www.alibabacloud.com/help/doc-detail/378661.html
+	cred, err := credentials.NewCredential(nil)
+	if err != nil {
+		panic(err)
+	}
+	return cred
+}
+
 func newOidcCredential() credentials.Credential {
 	// https://www.alibabacloud.com/help/doc-detail/378661.html
 	config := new(credentials.Config).
