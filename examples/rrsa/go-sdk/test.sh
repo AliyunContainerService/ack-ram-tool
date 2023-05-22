@@ -5,6 +5,8 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
 CLUSTER_ID="$1"
 KUBECONFIG_PATH="${SCRIPT_DIR}/kubeconfig"
 NAMESPACE="rrsa-demo-golang-sdk"
+ROLE_NAME="test-rrsa-demo"
+POLICY_NAME="test-cs-describe-clusters"
 
 trap cleanup EXIT
 
@@ -27,13 +29,15 @@ function install_helper() {
 function setup_role() {
   bar_tip "setup ram role"
 
-  aliyun ram CreatePolicy --PolicyName cs-describe-clusters --PolicyDocument '{
+  aliyun ram DeletePolicy --PolicyName ${POLICY_NAME} || true
+  aliyun ram CreatePolicy --PolicyName ${POLICY_NAME} --PolicyDocument '{
   "Version": "1",
   "Statement": [
     {
       "Effect": "Allow",
       "Action": [
-        "cs:DescribeClusters"
+        "cs:DescribeClusters",
+        "cs:GetClusters"
       ],
       "Resource": [
         "*"
@@ -46,15 +50,16 @@ function setup_role() {
   ack-ram-tool rrsa associate-role --cluster-id "${CLUSTER_ID}" \
     --namespace "${NAMESPACE}" \
     --service-account demo-sa \
-    --role-name test-rrsa-demo \
+    --role-name ${ROLE_NAME} \
     --create-role-if-not-exist \
-    --attach-custom-policy cs-describe-clusters
+    --attach-custom-policy ${POLICY_NAME}
 }
 
 function deploy_demo() {
   bar_tip "deploy demo"
 
   ack-ram-tool credential-plugin get-kubeconfig --cluster-id "${CLUSTER_ID}" > ${KUBECONFIG_PATH}
+  kubectl --kubeconfig ${KUBECONFIG_PATH} delete -f "${SCRIPT_DIR}/deploy.yaml" || true
   kubectl --kubeconfig ${KUBECONFIG_PATH} apply -f "${SCRIPT_DIR}/deploy.yaml"
 }
 
@@ -70,6 +75,7 @@ function cleanup() {
   bar_tip "cleanup"
 
   rm ${KUBECONFIG_PATH}
+  aliyun ram DetachPolicyFromRole --RoleName ${ROLE_NAME} --PolicyName ${POLICY_NAME} --PolicyType Custom || true
 
   set -e
 }

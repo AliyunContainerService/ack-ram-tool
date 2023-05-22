@@ -58,7 +58,7 @@ function deploy_demo() {
   bar_tip "deploy demo"
 
   ack-ram-tool credential-plugin get-kubeconfig --cluster-id "${CLUSTER_ID}" > ${KUBECONFIG_PATH}
-  kubectl --kubeconfig ${KUBECONFIG_PATH} delete -f "${SCRIPT_DIR}/deploy.yaml"
+  kubectl --kubeconfig ${KUBECONFIG_PATH} delete -f "${SCRIPT_DIR}/deploy.yaml" || true
   kubectl --kubeconfig ${KUBECONFIG_PATH} apply -f "${SCRIPT_DIR}/deploy.yaml"
 }
 

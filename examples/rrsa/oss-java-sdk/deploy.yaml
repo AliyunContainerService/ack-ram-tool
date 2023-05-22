@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: rrsa-demo-java-sdk
+  name: rrsa-demo-oss-java-sdk
   labels:
     pod-identity.alibabacloud.com/injection: 'on'
 
@@ -11,7 +11,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: demo-sa
-  namespace: rrsa-demo-java-sdk
+  namespace: rrsa-demo-oss-java-sdk
   annotations:
     pod-identity.alibabacloud.com/role-name: test-rrsa-demo
 
@@ -20,7 +20,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: demo
-  namespace: rrsa-demo-java-sdk
+  namespace: rrsa-demo-oss-java-sdk
 spec:
   template:
     spec:

@@ -64,5 +64,9 @@ kubectl --kubeconfig ./kubeconfig -n rrsa-demo-oss-java-sdk logs job/demo
 Outputs:
 
 ```
+2023/05/19 10:58:55 test oss sdk using rrsa oidc token
+call oss.listBuckets via oidc token success:
+- test-***
+- cri-***
 
 ```

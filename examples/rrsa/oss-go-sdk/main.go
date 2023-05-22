@@ -36,7 +36,7 @@ func testOSSSDK() {
 
 	fmt.Println("call oss.listBuckets via oidc token success:")
 	for _, item := range ret.Buckets {
-		fmt.Printf("-%s\n", item.Name)
+		fmt.Printf("- %s\n", item.Name)
 	}
 }
 

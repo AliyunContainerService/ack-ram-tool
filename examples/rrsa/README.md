@@ -7,7 +7,8 @@ Examples for RRSA Usage.
 |-------------------|---------------------------------------------------------------------------------------------------------------------|
 | go-sdk            | Using [Alibaba Could Go SDK](https://github.com/aliyun/alibabacloud-go-sdk) with RRSA Auth                          |
 | oss-go-sdk        | Using [aliyun-oss-go-sdk](https://github.com/aliyun/aliyun-oss-go-sdk) with RRSA Auth                               |
-| java-sdk          | Using Alibaba Could Java SDK with RRSA Auth                                                                         |
+| java-sdk          | Using [Alibaba Could Java SDK](https://github.com/aliyun/alibabacloud-java-sdk) with RRSA Auth                                                                     |
+| oss-java-sdk      | Using [aliyun-oss-java-sdk](https://github.com/aliyun/aliyun-oss-java-sdk) with RRSA Auth                                                                     |
 | python3-sdk       | Using Alibaba Could Python 3 SDK with RRSA Auth                                                                     |
 | nodejs-sdk        | Using Alibaba Could Node.js/TypeScript SDK with RRSA Auth                                                           |
 | kaniko-in-ack     | Building docker image with [Kaniko](https://github.com/GoogleContainerTools/kaniko) then push to ACR with RRSA Auth |

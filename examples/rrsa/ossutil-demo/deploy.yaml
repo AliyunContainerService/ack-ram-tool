@@ -33,7 +33,7 @@ spec:
           command:
             - sh
             - -c
-            - 'timeout 200 ack-ram-tool export-credentials --format=ecs-metadata-json --serve=0.0.0.0:8088; echo done'
+            - 'timeout 200 ack-ram-tool export-credentials --format=ecs-metadata-json --serve=127.0.0.1:8088; echo done'
         - image: registry.cn-hangzhou.aliyuncs.com/acs/ack-ram-tool:1.0.0-dev-rrsa-example-ossutil
           imagePullPolicy: "Always"
           name: test
