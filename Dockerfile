@@ -7,7 +7,7 @@ WORKDIR /workspace
 COPY . ./
 RUN make build VERSION=${VERSION} GIT_COMMIT=${GIT_COMMIT}
 
-FROM alpine:3.17.3
+FROM alpine:3.18.0
 
 WORKDIR /usr/bin/
 
