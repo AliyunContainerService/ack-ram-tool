@@ -4,9 +4,9 @@ set -e
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
 CLUSTER_ID="$1"
 KUBECONFIG_PATH="${SCRIPT_DIR}/kubeconfig"
-NAMESPACE="rrsa-demo-aliyun-cli"
+NAMESPACE="rrsa-demo-oss-golang-sdk"
 ROLE_NAME="test-rrsa-demo"
-POLICY_NAME="AliyunCSReadOnlyAccess"
+POLICY_NAME="test-oss-list-buckets"
 
 trap cleanup EXIT
 
@@ -29,12 +29,29 @@ function install_helper() {
 function setup_role() {
   bar_tip "setup ram role"
 
+  aliyun ram DeletePolicy --PolicyName ${POLICY_NAME} || true
+  aliyun ram CreatePolicy --PolicyName ${POLICY_NAME} --PolicyDocument '{
+  "Version": "1",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "oss:ListBuckets"
+      ],
+      "Resource": [
+        "*"
+      ],
+      "Condition": {}
+    }
+  ]
+}' || true
+
   ack-ram-tool rrsa associate-role --cluster-id "${CLUSTER_ID}" \
     --namespace "${NAMESPACE}" \
     --service-account demo-sa \
     --role-name ${ROLE_NAME} \
     --create-role-if-not-exist \
-    --attach-system-policy ${POLICY_NAME}
+    --attach-custom-policy ${POLICY_NAME}
 }
 
 function deploy_demo() {
@@ -57,7 +74,7 @@ function cleanup() {
   bar_tip "cleanup"
 
   rm ${KUBECONFIG_PATH}
-  aliyun ram DetachPolicyFromRole --RoleName ${ROLE_NAME} --PolicyName ${POLICY_NAME} --PolicyType System || true
+  aliyun ram DetachPolicyFromRole --RoleName ${ROLE_NAME} --PolicyName ${POLICY_NAME} --PolicyType Custom || true
 
   set -e
 }
