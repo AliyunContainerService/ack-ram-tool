@@ -10,7 +10,7 @@ require (
 	github.com/alibabacloud-go/darabonba-openapi/v2 v2.0.2
 	github.com/alibabacloud-go/ram-20150501 v1.0.2
 	github.com/alibabacloud-go/sts-20150401 v1.1.0
-	github.com/alibabacloud-go/tea v1.1.20
+	github.com/alibabacloud-go/tea v1.2.0
 	github.com/aliyun/alibaba-cloud-sdk-go v1.62.156
 	github.com/aliyun/credentials-go v1.3.0
 	github.com/briandowns/spinner v1.23.0
