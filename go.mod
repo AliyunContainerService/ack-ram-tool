@@ -10,7 +10,7 @@ require (
 	github.com/alibabacloud-go/darabonba-openapi/v2 v2.0.2
 	github.com/alibabacloud-go/ram-20150501 v1.0.2
 	github.com/alibabacloud-go/sts-20150401 v1.1.0
-	github.com/alibabacloud-go/tea v1.1.20
+	github.com/alibabacloud-go/tea v1.2.1
 	github.com/aliyun/alibaba-cloud-sdk-go v1.62.156
 	github.com/aliyun/credentials-go v1.3.0
 	github.com/briandowns/spinner v1.23.0
@@ -70,11 +70,11 @@ require (
 	github.com/tjfoc/gmsm v1.3.2 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
-	golang.org/x/net v0.9.0 // indirect
+	golang.org/x/net v0.11.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20220223155221-ee480838109b // indirect
-	golang.org/x/sys v0.7.0 // indirect
-	golang.org/x/term v0.7.0 // indirect
-	golang.org/x/text v0.9.0 // indirect
+	golang.org/x/sys v0.9.0 // indirect
+	golang.org/x/term v0.9.0 // indirect
+	golang.org/x/text v0.10.0 // indirect
 	golang.org/x/time v0.0.0-20220224211638-0e9765cccd65 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
