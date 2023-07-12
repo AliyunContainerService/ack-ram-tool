@@ -11,7 +11,7 @@ FROM alpine:3.17.2
 RUN apk --no-cache add libc6-compat
 
 WORKDIR /usr/bin/
-COPY --from=cli /ack-ram-tool ./ack-ram-tool
+COPY --from=cli /tmp/ack-ram-tool ./ack-ram-tool
 COPY --from=cli /tmp/aliyun ./aliyun
 
 WORKDIR /root/.aliyun/
