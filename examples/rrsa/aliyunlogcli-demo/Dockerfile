@@ -1,4 +1,4 @@
-FROM debian:buster as cli
+FROM alpine:3.17.2 as cli
 # TARGETPLATFORM
 
 WORKDIR /tmp/
