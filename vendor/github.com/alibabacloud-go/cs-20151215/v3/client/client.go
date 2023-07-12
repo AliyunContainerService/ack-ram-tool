@@ -640,13 +640,20 @@ func (s *CancelWorkflowResponse) SetStatusCode(v int32) *CancelWorkflowResponse 
 }
 
 type CreateAutoscalingConfigRequest struct {
-	CoolDownDuration        *string `json:"cool_down_duration,omitempty" xml:"cool_down_duration,omitempty"`
-	Expander                *string `json:"expander,omitempty" xml:"expander,omitempty"`
-	GpuUtilizationThreshold *string `json:"gpu_utilization_threshold,omitempty" xml:"gpu_utilization_threshold,omitempty"`
-	ScaleDownEnabled        *bool   `json:"scale_down_enabled,omitempty" xml:"scale_down_enabled,omitempty"`
-	ScanInterval            *string `json:"scan_interval,omitempty" xml:"scan_interval,omitempty"`
-	UnneededDuration        *string `json:"unneeded_duration,omitempty" xml:"unneeded_duration,omitempty"`
-	UtilizationThreshold    *string `json:"utilization_threshold,omitempty" xml:"utilization_threshold,omitempty"`
+	CoolDownDuration           *string `json:"cool_down_duration,omitempty" xml:"cool_down_duration,omitempty"`
+	DaemonsetEvictionForNodes  *bool   `json:"daemonset_eviction_for_nodes,omitempty" xml:"daemonset_eviction_for_nodes,omitempty"`
+	Expander                   *string `json:"expander,omitempty" xml:"expander,omitempty"`
+	GpuUtilizationThreshold    *string `json:"gpu_utilization_threshold,omitempty" xml:"gpu_utilization_threshold,omitempty"`
+	MaxGracefulTerminationSec  *int32  `json:"max_graceful_termination_sec,omitempty" xml:"max_graceful_termination_sec,omitempty"`
+	MinReplicaCount            *int32  `json:"min_replica_count,omitempty" xml:"min_replica_count,omitempty"`
+	RecycleNodeDeletionEnabled *bool   `json:"recycle_node_deletion_enabled,omitempty" xml:"recycle_node_deletion_enabled,omitempty"`
+	ScaleDownEnabled           *bool   `json:"scale_down_enabled,omitempty" xml:"scale_down_enabled,omitempty"`
+	ScaleUpFromZero            *bool   `json:"scale_up_from_zero,omitempty" xml:"scale_up_from_zero,omitempty"`
+	ScanInterval               *string `json:"scan_interval,omitempty" xml:"scan_interval,omitempty"`
+	SkipNodesWithLocalStorage  *bool   `json:"skip_nodes_with_local_storage,omitempty" xml:"skip_nodes_with_local_storage,omitempty"`
+	SkipNodesWithSystemPods    *bool   `json:"skip_nodes_with_system_pods,omitempty" xml:"skip_nodes_with_system_pods,omitempty"`
+	UnneededDuration           *string `json:"unneeded_duration,omitempty" xml:"unneeded_duration,omitempty"`
+	UtilizationThreshold       *string `json:"utilization_threshold,omitempty" xml:"utilization_threshold,omitempty"`
 }
 
 func (s CreateAutoscalingConfigRequest) String() string {
@@ -662,6 +669,11 @@ func (s *CreateAutoscalingConfigRequest) SetCoolDownDuration(v string) *CreateAu
 	return s
 }
 
+func (s *CreateAutoscalingConfigRequest) SetDaemonsetEvictionForNodes(v bool) *CreateAutoscalingConfigRequest {
+	s.DaemonsetEvictionForNodes = &v
+	return s
+}
+
 func (s *CreateAutoscalingConfigRequest) SetExpander(v string) *CreateAutoscalingConfigRequest {
 	s.Expander = &v
 	return s
@@ -672,13 +684,43 @@ func (s *CreateAutoscalingConfigRequest) SetGpuUtilizationThreshold(v string) *C
 	return s
 }
 
+func (s *CreateAutoscalingConfigRequest) SetMaxGracefulTerminationSec(v int32) *CreateAutoscalingConfigRequest {
+	s.MaxGracefulTerminationSec = &v
+	return s
+}
+
+func (s *CreateAutoscalingConfigRequest) SetMinReplicaCount(v int32) *CreateAutoscalingConfigRequest {
+	s.MinReplicaCount = &v
+	return s
+}
+
+func (s *CreateAutoscalingConfigRequest) SetRecycleNodeDeletionEnabled(v bool) *CreateAutoscalingConfigRequest {
+	s.RecycleNodeDeletionEnabled = &v
+	return s
+}
+
 func (s *CreateAutoscalingConfigRequest) SetScaleDownEnabled(v bool) *CreateAutoscalingConfigRequest {
 	s.ScaleDownEnabled = &v
 	return s
 }
 
+func (s *CreateAutoscalingConfigRequest) SetScaleUpFromZero(v bool) *CreateAutoscalingConfigRequest {
+	s.ScaleUpFromZero = &v
+	return s
+}
+
 func (s *CreateAutoscalingConfigRequest) SetScanInterval(v string) *CreateAutoscalingConfigRequest {
 	s.ScanInterval = &v
+	return s
+}
+
+func (s *CreateAutoscalingConfigRequest) SetSkipNodesWithLocalStorage(v bool) *CreateAutoscalingConfigRequest {
+	s.SkipNodesWithLocalStorage = &v
+	return s
+}
+
+func (s *CreateAutoscalingConfigRequest) SetSkipNodesWithSystemPods(v bool) *CreateAutoscalingConfigRequest {
+	s.SkipNodesWithSystemPods = &v
 	return s
 }
 
@@ -2516,6 +2558,7 @@ func (s *DeleteClusterShrinkRequest) SetRetainResourcesShrink(v string) *DeleteC
 }
 
 type DeleteClusterResponseBody struct {
+	// 任务ID。
 	TaskId *string `json:"task_id,omitempty" xml:"task_id,omitempty"`
 }
 
@@ -6711,8 +6754,10 @@ func (s *DescribeClusterVulsResponse) SetBody(v *DescribeClusterVulsResponseBody
 }
 
 type DescribeClustersRequest struct {
+	// The cluster type.
 	ClusterType *string `json:"clusterType,omitempty" xml:"clusterType,omitempty"`
-	Name        *string `json:"name,omitempty" xml:"name,omitempty"`
+	// The cluster name based on which the system performs fuzzy searches among the clusters that belong to the current Alibaba Cloud account.
+	Name *string `json:"name,omitempty" xml:"name,omitempty"`
 }
 
 func (s DescribeClustersRequest) String() string {
@@ -13313,8 +13358,10 @@ func (s *ScanClusterVulsResponse) SetBody(v *ScanClusterVulsResponseBody) *ScanC
 }
 
 type StartAlertResponseBody struct {
-	Msg    *string `json:"msg,omitempty" xml:"msg,omitempty"`
-	Status *bool   `json:"status,omitempty" xml:"status,omitempty"`
+	// The message returned.
+	Msg *string `json:"msg,omitempty" xml:"msg,omitempty"`
+	// The status.
+	Status *bool `json:"status,omitempty" xml:"status,omitempty"`
 }
 
 func (s StartAlertResponseBody) String() string {
@@ -13812,6 +13859,47 @@ func (s *UntagResourcesRequest) SetResourceType(v string) *UntagResourcesRequest
 
 func (s *UntagResourcesRequest) SetTagKeys(v []*string) *UntagResourcesRequest {
 	s.TagKeys = v
+	return s
+}
+
+type UntagResourcesShrinkRequest struct {
+	All               *bool   `json:"all,omitempty" xml:"all,omitempty"`
+	RegionId          *string `json:"region_id,omitempty" xml:"region_id,omitempty"`
+	ResourceIdsShrink *string `json:"resource_ids,omitempty" xml:"resource_ids,omitempty"`
+	ResourceType      *string `json:"resource_type,omitempty" xml:"resource_type,omitempty"`
+	TagKeysShrink     *string `json:"tag_keys,omitempty" xml:"tag_keys,omitempty"`
+}
+
+func (s UntagResourcesShrinkRequest) String() string {
+	return tea.Prettify(s)
+}
+
+func (s UntagResourcesShrinkRequest) GoString() string {
+	return s.String()
+}
+
+func (s *UntagResourcesShrinkRequest) SetAll(v bool) *UntagResourcesShrinkRequest {
+	s.All = &v
+	return s
+}
+
+func (s *UntagResourcesShrinkRequest) SetRegionId(v string) *UntagResourcesShrinkRequest {
+	s.RegionId = &v
+	return s
+}
+
+func (s *UntagResourcesShrinkRequest) SetResourceIdsShrink(v string) *UntagResourcesShrinkRequest {
+	s.ResourceIdsShrink = &v
+	return s
+}
+
+func (s *UntagResourcesShrinkRequest) SetResourceType(v string) *UntagResourcesShrinkRequest {
+	s.ResourceType = &v
+	return s
+}
+
+func (s *UntagResourcesShrinkRequest) SetTagKeysShrink(v string) *UntagResourcesShrinkRequest {
+	s.TagKeysShrink = &v
 	return s
 }
 
@@ -14620,6 +14708,10 @@ func (client *Client) CreateAutoscalingConfigWithOptions(ClusterId *string, requ
 		body["cool_down_duration"] = request.CoolDownDuration
 	}
 
+	if !tea.BoolValue(util.IsUnset(request.DaemonsetEvictionForNodes)) {
+		body["daemonset_eviction_for_nodes"] = request.DaemonsetEvictionForNodes
+	}
+
 	if !tea.BoolValue(util.IsUnset(request.Expander)) {
 		body["expander"] = request.Expander
 	}
@@ -14628,12 +14720,36 @@ func (client *Client) CreateAutoscalingConfigWithOptions(ClusterId *string, requ
 		body["gpu_utilization_threshold"] = request.GpuUtilizationThreshold
 	}
 
+	if !tea.BoolValue(util.IsUnset(request.MaxGracefulTerminationSec)) {
+		body["max_graceful_termination_sec"] = request.MaxGracefulTerminationSec
+	}
+
+	if !tea.BoolValue(util.IsUnset(request.MinReplicaCount)) {
+		body["min_replica_count"] = request.MinReplicaCount
+	}
+
+	if !tea.BoolValue(util.IsUnset(request.RecycleNodeDeletionEnabled)) {
+		body["recycle_node_deletion_enabled"] = request.RecycleNodeDeletionEnabled
+	}
+
 	if !tea.BoolValue(util.IsUnset(request.ScaleDownEnabled)) {
 		body["scale_down_enabled"] = request.ScaleDownEnabled
 	}
 
+	if !tea.BoolValue(util.IsUnset(request.ScaleUpFromZero)) {
+		body["scale_up_from_zero"] = request.ScaleUpFromZero
+	}
+
 	if !tea.BoolValue(util.IsUnset(request.ScanInterval)) {
 		body["scan_interval"] = request.ScanInterval
+	}
+
+	if !tea.BoolValue(util.IsUnset(request.SkipNodesWithLocalStorage)) {
+		body["skip_nodes_with_local_storage"] = request.SkipNodesWithLocalStorage
+	}
+
+	if !tea.BoolValue(util.IsUnset(request.SkipNodesWithSystemPods)) {
+		body["skip_nodes_with_system_pods"] = request.SkipNodesWithSystemPods
 	}
 
 	if !tea.BoolValue(util.IsUnset(request.UnneededDuration)) {
@@ -17710,7 +17826,7 @@ func (client *Client) DescribeTriggerWithOptions(clusterId *string, request *Des
 		Action:      tea.String("DescribeTrigger"),
 		Version:     tea.String("2015-12-15"),
 		Protocol:    tea.String("HTTPS"),
-		Pathname:    tea.String("/clusters/%5Bcluster_id%5D/triggers"),
+		Pathname:    tea.String("/clusters/" + tea.StringValue(openapiutil.GetEncodeParam(clusterId)) + "/triggers"),
 		Method:      tea.String("GET"),
 		AuthType:    tea.String("AK"),
 		Style:       tea.String("ROA"),
@@ -19882,11 +19998,21 @@ func (client *Client) UnInstallClusterAddons(ClusterId *string, request *UnInsta
 	return _result, _err
 }
 
-func (client *Client) UntagResourcesWithOptions(request *UntagResourcesRequest, headers map[string]*string, runtime *util.RuntimeOptions) (_result *UntagResourcesResponse, _err error) {
-	_err = util.ValidateModel(request)
+func (client *Client) UntagResourcesWithOptions(tmpReq *UntagResourcesRequest, headers map[string]*string, runtime *util.RuntimeOptions) (_result *UntagResourcesResponse, _err error) {
+	_err = util.ValidateModel(tmpReq)
 	if _err != nil {
 		return _result, _err
 	}
+	request := &UntagResourcesShrinkRequest{}
+	openapiutil.Convert(tmpReq, request)
+	if !tea.BoolValue(util.IsUnset(tmpReq.ResourceIds)) {
+		request.ResourceIdsShrink = openapiutil.ArrayToStringWithSpecifiedStyle(tmpReq.ResourceIds, tea.String("resource_ids"), tea.String("json"))
+	}
+
+	if !tea.BoolValue(util.IsUnset(tmpReq.TagKeys)) {
+		request.TagKeysShrink = openapiutil.ArrayToStringWithSpecifiedStyle(tmpReq.TagKeys, tea.String("tag_keys"), tea.String("json"))
+	}
+
 	query := map[string]interface{}{}
 	if !tea.BoolValue(util.IsUnset(request.All)) {
 		query["all"] = request.All
@@ -19896,16 +20022,16 @@ func (client *Client) UntagResourcesWithOptions(request *UntagResourcesRequest, 
 		query["region_id"] = request.RegionId
 	}
 
-	if !tea.BoolValue(util.IsUnset(request.ResourceIds)) {
-		query["resource_ids"] = request.ResourceIds
+	if !tea.BoolValue(util.IsUnset(request.ResourceIdsShrink)) {
+		query["resource_ids"] = request.ResourceIdsShrink
 	}
 
 	if !tea.BoolValue(util.IsUnset(request.ResourceType)) {
 		query["resource_type"] = request.ResourceType
 	}
 
-	if !tea.BoolValue(util.IsUnset(request.TagKeys)) {
-		query["tag_keys"] = request.TagKeys
+	if !tea.BoolValue(util.IsUnset(request.TagKeysShrink)) {
+		query["tag_keys"] = request.TagKeysShrink
 	}
 
 	req := &openapi.OpenApiRequest{
