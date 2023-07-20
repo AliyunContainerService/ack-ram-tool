@@ -27,7 +27,9 @@ func testOpenAPISDK() {
 		panic(err)
 	}
 
-	config := &openapi.Config{Credential: cred}
+	config := &openapi.Config{
+		Credential: cred,
+	}
 	config.Endpoint = tea.String("cs.cn-hangzhou.aliyuncs.com")
 	client, err := cs20151215.NewClient(config)
 	if err != nil {

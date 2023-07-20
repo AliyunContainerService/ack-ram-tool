@@ -26,7 +26,9 @@ func testOSSSDK() {
 		panic(err)
 	}
 
-	provider := &OSSCredentialsProvider{cred: cred}
+	provider := &OSSCredentialsProvider{
+		cred: cred,
+	}
 	client, err := oss.New("https://oss-cn-hangzhou.aliyuncs.com", "", "",
 		oss.SetCredentialsProvider(provider))
 	if err != nil {
