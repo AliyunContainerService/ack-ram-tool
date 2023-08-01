@@ -639,14 +639,85 @@ func (s *CancelWorkflowResponse) SetStatusCode(v int32) *CancelWorkflowResponse 
 	return s
 }
 
+type CheckControlPlaneLogEnableResponseBody struct {
+	Aliuid     *string   `json:"aliuid,omitempty" xml:"aliuid,omitempty"`
+	Components []*string `json:"components,omitempty" xml:"components,omitempty" type:"Repeated"`
+	LogProject *string   `json:"log_project,omitempty" xml:"log_project,omitempty"`
+	LogTtl     *string   `json:"log_ttl,omitempty" xml:"log_ttl,omitempty"`
+}
+
+func (s CheckControlPlaneLogEnableResponseBody) String() string {
+	return tea.Prettify(s)
+}
+
+func (s CheckControlPlaneLogEnableResponseBody) GoString() string {
+	return s.String()
+}
+
+func (s *CheckControlPlaneLogEnableResponseBody) SetAliuid(v string) *CheckControlPlaneLogEnableResponseBody {
+	s.Aliuid = &v
+	return s
+}
+
+func (s *CheckControlPlaneLogEnableResponseBody) SetComponents(v []*string) *CheckControlPlaneLogEnableResponseBody {
+	s.Components = v
+	return s
+}
+
+func (s *CheckControlPlaneLogEnableResponseBody) SetLogProject(v string) *CheckControlPlaneLogEnableResponseBody {
+	s.LogProject = &v
+	return s
+}
+
+func (s *CheckControlPlaneLogEnableResponseBody) SetLogTtl(v string) *CheckControlPlaneLogEnableResponseBody {
+	s.LogTtl = &v
+	return s
+}
+
+type CheckControlPlaneLogEnableResponse struct {
+	Headers    map[string]*string                      `json:"headers,omitempty" xml:"headers,omitempty" require:"true"`
+	StatusCode *int32                                  `json:"statusCode,omitempty" xml:"statusCode,omitempty" require:"true"`
+	Body       *CheckControlPlaneLogEnableResponseBody `json:"body,omitempty" xml:"body,omitempty" require:"true"`
+}
+
+func (s CheckControlPlaneLogEnableResponse) String() string {
+	return tea.Prettify(s)
+}
+
+func (s CheckControlPlaneLogEnableResponse) GoString() string {
+	return s.String()
+}
+
+func (s *CheckControlPlaneLogEnableResponse) SetHeaders(v map[string]*string) *CheckControlPlaneLogEnableResponse {
+	s.Headers = v
+	return s
+}
+
+func (s *CheckControlPlaneLogEnableResponse) SetStatusCode(v int32) *CheckControlPlaneLogEnableResponse {
+	s.StatusCode = &v
+	return s
+}
+
+func (s *CheckControlPlaneLogEnableResponse) SetBody(v *CheckControlPlaneLogEnableResponseBody) *CheckControlPlaneLogEnableResponse {
+	s.Body = v
+	return s
+}
+
 type CreateAutoscalingConfigRequest struct {
-	CoolDownDuration        *string `json:"cool_down_duration,omitempty" xml:"cool_down_duration,omitempty"`
-	Expander                *string `json:"expander,omitempty" xml:"expander,omitempty"`
-	GpuUtilizationThreshold *string `json:"gpu_utilization_threshold,omitempty" xml:"gpu_utilization_threshold,omitempty"`
-	ScaleDownEnabled        *bool   `json:"scale_down_enabled,omitempty" xml:"scale_down_enabled,omitempty"`
-	ScanInterval            *string `json:"scan_interval,omitempty" xml:"scan_interval,omitempty"`
-	UnneededDuration        *string `json:"unneeded_duration,omitempty" xml:"unneeded_duration,omitempty"`
-	UtilizationThreshold    *string `json:"utilization_threshold,omitempty" xml:"utilization_threshold,omitempty"`
+	CoolDownDuration           *string `json:"cool_down_duration,omitempty" xml:"cool_down_duration,omitempty"`
+	DaemonsetEvictionForNodes  *bool   `json:"daemonset_eviction_for_nodes,omitempty" xml:"daemonset_eviction_for_nodes,omitempty"`
+	Expander                   *string `json:"expander,omitempty" xml:"expander,omitempty"`
+	GpuUtilizationThreshold    *string `json:"gpu_utilization_threshold,omitempty" xml:"gpu_utilization_threshold,omitempty"`
+	MaxGracefulTerminationSec  *int32  `json:"max_graceful_termination_sec,omitempty" xml:"max_graceful_termination_sec,omitempty"`
+	MinReplicaCount            *int32  `json:"min_replica_count,omitempty" xml:"min_replica_count,omitempty"`
+	RecycleNodeDeletionEnabled *bool   `json:"recycle_node_deletion_enabled,omitempty" xml:"recycle_node_deletion_enabled,omitempty"`
+	ScaleDownEnabled           *bool   `json:"scale_down_enabled,omitempty" xml:"scale_down_enabled,omitempty"`
+	ScaleUpFromZero            *bool   `json:"scale_up_from_zero,omitempty" xml:"scale_up_from_zero,omitempty"`
+	ScanInterval               *string `json:"scan_interval,omitempty" xml:"scan_interval,omitempty"`
+	SkipNodesWithLocalStorage  *bool   `json:"skip_nodes_with_local_storage,omitempty" xml:"skip_nodes_with_local_storage,omitempty"`
+	SkipNodesWithSystemPods    *bool   `json:"skip_nodes_with_system_pods,omitempty" xml:"skip_nodes_with_system_pods,omitempty"`
+	UnneededDuration           *string `json:"unneeded_duration,omitempty" xml:"unneeded_duration,omitempty"`
+	UtilizationThreshold       *string `json:"utilization_threshold,omitempty" xml:"utilization_threshold,omitempty"`
 }
 
 func (s CreateAutoscalingConfigRequest) String() string {
@@ -662,6 +733,11 @@ func (s *CreateAutoscalingConfigRequest) SetCoolDownDuration(v string) *CreateAu
 	return s
 }
 
+func (s *CreateAutoscalingConfigRequest) SetDaemonsetEvictionForNodes(v bool) *CreateAutoscalingConfigRequest {
+	s.DaemonsetEvictionForNodes = &v
+	return s
+}
+
 func (s *CreateAutoscalingConfigRequest) SetExpander(v string) *CreateAutoscalingConfigRequest {
 	s.Expander = &v
 	return s
@@ -672,13 +748,43 @@ func (s *CreateAutoscalingConfigRequest) SetGpuUtilizationThreshold(v string) *C
 	return s
 }
 
+func (s *CreateAutoscalingConfigRequest) SetMaxGracefulTerminationSec(v int32) *CreateAutoscalingConfigRequest {
+	s.MaxGracefulTerminationSec = &v
+	return s
+}
+
+func (s *CreateAutoscalingConfigRequest) SetMinReplicaCount(v int32) *CreateAutoscalingConfigRequest {
+	s.MinReplicaCount = &v
+	return s
+}
+
+func (s *CreateAutoscalingConfigRequest) SetRecycleNodeDeletionEnabled(v bool) *CreateAutoscalingConfigRequest {
+	s.RecycleNodeDeletionEnabled = &v
+	return s
+}
+
 func (s *CreateAutoscalingConfigRequest) SetScaleDownEnabled(v bool) *CreateAutoscalingConfigRequest {
 	s.ScaleDownEnabled = &v
 	return s
 }
 
+func (s *CreateAutoscalingConfigRequest) SetScaleUpFromZero(v bool) *CreateAutoscalingConfigRequest {
+	s.ScaleUpFromZero = &v
+	return s
+}
+
 func (s *CreateAutoscalingConfigRequest) SetScanInterval(v string) *CreateAutoscalingConfigRequest {
 	s.ScanInterval = &v
+	return s
+}
+
+func (s *CreateAutoscalingConfigRequest) SetSkipNodesWithLocalStorage(v bool) *CreateAutoscalingConfigRequest {
+	s.SkipNodesWithLocalStorage = &v
+	return s
+}
+
+func (s *CreateAutoscalingConfigRequest) SetSkipNodesWithSystemPods(v bool) *CreateAutoscalingConfigRequest {
+	s.SkipNodesWithSystemPods = &v
 	return s
 }
 
@@ -2516,6 +2622,7 @@ func (s *DeleteClusterShrinkRequest) SetRetainResourcesShrink(v string) *DeleteC
 }
 
 type DeleteClusterResponseBody struct {
+	// 任务ID。
 	TaskId *string `json:"task_id,omitempty" xml:"task_id,omitempty"`
 }
 
@@ -6711,8 +6818,10 @@ func (s *DescribeClusterVulsResponse) SetBody(v *DescribeClusterVulsResponseBody
 }
 
 type DescribeClustersRequest struct {
+	// The cluster type.
 	ClusterType *string `json:"clusterType,omitempty" xml:"clusterType,omitempty"`
-	Name        *string `json:"name,omitempty" xml:"name,omitempty"`
+	// The cluster name based on which the system performs fuzzy searches among the clusters that belong to the current Alibaba Cloud account.
+	Name *string `json:"name,omitempty" xml:"name,omitempty"`
 }
 
 func (s DescribeClustersRequest) String() string {
@@ -8155,6 +8264,7 @@ func (s *DescribeExternalAgentResponse) SetBody(v *DescribeExternalAgentResponse
 type DescribeKubernetesVersionMetadataRequest struct {
 	ClusterType       *string `json:"ClusterType,omitempty" xml:"ClusterType,omitempty"`
 	KubernetesVersion *string `json:"KubernetesVersion,omitempty" xml:"KubernetesVersion,omitempty"`
+	Mode              *string `json:"Mode,omitempty" xml:"Mode,omitempty"`
 	Profile           *string `json:"Profile,omitempty" xml:"Profile,omitempty"`
 	Region            *string `json:"Region,omitempty" xml:"Region,omitempty"`
 	Runtime           *string `json:"runtime,omitempty" xml:"runtime,omitempty"`
@@ -8175,6 +8285,11 @@ func (s *DescribeKubernetesVersionMetadataRequest) SetClusterType(v string) *Des
 
 func (s *DescribeKubernetesVersionMetadataRequest) SetKubernetesVersion(v string) *DescribeKubernetesVersionMetadataRequest {
 	s.KubernetesVersion = &v
+	return s
+}
+
+func (s *DescribeKubernetesVersionMetadataRequest) SetMode(v string) *DescribeKubernetesVersionMetadataRequest {
+	s.Mode = &v
 	return s
 }
 
@@ -8223,12 +8338,14 @@ func (s *DescribeKubernetesVersionMetadataResponse) SetBody(v []*DescribeKuberne
 }
 
 type DescribeKubernetesVersionMetadataResponseBody struct {
-	Capabilities map[string]interface{}                                 `json:"capabilities,omitempty" xml:"capabilities,omitempty"`
-	Images       []*DescribeKubernetesVersionMetadataResponseBodyImages `json:"images,omitempty" xml:"images,omitempty" type:"Repeated"`
-	MetaData     map[string]interface{}                                 `json:"meta_data,omitempty" xml:"meta_data,omitempty"`
-	Runtimes     []*Runtime                                             `json:"runtimes,omitempty" xml:"runtimes,omitempty" type:"Repeated"`
-	Version      *string                                                `json:"version,omitempty" xml:"version,omitempty"`
-	MultiAz      *string                                                `json:"multi_az,omitempty" xml:"multi_az,omitempty"`
+	Capabilities   map[string]interface{}                                 `json:"capabilities,omitempty" xml:"capabilities,omitempty"`
+	Images         []*DescribeKubernetesVersionMetadataResponseBodyImages `json:"images,omitempty" xml:"images,omitempty" type:"Repeated"`
+	MetaData       map[string]interface{}                                 `json:"meta_data,omitempty" xml:"meta_data,omitempty"`
+	Runtimes       []*Runtime                                             `json:"runtimes,omitempty" xml:"runtimes,omitempty" type:"Repeated"`
+	Version        *string                                                `json:"version,omitempty" xml:"version,omitempty"`
+	ReleaseDate    *string                                                `json:"release_date,omitempty" xml:"release_date,omitempty"`
+	ExpirationDate *string                                                `json:"expiration_date,omitempty" xml:"expiration_date,omitempty"`
+	Creatable      *bool                                                  `json:"creatable,omitempty" xml:"creatable,omitempty"`
 }
 
 func (s DescribeKubernetesVersionMetadataResponseBody) String() string {
@@ -8264,8 +8381,18 @@ func (s *DescribeKubernetesVersionMetadataResponseBody) SetVersion(v string) *De
 	return s
 }
 
-func (s *DescribeKubernetesVersionMetadataResponseBody) SetMultiAz(v string) *DescribeKubernetesVersionMetadataResponseBody {
-	s.MultiAz = &v
+func (s *DescribeKubernetesVersionMetadataResponseBody) SetReleaseDate(v string) *DescribeKubernetesVersionMetadataResponseBody {
+	s.ReleaseDate = &v
+	return s
+}
+
+func (s *DescribeKubernetesVersionMetadataResponseBody) SetExpirationDate(v string) *DescribeKubernetesVersionMetadataResponseBody {
+	s.ExpirationDate = &v
+	return s
+}
+
+func (s *DescribeKubernetesVersionMetadataResponseBody) SetCreatable(v bool) *DescribeKubernetesVersionMetadataResponseBody {
+	s.Creatable = &v
 	return s
 }
 
@@ -9975,6 +10102,35 @@ func (s *DescribeTriggerResponseBody) SetAction(v string) *DescribeTriggerRespon
 
 func (s *DescribeTriggerResponseBody) SetToken(v string) *DescribeTriggerResponseBody {
 	s.Token = &v
+	return s
+}
+
+type DescribeUserClusterNamespacesResponse struct {
+	Headers    map[string]*string `json:"headers,omitempty" xml:"headers,omitempty" require:"true"`
+	StatusCode *int32             `json:"statusCode,omitempty" xml:"statusCode,omitempty" require:"true"`
+	Body       []*string          `json:"body,omitempty" xml:"body,omitempty" require:"true" type:"Repeated"`
+}
+
+func (s DescribeUserClusterNamespacesResponse) String() string {
+	return tea.Prettify(s)
+}
+
+func (s DescribeUserClusterNamespacesResponse) GoString() string {
+	return s.String()
+}
+
+func (s *DescribeUserClusterNamespacesResponse) SetHeaders(v map[string]*string) *DescribeUserClusterNamespacesResponse {
+	s.Headers = v
+	return s
+}
+
+func (s *DescribeUserClusterNamespacesResponse) SetStatusCode(v int32) *DescribeUserClusterNamespacesResponse {
+	s.StatusCode = &v
+	return s
+}
+
+func (s *DescribeUserClusterNamespacesResponse) SetBody(v []*string) *DescribeUserClusterNamespacesResponse {
+	s.Body = v
 	return s
 }
 
@@ -13313,8 +13469,10 @@ func (s *ScanClusterVulsResponse) SetBody(v *ScanClusterVulsResponseBody) *ScanC
 }
 
 type StartAlertResponseBody struct {
-	Msg    *string `json:"msg,omitempty" xml:"msg,omitempty"`
-	Status *bool   `json:"status,omitempty" xml:"status,omitempty"`
+	// The message returned.
+	Msg *string `json:"msg,omitempty" xml:"msg,omitempty"`
+	// The status.
+	Status *bool `json:"status,omitempty" xml:"status,omitempty"`
 }
 
 func (s StartAlertResponseBody) String() string {
@@ -13815,6 +13973,47 @@ func (s *UntagResourcesRequest) SetTagKeys(v []*string) *UntagResourcesRequest {
 	return s
 }
 
+type UntagResourcesShrinkRequest struct {
+	All               *bool   `json:"all,omitempty" xml:"all,omitempty"`
+	RegionId          *string `json:"region_id,omitempty" xml:"region_id,omitempty"`
+	ResourceIdsShrink *string `json:"resource_ids,omitempty" xml:"resource_ids,omitempty"`
+	ResourceType      *string `json:"resource_type,omitempty" xml:"resource_type,omitempty"`
+	TagKeysShrink     *string `json:"tag_keys,omitempty" xml:"tag_keys,omitempty"`
+}
+
+func (s UntagResourcesShrinkRequest) String() string {
+	return tea.Prettify(s)
+}
+
+func (s UntagResourcesShrinkRequest) GoString() string {
+	return s.String()
+}
+
+func (s *UntagResourcesShrinkRequest) SetAll(v bool) *UntagResourcesShrinkRequest {
+	s.All = &v
+	return s
+}
+
+func (s *UntagResourcesShrinkRequest) SetRegionId(v string) *UntagResourcesShrinkRequest {
+	s.RegionId = &v
+	return s
+}
+
+func (s *UntagResourcesShrinkRequest) SetResourceIdsShrink(v string) *UntagResourcesShrinkRequest {
+	s.ResourceIdsShrink = &v
+	return s
+}
+
+func (s *UntagResourcesShrinkRequest) SetResourceType(v string) *UntagResourcesShrinkRequest {
+	s.ResourceType = &v
+	return s
+}
+
+func (s *UntagResourcesShrinkRequest) SetTagKeysShrink(v string) *UntagResourcesShrinkRequest {
+	s.TagKeysShrink = &v
+	return s
+}
+
 type UntagResourcesResponseBody struct {
 	// The ID of the request.
 	RequestId *string `json:"RequestId,omitempty" xml:"RequestId,omitempty"`
@@ -13881,6 +14080,64 @@ func (s *UpdateContactGroupForAlertResponse) SetHeaders(v map[string]*string) *U
 }
 
 func (s *UpdateContactGroupForAlertResponse) SetStatusCode(v int32) *UpdateContactGroupForAlertResponse {
+	s.StatusCode = &v
+	return s
+}
+
+type UpdateControlPlaneLogRequest struct {
+	Aliuid     *string   `json:"aliuid,omitempty" xml:"aliuid,omitempty"`
+	Components []*string `json:"components,omitempty" xml:"components,omitempty" type:"Repeated"`
+	LogProject *string   `json:"log_project,omitempty" xml:"log_project,omitempty"`
+	LogTtl     *string   `json:"log_ttl,omitempty" xml:"log_ttl,omitempty"`
+}
+
+func (s UpdateControlPlaneLogRequest) String() string {
+	return tea.Prettify(s)
+}
+
+func (s UpdateControlPlaneLogRequest) GoString() string {
+	return s.String()
+}
+
+func (s *UpdateControlPlaneLogRequest) SetAliuid(v string) *UpdateControlPlaneLogRequest {
+	s.Aliuid = &v
+	return s
+}
+
+func (s *UpdateControlPlaneLogRequest) SetComponents(v []*string) *UpdateControlPlaneLogRequest {
+	s.Components = v
+	return s
+}
+
+func (s *UpdateControlPlaneLogRequest) SetLogProject(v string) *UpdateControlPlaneLogRequest {
+	s.LogProject = &v
+	return s
+}
+
+func (s *UpdateControlPlaneLogRequest) SetLogTtl(v string) *UpdateControlPlaneLogRequest {
+	s.LogTtl = &v
+	return s
+}
+
+type UpdateControlPlaneLogResponse struct {
+	Headers    map[string]*string `json:"headers,omitempty" xml:"headers,omitempty" require:"true"`
+	StatusCode *int32             `json:"statusCode,omitempty" xml:"statusCode,omitempty" require:"true"`
+}
+
+func (s UpdateControlPlaneLogResponse) String() string {
+	return tea.Prettify(s)
+}
+
+func (s UpdateControlPlaneLogResponse) GoString() string {
+	return s.String()
+}
+
+func (s *UpdateControlPlaneLogResponse) SetHeaders(v map[string]*string) *UpdateControlPlaneLogResponse {
+	s.Headers = v
+	return s
+}
+
+func (s *UpdateControlPlaneLogResponse) SetStatusCode(v int32) *UpdateControlPlaneLogResponse {
 	s.StatusCode = &v
 	return s
 }
@@ -14610,6 +14867,42 @@ func (client *Client) CancelWorkflow(workflowName *string, request *CancelWorkfl
 	return _result, _err
 }
 
+func (client *Client) CheckControlPlaneLogEnableWithOptions(ClusterId *string, headers map[string]*string, runtime *util.RuntimeOptions) (_result *CheckControlPlaneLogEnableResponse, _err error) {
+	req := &openapi.OpenApiRequest{
+		Headers: headers,
+	}
+	params := &openapi.Params{
+		Action:      tea.String("CheckControlPlaneLogEnable"),
+		Version:     tea.String("2015-12-15"),
+		Protocol:    tea.String("HTTPS"),
+		Pathname:    tea.String("/clusters/" + tea.StringValue(openapiutil.GetEncodeParam(ClusterId)) + "/controlplanelog"),
+		Method:      tea.String("GET"),
+		AuthType:    tea.String("AK"),
+		Style:       tea.String("ROA"),
+		ReqBodyType: tea.String("json"),
+		BodyType:    tea.String("json"),
+	}
+	_result = &CheckControlPlaneLogEnableResponse{}
+	_body, _err := client.CallApi(params, req, runtime)
+	if _err != nil {
+		return _result, _err
+	}
+	_err = tea.Convert(_body, &_result)
+	return _result, _err
+}
+
+func (client *Client) CheckControlPlaneLogEnable(ClusterId *string) (_result *CheckControlPlaneLogEnableResponse, _err error) {
+	runtime := &util.RuntimeOptions{}
+	headers := make(map[string]*string)
+	_result = &CheckControlPlaneLogEnableResponse{}
+	_body, _err := client.CheckControlPlaneLogEnableWithOptions(ClusterId, headers, runtime)
+	if _err != nil {
+		return _result, _err
+	}
+	_result = _body
+	return _result, _err
+}
+
 func (client *Client) CreateAutoscalingConfigWithOptions(ClusterId *string, request *CreateAutoscalingConfigRequest, headers map[string]*string, runtime *util.RuntimeOptions) (_result *CreateAutoscalingConfigResponse, _err error) {
 	_err = util.ValidateModel(request)
 	if _err != nil {
@@ -14620,6 +14913,10 @@ func (client *Client) CreateAutoscalingConfigWithOptions(ClusterId *string, requ
 		body["cool_down_duration"] = request.CoolDownDuration
 	}
 
+	if !tea.BoolValue(util.IsUnset(request.DaemonsetEvictionForNodes)) {
+		body["daemonset_eviction_for_nodes"] = request.DaemonsetEvictionForNodes
+	}
+
 	if !tea.BoolValue(util.IsUnset(request.Expander)) {
 		body["expander"] = request.Expander
 	}
@@ -14628,12 +14925,36 @@ func (client *Client) CreateAutoscalingConfigWithOptions(ClusterId *string, requ
 		body["gpu_utilization_threshold"] = request.GpuUtilizationThreshold
 	}
 
+	if !tea.BoolValue(util.IsUnset(request.MaxGracefulTerminationSec)) {
+		body["max_graceful_termination_sec"] = request.MaxGracefulTerminationSec
+	}
+
+	if !tea.BoolValue(util.IsUnset(request.MinReplicaCount)) {
+		body["min_replica_count"] = request.MinReplicaCount
+	}
+
+	if !tea.BoolValue(util.IsUnset(request.RecycleNodeDeletionEnabled)) {
+		body["recycle_node_deletion_enabled"] = request.RecycleNodeDeletionEnabled
+	}
+
 	if !tea.BoolValue(util.IsUnset(request.ScaleDownEnabled)) {
 		body["scale_down_enabled"] = request.ScaleDownEnabled
 	}
 
+	if !tea.BoolValue(util.IsUnset(request.ScaleUpFromZero)) {
+		body["scale_up_from_zero"] = request.ScaleUpFromZero
+	}
+
 	if !tea.BoolValue(util.IsUnset(request.ScanInterval)) {
 		body["scan_interval"] = request.ScanInterval
+	}
+
+	if !tea.BoolValue(util.IsUnset(request.SkipNodesWithLocalStorage)) {
+		body["skip_nodes_with_local_storage"] = request.SkipNodesWithLocalStorage
+	}
+
+	if !tea.BoolValue(util.IsUnset(request.SkipNodesWithSystemPods)) {
+		body["skip_nodes_with_system_pods"] = request.SkipNodesWithSystemPods
 	}
 
 	if !tea.BoolValue(util.IsUnset(request.UnneededDuration)) {
@@ -17192,6 +17513,10 @@ func (client *Client) DescribeKubernetesVersionMetadataWithOptions(request *Desc
 		query["KubernetesVersion"] = request.KubernetesVersion
 	}
 
+	if !tea.BoolValue(util.IsUnset(request.Mode)) {
+		query["Mode"] = request.Mode
+	}
+
 	if !tea.BoolValue(util.IsUnset(request.Profile)) {
 		query["Profile"] = request.Profile
 	}
@@ -17710,7 +18035,7 @@ func (client *Client) DescribeTriggerWithOptions(clusterId *string, request *Des
 		Action:      tea.String("DescribeTrigger"),
 		Version:     tea.String("2015-12-15"),
 		Protocol:    tea.String("HTTPS"),
-		Pathname:    tea.String("/clusters/%5Bcluster_id%5D/triggers"),
+		Pathname:    tea.String("/clusters/" + tea.StringValue(openapiutil.GetEncodeParam(clusterId)) + "/triggers"),
 		Method:      tea.String("GET"),
 		AuthType:    tea.String("AK"),
 		Style:       tea.String("ROA"),
@@ -17731,6 +18056,42 @@ func (client *Client) DescribeTrigger(clusterId *string, request *DescribeTrigge
 	headers := make(map[string]*string)
 	_result = &DescribeTriggerResponse{}
 	_body, _err := client.DescribeTriggerWithOptions(clusterId, request, headers, runtime)
+	if _err != nil {
+		return _result, _err
+	}
+	_result = _body
+	return _result, _err
+}
+
+func (client *Client) DescribeUserClusterNamespacesWithOptions(ClusterId *string, headers map[string]*string, runtime *util.RuntimeOptions) (_result *DescribeUserClusterNamespacesResponse, _err error) {
+	req := &openapi.OpenApiRequest{
+		Headers: headers,
+	}
+	params := &openapi.Params{
+		Action:      tea.String("DescribeUserClusterNamespaces"),
+		Version:     tea.String("2015-12-15"),
+		Protocol:    tea.String("HTTPS"),
+		Pathname:    tea.String("/api/v2/k8s/" + tea.StringValue(openapiutil.GetEncodeParam(ClusterId)) + "/namespaces"),
+		Method:      tea.String("GET"),
+		AuthType:    tea.String("AK"),
+		Style:       tea.String("ROA"),
+		ReqBodyType: tea.String("json"),
+		BodyType:    tea.String("array"),
+	}
+	_result = &DescribeUserClusterNamespacesResponse{}
+	_body, _err := client.CallApi(params, req, runtime)
+	if _err != nil {
+		return _result, _err
+	}
+	_err = tea.Convert(_body, &_result)
+	return _result, _err
+}
+
+func (client *Client) DescribeUserClusterNamespaces(ClusterId *string) (_result *DescribeUserClusterNamespacesResponse, _err error) {
+	runtime := &util.RuntimeOptions{}
+	headers := make(map[string]*string)
+	_result = &DescribeUserClusterNamespacesResponse{}
+	_body, _err := client.DescribeUserClusterNamespacesWithOptions(ClusterId, headers, runtime)
 	if _err != nil {
 		return _result, _err
 	}
@@ -19882,11 +20243,21 @@ func (client *Client) UnInstallClusterAddons(ClusterId *string, request *UnInsta
 	return _result, _err
 }
 
-func (client *Client) UntagResourcesWithOptions(request *UntagResourcesRequest, headers map[string]*string, runtime *util.RuntimeOptions) (_result *UntagResourcesResponse, _err error) {
-	_err = util.ValidateModel(request)
+func (client *Client) UntagResourcesWithOptions(tmpReq *UntagResourcesRequest, headers map[string]*string, runtime *util.RuntimeOptions) (_result *UntagResourcesResponse, _err error) {
+	_err = util.ValidateModel(tmpReq)
 	if _err != nil {
 		return _result, _err
 	}
+	request := &UntagResourcesShrinkRequest{}
+	openapiutil.Convert(tmpReq, request)
+	if !tea.BoolValue(util.IsUnset(tmpReq.ResourceIds)) {
+		request.ResourceIdsShrink = openapiutil.ArrayToStringWithSpecifiedStyle(tmpReq.ResourceIds, tea.String("resource_ids"), tea.String("json"))
+	}
+
+	if !tea.BoolValue(util.IsUnset(tmpReq.TagKeys)) {
+		request.TagKeysShrink = openapiutil.ArrayToStringWithSpecifiedStyle(tmpReq.TagKeys, tea.String("tag_keys"), tea.String("json"))
+	}
+
 	query := map[string]interface{}{}
 	if !tea.BoolValue(util.IsUnset(request.All)) {
 		query["all"] = request.All
@@ -19896,16 +20267,16 @@ func (client *Client) UntagResourcesWithOptions(request *UntagResourcesRequest, 
 		query["region_id"] = request.RegionId
 	}
 
-	if !tea.BoolValue(util.IsUnset(request.ResourceIds)) {
-		query["resource_ids"] = request.ResourceIds
+	if !tea.BoolValue(util.IsUnset(request.ResourceIdsShrink)) {
+		query["resource_ids"] = request.ResourceIdsShrink
 	}
 
 	if !tea.BoolValue(util.IsUnset(request.ResourceType)) {
 		query["resource_type"] = request.ResourceType
 	}
 
-	if !tea.BoolValue(util.IsUnset(request.TagKeys)) {
-		query["tag_keys"] = request.TagKeys
+	if !tea.BoolValue(util.IsUnset(request.TagKeysShrink)) {
+		query["tag_keys"] = request.TagKeysShrink
 	}
 
 	req := &openapi.OpenApiRequest{
@@ -19973,6 +20344,64 @@ func (client *Client) UpdateContactGroupForAlert(ClusterId *string) (_result *Up
 	headers := make(map[string]*string)
 	_result = &UpdateContactGroupForAlertResponse{}
 	_body, _err := client.UpdateContactGroupForAlertWithOptions(ClusterId, headers, runtime)
+	if _err != nil {
+		return _result, _err
+	}
+	_result = _body
+	return _result, _err
+}
+
+func (client *Client) UpdateControlPlaneLogWithOptions(ClusterId *string, request *UpdateControlPlaneLogRequest, headers map[string]*string, runtime *util.RuntimeOptions) (_result *UpdateControlPlaneLogResponse, _err error) {
+	_err = util.ValidateModel(request)
+	if _err != nil {
+		return _result, _err
+	}
+	body := map[string]interface{}{}
+	if !tea.BoolValue(util.IsUnset(request.Aliuid)) {
+		body["aliuid"] = request.Aliuid
+	}
+
+	if !tea.BoolValue(util.IsUnset(request.Components)) {
+		body["components"] = request.Components
+	}
+
+	if !tea.BoolValue(util.IsUnset(request.LogProject)) {
+		body["log_project"] = request.LogProject
+	}
+
+	if !tea.BoolValue(util.IsUnset(request.LogTtl)) {
+		body["log_ttl"] = request.LogTtl
+	}
+
+	req := &openapi.OpenApiRequest{
+		Headers: headers,
+		Body:    openapiutil.ParseToMap(body),
+	}
+	params := &openapi.Params{
+		Action:      tea.String("UpdateControlPlaneLog"),
+		Version:     tea.String("2015-12-15"),
+		Protocol:    tea.String("HTTPS"),
+		Pathname:    tea.String("/clusters/" + tea.StringValue(openapiutil.GetEncodeParam(ClusterId)) + "/controlplanelog"),
+		Method:      tea.String("PUT"),
+		AuthType:    tea.String("AK"),
+		Style:       tea.String("ROA"),
+		ReqBodyType: tea.String("json"),
+		BodyType:    tea.String("none"),
+	}
+	_result = &UpdateControlPlaneLogResponse{}
+	_body, _err := client.CallApi(params, req, runtime)
+	if _err != nil {
+		return _result, _err
+	}
+	_err = tea.Convert(_body, &_result)
+	return _result, _err
+}
+
+func (client *Client) UpdateControlPlaneLog(ClusterId *string, request *UpdateControlPlaneLogRequest) (_result *UpdateControlPlaneLogResponse, _err error) {
+	runtime := &util.RuntimeOptions{}
+	headers := make(map[string]*string)
+	_result = &UpdateControlPlaneLogResponse{}
+	_body, _err := client.UpdateControlPlaneLogWithOptions(ClusterId, request, headers, runtime)
 	if _err != nil {
 		return _result, _err
 	}
