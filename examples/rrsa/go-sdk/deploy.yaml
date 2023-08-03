@@ -27,6 +27,6 @@ spec:
       serviceAccountName: demo-sa
       restartPolicy: Never
       containers:
-        - image: registry.cn-hangzhou.aliyuncs.com/acs/ack-ram-tool:0.13.2-rrsa-example-golang
+        - image: registry.cn-hangzhou.aliyuncs.com/acs/ack-ram-tool:0.14.0-dev-rrsa-example-golang
           imagePullPolicy: "Always"
           name: test

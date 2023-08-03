@@ -19,11 +19,16 @@ const (
 
 func testOSSSDK() {
 	// 两种方法都可以
-	cred := newCredential()
+	cred, err := newCredential()
 	// or
-	// cred := newOidcCredential()
+	// cred, err := newOidcCredential()
+	if err != nil {
+		panic(err)
+	}
 
-	provider := &OSSCredentialsProvider{cred: cred}
+	provider := &OSSCredentialsProvider{
+		cred: cred,
+	}
 	client, err := oss.New("https://oss-cn-hangzhou.aliyuncs.com", "", "",
 		oss.SetCredentialsProvider(provider))
 	if err != nil {
@@ -40,16 +45,13 @@ func testOSSSDK() {
 	}
 }
 
-func newCredential() credentials.Credential {
+func newCredential() (credentials.Credential, error) {
 	// https://www.alibabacloud.com/help/doc-detail/378661.html
 	cred, err := credentials.NewCredential(nil)
-	if err != nil {
-		panic(err)
-	}
-	return cred
+	return cred, err
 }
 
-func newOidcCredential() credentials.Credential {
+func newOidcCredential() (credentials.Credential, error) {
 	// https://www.alibabacloud.com/help/doc-detail/378661.html
 	config := new(credentials.Config).
 		SetType("oidc_role_arn").
@@ -59,18 +61,15 @@ func newOidcCredential() credentials.Credential {
 		SetRoleSessionName("test-rrsa-oidc-token")
 
 	oidcCredential, err := credentials.NewCredential(config)
-	if err != nil {
-		panic(err)
-	}
-	return oidcCredential
+	return oidcCredential, err
 }
 
-type OSSCredentials struct {
-	teaCred credentials.Credential
+type OSSCredentialsProvider struct {
+	cred credentials.Credential
 }
 
-func (cred *OSSCredentials) GetAccessKeyID() string {
-	value, err := cred.teaCred.GetAccessKeyId()
+func (p *OSSCredentialsProvider) GetAccessKeyID() string {
+	value, err := p.cred.GetAccessKeyId()
 	if err != nil {
 		log.Printf("get access key id failed: %+v", err)
 		return ""
@@ -78,8 +77,8 @@ func (cred *OSSCredentials) GetAccessKeyID() string {
 	return tea.StringValue(value)
 }
 
-func (cred *OSSCredentials) GetAccessKeySecret() string {
-	value, err := cred.teaCred.GetAccessKeySecret()
+func (p *OSSCredentialsProvider) GetAccessKeySecret() string {
+	value, err := p.cred.GetAccessKeySecret()
 	if err != nil {
 		log.Printf("get access key secret failed: %+v", err)
 		return ""
@@ -87,8 +86,8 @@ func (cred *OSSCredentials) GetAccessKeySecret() string {
 	return tea.StringValue(value)
 }
 
-func (cred *OSSCredentials) GetSecurityToken() string {
-	value, err := cred.teaCred.GetSecurityToken()
+func (p *OSSCredentialsProvider) GetSecurityToken() string {
+	value, err := p.cred.GetSecurityToken()
 	if err != nil {
 		log.Printf("get access security token failed: %+v", err)
 		return ""
@@ -96,12 +95,8 @@ func (cred *OSSCredentials) GetSecurityToken() string {
 	return tea.StringValue(value)
 }
 
-type OSSCredentialsProvider struct {
-	cred credentials.Credential
-}
-
 func (p *OSSCredentialsProvider) GetCredentials() oss.Credentials {
-	return &OSSCredentials{teaCred: p.cred}
+	return p
 }
 
 func main() {

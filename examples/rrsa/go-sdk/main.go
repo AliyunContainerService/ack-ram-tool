@@ -20,11 +20,16 @@ const (
 
 func testOpenAPISDK() {
 	// 两种方法都可以
-	cred := newCredential()
+	cred, err := newCredential()
 	// or
-	// cred := newOidcCredential()
+	// cred, err := newOidcCredential()
+	if err != nil {
+		panic(err)
+	}
 
-	config := &openapi.Config{Credential: cred}
+	config := &openapi.Config{
+		Credential: cred,
+	}
 	config.Endpoint = tea.String("cs.cn-hangzhou.aliyuncs.com")
 	client, err := cs20151215.NewClient(config)
 	if err != nil {
@@ -41,16 +46,13 @@ func testOpenAPISDK() {
 	}
 }
 
-func newCredential() credentials.Credential {
+func newCredential() (credentials.Credential, error) {
 	// https://www.alibabacloud.com/help/doc-detail/378661.html
 	cred, err := credentials.NewCredential(nil)
-	if err != nil {
-		panic(err)
-	}
-	return cred
+	return cred, err
 }
 
-func newOidcCredential() credentials.Credential {
+func newOidcCredential() (credentials.Credential, error) {
 	// https://www.alibabacloud.com/help/doc-detail/378661.html
 	config := new(credentials.Config).
 		SetType("oidc_role_arn").
@@ -60,10 +62,7 @@ func newOidcCredential() credentials.Credential {
 		SetRoleSessionName("test-rrsa-oidc-token")
 
 	oidcCredential, err := credentials.NewCredential(config)
-	if err != nil {
-		panic(err)
-	}
-	return oidcCredential
+	return oidcCredential, err
 }
 
 func main() {
