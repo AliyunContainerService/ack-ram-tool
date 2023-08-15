@@ -88,8 +88,13 @@ func (u *Updater) refreshCredForLoop(ctx context.Context) {
 	u.logger().Debug(fmt.Sprintf("start refresh credentials, current expiration: %s",
 		exp.Format("2006-01-02T15:04:05Z")))
 
-	// TODO: add retry
-	_ = u.refreshCred(ctx)
+	for i := 0; i < 5; i++ {
+		err := u.refreshCred(ctx)
+		if _, ok := err.(*NotEnableError); ok {
+			return
+		}
+		time.Sleep(time.Second * time.Duration(i))
+	}
 }
 
 func (u *Updater) refreshCred(ctx context.Context) error {
