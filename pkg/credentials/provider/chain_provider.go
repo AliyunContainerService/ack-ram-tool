@@ -59,13 +59,13 @@ func DefaultChainProvider() *ChainProvider {
 	return NewChainProvider(
 		NewEnvProvider(EnvProviderOptions{}),
 		NewOIDCProvider(OIDCProviderOptions{
-			RefreshPeriod: time.Minute * 20,
+			RefreshPeriod: time.Minute * 10,
 		}),
 		NewEncryptedFileProvider(EncryptedFileProviderOptions{
-			RefreshPeriod: time.Minute * 20,
+			RefreshPeriod: time.Minute * 10,
 		}),
 		NewECSMetadataProvider(ECSMetadataProviderOptions{
-			RefreshPeriod: time.Minute * 20,
+			RefreshPeriod: time.Minute * 10,
 		}),
 	)
 }
