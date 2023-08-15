@@ -1,0 +1,108 @@
+package provider
+
+import (
+	"context"
+	"crypto/aes"
+	"crypto/cipher"
+	"encoding/json"
+	"fmt"
+	"time"
+)
+
+const defaultEncryptedFilePath = "/var/addon/token-config"
+
+type EncryptedFileProvider struct {
+	f *FileProvider
+}
+
+type EncryptedFileProviderOptions struct {
+	FilePath      string
+	RefreshPeriod time.Duration
+	ExpiryWindow  time.Duration
+}
+
+func NewEncryptedFileProvider(opts EncryptedFileProviderOptions) *EncryptedFileProvider {
+	opts.applyDefaults()
+
+	e := &EncryptedFileProvider{}
+	e.f = NewFileProvider(opts.FilePath, parseEncryptedToken, FileProviderOptions{
+		RefreshPeriod: opts.RefreshPeriod,
+		ExpiryWindow:  opts.ExpiryWindow,
+	})
+
+	return e
+}
+
+func (e *EncryptedFileProvider) Credentials(ctx context.Context) (*Credentials, error) {
+	return e.f.Credentials(ctx)
+}
+
+func (o *EncryptedFileProviderOptions) applyDefaults() {
+	if o.ExpiryWindow == 0 {
+		o.ExpiryWindow = defaultExpiryWindow
+	}
+	if o.FilePath == "" {
+		o.FilePath = defaultEncryptedFilePath
+	}
+}
+
+func parseEncryptedToken(data []byte) (*Credentials, error) {
+	var t encryptedToken
+	if err := json.Unmarshal(data, &t); err != nil {
+		return nil, fmt.Errorf("parse data failed: %w", err)
+	}
+	id, err := decrypt([]byte(t.AccessKeyId), []byte(t.Keyring))
+	if err != nil {
+		return nil, fmt.Errorf("parse data failed: %w", err)
+	}
+	se, err := decrypt([]byte(t.AccessKeySecret), []byte(t.Keyring))
+	if err != nil {
+		return nil, fmt.Errorf("parse data failed: %w", err)
+	}
+	st, err := decrypt([]byte(t.SecurityToken), []byte(t.Keyring))
+	if err != nil {
+		return nil, fmt.Errorf("parse data failed: %w", err)
+	}
+	exp, err := time.Parse("2006-01-02T15:04:05Z", t.Expiration)
+	if err != nil {
+		return nil, fmt.Errorf("parse expiration %s failed: %w", t.Expiration, err)
+	}
+
+	return &Credentials{
+		AccessKeyId:     string(id),
+		AccessKeySecret: string(se),
+		SecurityToken:   string(st),
+		Expiration:      exp,
+	}, nil
+}
+
+type encryptedToken struct {
+	AccessKeyId     string `json:"access.key.id"`
+	AccessKeySecret string `json:"access.key.secret"`
+	SecurityToken   string `json:"security.token"`
+	Expiration      string `json:"expiration"`
+	Keyring         string `json:"keyring"`
+}
+
+func decrypt(cdata []byte, keyring []byte) ([]byte, error) {
+	block, err := aes.NewCipher(keyring)
+	if err != nil {
+		return nil, err
+	}
+
+	blockSize := block.BlockSize()
+	iv := cdata[:blockSize]
+	blockMode := cipher.NewCBCDecrypter(block, iv)
+	origData := make([]byte, len(cdata)-blockSize)
+
+	blockMode.CryptBlocks(origData, cdata[blockSize:])
+
+	origData = pkcs5UnPadding(origData)
+	return origData, nil
+}
+
+func pkcs5UnPadding(origData []byte) []byte {
+	length := len(origData)
+	unpadding := int(origData[length-1])
+	return origData[:(length - unpadding)]
+}
