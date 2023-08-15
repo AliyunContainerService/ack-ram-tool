@@ -17,9 +17,12 @@ type FileProvider struct {
 type FileProviderOptions struct {
 	RefreshPeriod time.Duration
 	ExpiryWindow  time.Duration
+	Logger        Logger
 }
 
 func NewFileProvider(filepath string, decoder func(data []byte) (*Credentials, error), opts FileProviderOptions) *FileProvider {
+	opts.applyDefaults()
+
 	e := &FileProvider{
 		filepath: filepath,
 		decoder:  decoder,
@@ -27,6 +30,7 @@ func NewFileProvider(filepath string, decoder func(data []byte) (*Credentials, e
 	e.u = NewUpdater(e.getCredentials, UpdaterOptions{
 		ExpiryWindow:  opts.ExpiryWindow,
 		RefreshPeriod: opts.RefreshPeriod,
+		Logger:        opts.Logger,
 	})
 	e.u.Start(context.TODO())
 
@@ -51,4 +55,13 @@ func (f *FileProvider) getCredentials(ctx context.Context) (*Credentials, error)
 		return nil, fmt.Errorf("decode data from %s failed: %w", f.filepath, err)
 	}
 	return cred, nil
+}
+
+func (f *FileProviderOptions) applyDefaults() {
+	if f.ExpiryWindow == 0 {
+		f.ExpiryWindow = defaultExpiryWindow
+	}
+	if f.Logger == nil {
+		f.Logger = defaultLog
+	}
 }

@@ -49,6 +49,7 @@ type OIDCProviderOptions struct {
 
 	ExpiryWindow  time.Duration
 	RefreshPeriod time.Duration
+	Logger        Logger
 }
 
 func NewOIDCProvider(opts OIDCProviderOptions) *OIDCProvider {
@@ -70,6 +71,7 @@ func NewOIDCProvider(opts OIDCProviderOptions) *OIDCProvider {
 	e.u = NewUpdater(e.getCredentials, UpdaterOptions{
 		ExpiryWindow:  opts.ExpiryWindow,
 		RefreshPeriod: opts.RefreshPeriod,
+		Logger:        opts.Logger,
 	})
 	e.u.Start(context.TODO())
 
@@ -208,5 +210,8 @@ func (o *OIDCProviderOptions) applyDefaults() {
 	}
 	if o.EnvOIDCTokenFile == "" {
 		o.EnvOIDCTokenFile = defaultEnvOIDCTokenFile
+	}
+	if o.Logger == nil {
+		o.Logger = defaultLog
 	}
 }

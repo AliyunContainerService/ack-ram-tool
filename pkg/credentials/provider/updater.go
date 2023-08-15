@@ -28,6 +28,7 @@ type Updater struct {
 type UpdaterOptions struct {
 	ExpiryWindow  time.Duration
 	RefreshPeriod time.Duration
+	Logger        Logger
 }
 
 func NewUpdater(getter getCredentialsFunc, opts UpdaterOptions) *Updater {
@@ -38,6 +39,7 @@ func NewUpdater(getter getCredentialsFunc, opts UpdaterOptions) *Updater {
 		getCredentials:             getter,
 		cred:                       nil,
 		lockForCred:                sync.RWMutex{},
+		Logger:                     opts.Logger,
 	}
 	return u
 }

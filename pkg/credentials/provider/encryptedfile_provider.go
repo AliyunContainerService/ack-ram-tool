@@ -19,6 +19,7 @@ type EncryptedFileProviderOptions struct {
 	FilePath      string
 	RefreshPeriod time.Duration
 	ExpiryWindow  time.Duration
+	Logger        Logger
 }
 
 func NewEncryptedFileProvider(opts EncryptedFileProviderOptions) *EncryptedFileProvider {
@@ -28,6 +29,7 @@ func NewEncryptedFileProvider(opts EncryptedFileProviderOptions) *EncryptedFileP
 	e.f = NewFileProvider(opts.FilePath, parseEncryptedToken, FileProviderOptions{
 		RefreshPeriod: opts.RefreshPeriod,
 		ExpiryWindow:  opts.ExpiryWindow,
+		Logger:        opts.Logger,
 	})
 
 	return e
@@ -43,6 +45,9 @@ func (o *EncryptedFileProviderOptions) applyDefaults() {
 	}
 	if o.FilePath == "" {
 		o.FilePath = defaultEncryptedFilePath
+	}
+	if o.Logger == nil {
+		o.Logger = defaultLog
 	}
 }
 

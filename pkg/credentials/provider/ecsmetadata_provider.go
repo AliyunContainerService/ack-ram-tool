@@ -39,6 +39,7 @@ type ECSMetadataProviderOptions struct {
 
 	ExpiryWindow  time.Duration
 	RefreshPeriod time.Duration
+	Logger        Logger
 }
 
 func NewECSMetadataProvider(opts ECSMetadataProviderOptions) *ECSMetadataProvider {
@@ -57,6 +58,7 @@ func NewECSMetadataProvider(opts ECSMetadataProviderOptions) *ECSMetadataProvide
 	e.u = NewUpdater(e.getCredentials, UpdaterOptions{
 		ExpiryWindow:  opts.ExpiryWindow,
 		RefreshPeriod: opts.RefreshPeriod,
+		Logger:        opts.Logger,
 	})
 	e.u.Start(context.TODO())
 
@@ -210,6 +212,9 @@ func (o *ECSMetadataProviderOptions) applyDefaults() {
 	}
 	if o.ExpiryWindow == 0 {
 		o.ExpiryWindow = defaultExpiryWindow
+	}
+	if o.Logger == nil {
+		o.Logger = defaultLog
 	}
 }
 
