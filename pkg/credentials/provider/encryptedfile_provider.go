@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/aes"
 	"crypto/cipher"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -56,15 +57,15 @@ func parseEncryptedToken(data []byte) (*Credentials, error) {
 	if err := json.Unmarshal(data, &t); err != nil {
 		return nil, fmt.Errorf("parse data failed: %w", err)
 	}
-	id, err := decrypt([]byte(t.AccessKeyId), []byte(t.Keyring))
+	id, err := decrypt(t.AccessKeyId, []byte(t.Keyring))
 	if err != nil {
 		return nil, fmt.Errorf("parse data failed: %w", err)
 	}
-	se, err := decrypt([]byte(t.AccessKeySecret), []byte(t.Keyring))
+	se, err := decrypt(t.AccessKeySecret, []byte(t.Keyring))
 	if err != nil {
 		return nil, fmt.Errorf("parse data failed: %w", err)
 	}
-	st, err := decrypt([]byte(t.SecurityToken), []byte(t.Keyring))
+	st, err := decrypt(t.SecurityToken, []byte(t.Keyring))
 	if err != nil {
 		return nil, fmt.Errorf("parse data failed: %w", err)
 	}
@@ -89,7 +90,11 @@ type encryptedToken struct {
 	Keyring         string `json:"keyring"`
 }
 
-func decrypt(cdata []byte, keyring []byte) ([]byte, error) {
+func decrypt(s string, keyring []byte) ([]byte, error) {
+	cdata, err := base64.StdEncoding.DecodeString(s)
+	if err != nil {
+		return nil, err
+	}
 	block, err := aes.NewCipher(keyring)
 	if err != nil {
 		return nil, err
