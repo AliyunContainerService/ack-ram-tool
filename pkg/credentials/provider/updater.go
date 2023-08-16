@@ -105,7 +105,7 @@ func (u *Updater) refreshCred(ctx context.Context) error {
 		if _, ok := err.(*NotEnableError); ok {
 			return err
 		}
-		u.logger().Debug(fmt.Sprintf("refresh credentials failed: %s", err))
+		u.logger().Error(err, fmt.Sprintf("refresh credentials failed: %s", err))
 		return err
 	}
 	u.logger().Debug(fmt.Sprintf("refreshed credentials, expiration: %s",
