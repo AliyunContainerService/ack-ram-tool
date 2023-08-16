@@ -57,6 +57,10 @@ func parseEncryptedToken(data []byte) (*Credentials, error) {
 	if err := json.Unmarshal(data, &t); err != nil {
 		return nil, fmt.Errorf("parse data failed: %w", err)
 	}
+	if t.Error != nil {
+		return nil, t.Error
+	}
+
 	id, err := decrypt(t.AccessKeyId, []byte(t.Keyring))
 	if err != nil {
 		return nil, fmt.Errorf("parse data failed: %w", err)
@@ -88,6 +92,18 @@ type encryptedToken struct {
 	SecurityToken   string `json:"security.token"`
 	Expiration      string `json:"expiration"`
 	Keyring         string `json:"keyring"`
+
+	Error *encryptedTokenError `json:"error,omitempty"`
+}
+
+type encryptedTokenError struct {
+	RoleName string `json:"roleName,omitempty"`
+	Code     string `json:"code,omitempty"`
+	Message  string `json:"message,omitempty"`
+}
+
+func (e encryptedTokenError) Error() string {
+	return fmt.Sprintf("assume role %s failed: %s %s", e.RoleName, e.Code, e.Message)
 }
 
 func decrypt(s string, keyring []byte) ([]byte, error) {
