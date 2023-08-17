@@ -56,16 +56,25 @@ func (c *ChainProvider) logger() Logger {
 }
 
 func DefaultChainProvider() *ChainProvider {
-	return NewChainProvider(
+	return DefaultChainProviderWithLogger(nil)
+}
+
+func DefaultChainProviderWithLogger(l Logger) *ChainProvider {
+	p := NewChainProvider(
 		NewEnvProvider(EnvProviderOptions{}),
 		NewOIDCProvider(OIDCProviderOptions{
 			RefreshPeriod: time.Minute * 10,
+			Logger:        l,
 		}),
 		NewEncryptedFileProvider(EncryptedFileProviderOptions{
 			RefreshPeriod: time.Minute * 10,
+			Logger:        l,
 		}),
 		NewECSMetadataProvider(ECSMetadataProviderOptions{
 			RefreshPeriod: time.Minute * 10,
+			Logger:        l,
 		}),
 	)
+	p.Logger = l
+	return p
 }
