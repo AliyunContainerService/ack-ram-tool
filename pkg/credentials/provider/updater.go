@@ -22,7 +22,8 @@ type Updater struct {
 	cred        *Credentials
 	lockForCred sync.RWMutex
 
-	Logger Logger
+	Logger  Logger
+	nowFunc func() time.Time
 }
 
 type UpdaterOptions struct {
@@ -40,6 +41,7 @@ func NewUpdater(getter getCredentialsFunc, opts UpdaterOptions) *Updater {
 		cred:                       nil,
 		lockForCred:                sync.RWMutex{},
 		Logger:                     opts.Logger,
+		nowFunc:                    time.Now,
 	}
 	return u
 }
@@ -83,19 +85,25 @@ func (u *Updater) Credentials(ctx context.Context) (*Credentials, error) {
 func (u *Updater) refreshCredForLoop(ctx context.Context) {
 	exp := u.expiration()
 
-	if exp.Add(-u.expiryWindowForRefreshLoop).Before(time.Now()) {
+	if !u.expired(u.expiryWindowForRefreshLoop) {
 		return
 	}
 
 	u.logger().Debug(fmt.Sprintf("start refresh credentials, current expiration: %s",
 		exp.Format("2006-01-02T15:04:05Z")))
 
-	for i := 0; i < 5; i++ {
+	maxRetry := 5
+	for i := 0; i < maxRetry; i++ {
 		err := u.refreshCred(ctx)
+		if err == nil {
+			return
+		}
 		if _, ok := err.(*NotEnableError); ok {
 			return
 		}
-		time.Sleep(time.Second * time.Duration(i))
+		if i < maxRetry-1 {
+			time.Sleep(time.Second * time.Duration(i))
+		}
 	}
 }
 
@@ -135,9 +143,13 @@ func (u *Updater) getCred() *Credentials {
 }
 
 func (u *Updater) Expired() bool {
+	return u.expired(0)
+}
+
+func (u *Updater) expired(expiryDelta time.Duration) bool {
 	exp := u.expiration()
 
-	return exp.Before(time.Now())
+	return exp.Add(-expiryDelta).Before(u.now())
 }
 
 func (u *Updater) expiration() time.Time {
@@ -147,7 +159,14 @@ func (u *Updater) expiration() time.Time {
 		return time.Time{}
 	}
 
-	return cred.Expiration
+	return cred.Expiration.Round(0)
+}
+
+func (u *Updater) now() time.Time {
+	if u.nowFunc == nil {
+		return time.Now()
+	}
+	return u.nowFunc()
 }
 
 func (u *Updater) logger() Logger {
