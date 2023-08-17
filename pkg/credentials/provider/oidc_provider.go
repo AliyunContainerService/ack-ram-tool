@@ -72,6 +72,7 @@ func NewOIDCProvider(opts OIDCProviderOptions) *OIDCProvider {
 		ExpiryWindow:  opts.ExpiryWindow,
 		RefreshPeriod: opts.RefreshPeriod,
 		Logger:        opts.Logger,
+		LogPrefix:     "[OIDCProvider]",
 	})
 	e.u.Start(context.TODO())
 

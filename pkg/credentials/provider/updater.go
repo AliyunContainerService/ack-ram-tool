@@ -22,14 +22,16 @@ type Updater struct {
 	cred        *Credentials
 	lockForCred sync.RWMutex
 
-	Logger  Logger
-	nowFunc func() time.Time
+	Logger    Logger
+	nowFunc   func() time.Time
+	logPrefix string
 }
 
 type UpdaterOptions struct {
 	ExpiryWindow  time.Duration
 	RefreshPeriod time.Duration
 	Logger        Logger
+	LogPrefix     string
 }
 
 func NewUpdater(getter getCredentialsFunc, opts UpdaterOptions) *Updater {
@@ -42,6 +44,7 @@ func NewUpdater(getter getCredentialsFunc, opts UpdaterOptions) *Updater {
 		lockForCred:                sync.RWMutex{},
 		Logger:                     opts.Logger,
 		nowFunc:                    time.Now,
+		logPrefix:                  opts.LogPrefix,
 	}
 	return u
 }
@@ -89,8 +92,8 @@ func (u *Updater) refreshCredForLoop(ctx context.Context) {
 		return
 	}
 
-	u.logger().Debug(fmt.Sprintf("start refresh credentials, current expiration: %s",
-		exp.Format("2006-01-02T15:04:05Z")))
+	u.logger().Debug(fmt.Sprintf("%s start refresh credentials, current expiration: %s",
+		u.logPrefix, exp.Format("2006-01-02T15:04:05Z")))
 
 	maxRetry := 5
 	for i := 0; i < maxRetry; i++ {
@@ -113,11 +116,11 @@ func (u *Updater) refreshCred(ctx context.Context) error {
 		if _, ok := err.(*NotEnableError); ok {
 			return err
 		}
-		u.logger().Error(err, fmt.Sprintf("refresh credentials failed: %s", err))
+		u.logger().Error(err, fmt.Sprintf("%s refresh credentials failed: %s", u.logPrefix, err))
 		return err
 	}
-	u.logger().Debug(fmt.Sprintf("refreshed credentials, expiration: %s",
-		cred.Expiration.Format("2006-01-02T15:04:05Z")))
+	u.logger().Debug(fmt.Sprintf("%s refreshed credentials, expiration: %s",
+		u.logPrefix, cred.Expiration.Format("2006-01-02T15:04:05Z")))
 
 	u.setCred(*cred)
 	return nil

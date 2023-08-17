@@ -31,6 +31,7 @@ func NewEncryptedFileProvider(opts EncryptedFileProviderOptions) *EncryptedFileP
 		RefreshPeriod: opts.RefreshPeriod,
 		ExpiryWindow:  opts.ExpiryWindow,
 		Logger:        opts.Logger,
+		LogPrefix:     "[EncryptedFileProvider]",
 	})
 
 	return e

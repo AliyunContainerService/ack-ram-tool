@@ -59,6 +59,7 @@ func NewECSMetadataProvider(opts ECSMetadataProviderOptions) *ECSMetadataProvide
 		ExpiryWindow:  opts.ExpiryWindow,
 		RefreshPeriod: opts.RefreshPeriod,
 		Logger:        opts.Logger,
+		LogPrefix:     "[ECSMetadataProvider]",
 	})
 	e.u.Start(context.TODO())
 

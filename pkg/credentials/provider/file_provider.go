@@ -18,6 +18,7 @@ type FileProviderOptions struct {
 	RefreshPeriod time.Duration
 	ExpiryWindow  time.Duration
 	Logger        Logger
+	LogPrefix     string
 }
 
 func NewFileProvider(filepath string, decoder func(data []byte) (*Credentials, error), opts FileProviderOptions) *FileProvider {
@@ -31,6 +32,7 @@ func NewFileProvider(filepath string, decoder func(data []byte) (*Credentials, e
 		ExpiryWindow:  opts.ExpiryWindow,
 		RefreshPeriod: opts.RefreshPeriod,
 		Logger:        opts.Logger,
+		LogPrefix:     opts.LogPrefix,
 	})
 	e.u.Start(context.TODO())
 
@@ -63,5 +65,8 @@ func (f *FileProviderOptions) applyDefaults() {
 	}
 	if f.Logger == nil {
 		f.Logger = defaultLog
+	}
+	if f.LogPrefix == "" {
+		f.LogPrefix = "[FileProvider]"
 	}
 }

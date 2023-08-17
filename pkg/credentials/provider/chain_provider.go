@@ -12,6 +12,7 @@ type ChainProvider struct {
 
 	preProvider string
 	Logger      Logger
+	logPrefix   string
 }
 
 func NewChainProvider(providers ...CredentialsProvider) *ChainProvider {
@@ -20,6 +21,7 @@ func NewChainProvider(providers ...CredentialsProvider) *ChainProvider {
 	}
 	return &ChainProvider{
 		providers: providers,
+		logPrefix: "[ChainProvider]",
 	}
 }
 
@@ -30,7 +32,8 @@ func (c *ChainProvider) Credentials(ctx context.Context) (*Credentials, error) {
 		cred, err := p.Credentials(ctx)
 		if err != nil {
 			if _, ok := err.(*NotEnableError); ok {
-				c.logger().Debug(fmt.Sprintf("provider %T not enabled will try to next: %s", p, err.Error()))
+				c.logger().Debug(fmt.Sprintf("%s provider %T not enabled will try to next: %s",
+					c.logPrefix, p, err.Error()))
 				notEnableErrors = append(notEnableErrors, fmt.Sprintf("provider %T not enabled: %s", p, err.Error()))
 				continue
 			}
@@ -39,7 +42,7 @@ func (c *ChainProvider) Credentials(ctx context.Context) (*Credentials, error) {
 		if err == nil {
 			if c.preProvider != pT {
 				c.preProvider = pT
-				c.logger().Info(fmt.Sprintf("switch to using provider %s", pT))
+				c.logger().Info(fmt.Sprintf("%s switch to using provider %s", c.logPrefix, pT))
 			}
 			return cred, nil
 		}
