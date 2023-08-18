@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	defaultExpiryWindow               = time.Minute * 5
+	defaultExpiryWindow               = time.Minute * 30
 	defaultECSMetadataServerEndpoint  = "http://100.100.100.200"
 	defaultECSMetadataTokenTTLSeconds = 3600
 	defaultClientTimeout              = time.Second * 30
