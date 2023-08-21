@@ -1,4 +1,4 @@
-# golang-sdk
+# oss-go-sdk
 
 ## Usage
 

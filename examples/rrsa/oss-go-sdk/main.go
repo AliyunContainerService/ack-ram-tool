@@ -26,7 +26,7 @@ func testOSSSDK() {
 		panic(err)
 	}
 
-	provider := &OSSCredentialsProvider{
+	provider := &CredentialsProvider{
 		cred: cred,
 	}
 	client, err := oss.New("https://oss-cn-hangzhou.aliyuncs.com", "", "",
@@ -64,39 +64,50 @@ func newOidcCredential() (credentials.Credential, error) {
 	return oidcCredential, err
 }
 
-type OSSCredentialsProvider struct {
+type Credentials struct {
+	AccessKeyId     string
+	AccessKeySecret string
+	SecurityToken   string
+}
+
+type CredentialsProvider struct {
 	cred credentials.Credential
 }
 
-func (p *OSSCredentialsProvider) GetAccessKeyID() string {
-	value, err := p.cred.GetAccessKeyId()
+func (c *Credentials) GetAccessKeyID() string {
+	return c.AccessKeyId
+}
+
+func (c *Credentials) GetAccessKeySecret() string {
+	return c.AccessKeySecret
+}
+
+func (c *Credentials) GetSecurityToken() string {
+	return c.SecurityToken
+}
+
+func (p CredentialsProvider) GetCredentials() oss.Credentials {
+	id, err := p.cred.GetAccessKeyId()
 	if err != nil {
 		log.Printf("get access key id failed: %+v", err)
-		return ""
+		return &Credentials{}
 	}
-	return tea.StringValue(value)
-}
-
-func (p *OSSCredentialsProvider) GetAccessKeySecret() string {
-	value, err := p.cred.GetAccessKeySecret()
+	secret, err := p.cred.GetAccessKeySecret()
 	if err != nil {
 		log.Printf("get access key secret failed: %+v", err)
-		return ""
+		return &Credentials{}
 	}
-	return tea.StringValue(value)
-}
-
-func (p *OSSCredentialsProvider) GetSecurityToken() string {
-	value, err := p.cred.GetSecurityToken()
+	token, err := p.cred.GetSecurityToken()
 	if err != nil {
 		log.Printf("get access security token failed: %+v", err)
-		return ""
+		return &Credentials{}
 	}
-	return tea.StringValue(value)
-}
 
-func (p *OSSCredentialsProvider) GetCredentials() oss.Credentials {
-	return p
+	return &Credentials{
+		AccessKeyId:     tea.StringValue(id),
+		AccessKeySecret: tea.StringValue(secret),
+		SecurityToken:   tea.StringValue(token),
+	}
 }
 
 func main() {
