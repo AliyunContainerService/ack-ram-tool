@@ -1,5 +1,8 @@
 # java-sdk
 
+Using [Alibaba Could Java SDK](https://github.com/aliyun/alibabacloud-java-sdk) with RRSA Auth.
+
+
 ## Usage
 
 1. Enable RRSA:

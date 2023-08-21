@@ -1,5 +1,7 @@
 # java-sdk
 
+Using [aliyun-oss-java-sdk](https://github.com/aliyun/aliyun-oss-java-sdk) with RRSA Auth.
+
 ## Usage
 
 1. Enable RRSA:

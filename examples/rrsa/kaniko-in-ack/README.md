@@ -3,7 +3,7 @@
 Running kaniko in ACK:
 
 * build image with kaniko
-* push image to the ACR with RRSA
+* push image to the ACR with RRSA Auth
 
 ## Usage
 
