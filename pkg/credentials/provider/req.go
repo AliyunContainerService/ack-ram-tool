@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-func ShaHmac1(source, secret string) string {
+func shaHmac1(source, secret string) string {
 	key := []byte(secret)
 	h := hmac.New(sha1.New, key)
 	h.Write([]byte(source))
