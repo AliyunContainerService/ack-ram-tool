@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path"
 	"runtime"
 )
 
@@ -14,7 +15,8 @@ type CredentialsProvider interface {
 }
 
 func init() {
-	UserAgent = fmt.Sprintf("%s %s/%s %s", os.Args[0], runtime.GOOS, runtime.GOARCH, runtime.Version())
+	name := path.Base(os.Args[0])
+	UserAgent = fmt.Sprintf("%s %s/%s ack-ram-tool/%s", name, runtime.GOOS, runtime.GOARCH, runtime.Version())
 }
 
 type NotEnableError struct {

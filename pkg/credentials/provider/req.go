@@ -14,6 +14,10 @@ import (
 	"time"
 )
 
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
 func shaHmac1(source, secret string) string {
 	key := []byte(secret)
 	h := hmac.New(sha1.New, key)
@@ -92,9 +96,10 @@ type uuid [16]byte
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 func randStringBytes(n int) string {
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	b := make([]byte, n)
 	for i := range b {
-		b[i] = letterBytes[rand.Intn(len(letterBytes))]
+		b[i] = letterBytes[r.Intn(len(letterBytes))]
 	}
 	return string(b)
 }
@@ -119,7 +124,8 @@ func newFromHash(h hash.Hash, ns uuid, name string) uuid {
 }
 
 func safeRandom(dest []byte) {
-	if _, err := rand.Read(dest); err != nil {
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	if _, err := r.Read(dest); err != nil {
 		panic(err)
 	}
 }
