@@ -16,15 +16,15 @@ Global Flags:
   -v, --verbose                         Make the operation more talkative
 ```
 
-## 参数说明
+## Description
 
-| Flag                            | Default                                                 | Description                                                                                                                         |
-|---------------------------------|---------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|
-| -y, --assume-yes                | false                                                   | When set to true, the program will automatically execute without asking whether to continue the operation                           |
-| --log-level                     | info                                                    | Log level                                                                                                                           |
-| --ignore-aliyun-cli-credentials | false                                                   | When set to true, the aliyun cli configuration file will be ignored when searching for credential information                       |
-| --ignore-env-credentials        | false                                                   | When set to true, the credential information in the environment variables will be ignored when searching for credential information |
-| --profile-file                  | `~/.aliyun/config.json` 或 `~/.alibabacloud/credentials` | Specify the credential configuration file                                                                                           |
-| --profile-name                  | no default                                              | When using the aliyun cli configuration file, use the credential configuration defined in the specified configuration set           |
-| --region-id                     | cn-hangzhou                                             | Region information used when accessing OpenAPI                                                                                      |
-| -v, --verbose                   | false                                                   | Quickly enable debug mode                                                                                                           |
+| Flag                            | Default                                                  | Description                                                                                                                         |
+|---------------------------------|----------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|
+| -y, --assume-yes                | false                                                    | When set to true, the program will automatically execute without asking whether to continue the operation                           |
+| --log-level                     | info                                                     | Log level                                                                                                                           |
+| --ignore-aliyun-cli-credentials | false                                                    | When set to true, the aliyun cli configuration file will be ignored when searching for credential information                       |
+| --ignore-env-credentials        | false                                                    | When set to true, the credential information in the environment variables will be ignored when searching for credential information |
+| --profile-file                  | `~/.aliyun/config.json` or `~/.alibabacloud/credentials` | Specify the credential configuration file                                                                                           |
+| --profile-name                  | no default                                               | When using the aliyun cli configuration file, use the credential configuration defined in the specified configuration set           |
+| --region-id                     | cn-hangzhou                                              | Region information used when accessing OpenAPI                                                                                      |
+| -v, --verbose                   | false                                                    | Quickly enable debug mode                                                                                                           |

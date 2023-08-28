@@ -71,12 +71,12 @@ Global Flags:
 
 参数说明：
 
-| 参数名称                       | 默认值 | 必需参数             | 说明                                       |
-|----------------------------|-----|------------------|------------------------------------------|
-| -c, --cluster-id           | 无   | 是                | 集群 ID                                    |
-| -n, --namespace            | 无   | 是                | 命名空间，可以使用 `*` 表示所有命名空间：`--namespace '*'` |
-| -s, --service-account      | 无   | 是                | service account                          |
-| -r, --role-name            | 无   | 是                | RAM 角色                                   |
-| --create-role-if-not-exist | 无   | 否                | 如果该 RAM 角色不存在，那么自动创建一个同名的 RAM 角色         |
-| --attach-system-policy     | 无   | 为该角色授予指定的系统权限策略  |                                          |
-| --attach-custom-policy     | 无   | 为该角色授予指定的自定义权限策略 |                                          |
+| 参数名称                       | 默认值 | 必需参数 | 说明                                       |
+|----------------------------|-----|------|------------------------------------------|
+| -c, --cluster-id           | 无   | 是    | 集群 ID                                    |
+| -n, --namespace            | 无   | 是    | 命名空间，可以使用 `*` 表示所有命名空间：`--namespace '*'` |
+| -s, --service-account      | 无   | 是    | service account                          |
+| -r, --role-name            | 无   | 是    | RAM 角色                                   |
+| --create-role-if-not-exist | 无   | 否    | 如果该 RAM 角色不存在，那么自动创建一个同名的 RAM 角色         |
+| --attach-system-policy     | 无   | 否     | 为该角色授予指定的系统权限策略                          |
+| --attach-custom-policy     | 无   | 否     | 为该角色授予指定的自定义权限策略                         |
