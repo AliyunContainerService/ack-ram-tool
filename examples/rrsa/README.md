@@ -7,6 +7,7 @@ Examples for RRSA Usage.
 |-------------------|---------------------------------------------------------------------------------------------------------------------------|
 | go-sdk            | Using [Alibaba Could Go SDK](https://github.com/aliyun/alibabacloud-go-sdk) with RRSA Auth                                |
 | oss-go-sdk        | Using [aliyun-oss-go-sdk](https://github.com/aliyun/aliyun-oss-go-sdk) with RRSA Auth                                     |
+| log-go-sdk        | Using [aliyun-log-go-sdk](https://github.com/aliyun/aliyun-log-go-sdk) with RRSA Auth                                     |
 | java-sdk          | Using [Alibaba Could Java SDK](https://github.com/aliyun/alibabacloud-java-sdk) with RRSA Auth                            |
 | oss-java-sdk      | Using [aliyun-oss-java-sdk](https://github.com/aliyun/aliyun-oss-java-sdk) with RRSA Auth                                 |
 | python3-sdk       | Using [Alibaba Could Python 3 SDK](https://github.com/aliyun/alibabacloud-python-sdk) with RRSA Auth                      |
