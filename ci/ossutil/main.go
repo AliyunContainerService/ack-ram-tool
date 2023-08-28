@@ -13,43 +13,50 @@ import (
 	"github.com/aliyun/credentials-go/credentials"
 )
 
-type ossCredentials struct {
-	teaCred credentials.Credential
+type Credentials struct {
+	AccessKeyId     string
+	AccessKeySecret string
+	SecurityToken   string
 }
 
-func (cred *ossCredentials) GetAccessKeyID() string {
-	value, err := cred.teaCred.GetAccessKeyId()
-	if err != nil {
-		log.Printf("get access key id failed: %+v", err)
-		return ""
-	}
-	return tea.StringValue(value)
-}
-
-func (cred *ossCredentials) GetAccessKeySecret() string {
-	value, err := cred.teaCred.GetAccessKeySecret()
-	if err != nil {
-		log.Printf("get access key secret failed: %+v", err)
-		return ""
-	}
-	return tea.StringValue(value)
-}
-
-func (cred *ossCredentials) GetSecurityToken() string {
-	value, err := cred.teaCred.GetSecurityToken()
-	if err != nil {
-		log.Printf("get access security token failed: %+v", err)
-		return ""
-	}
-	return tea.StringValue(value)
-}
-
-type ossCredentialsProvider struct {
+type CredentialsProvider struct {
 	cred credentials.Credential
 }
 
-func (p *ossCredentialsProvider) GetCredentials() oss.Credentials {
-	return &ossCredentials{teaCred: p.cred}
+func (c *Credentials) GetAccessKeyID() string {
+	return c.AccessKeyId
+}
+
+func (c *Credentials) GetAccessKeySecret() string {
+	return c.AccessKeySecret
+}
+
+func (c *Credentials) GetSecurityToken() string {
+	return c.SecurityToken
+}
+
+func (p CredentialsProvider) GetCredentials() oss.Credentials {
+	id, err := p.cred.GetAccessKeyId()
+	if err != nil {
+		log.Printf("get access key id failed: %+v", err)
+		return &Credentials{}
+	}
+	secret, err := p.cred.GetAccessKeySecret()
+	if err != nil {
+		log.Printf("get access key secret failed: %+v", err)
+		return &Credentials{}
+	}
+	token, err := p.cred.GetSecurityToken()
+	if err != nil {
+		log.Printf("get access security token failed: %+v", err)
+		return &Credentials{}
+	}
+
+	return &Credentials{
+		AccessKeyId:     tea.StringValue(id),
+		AccessKeySecret: tea.StringValue(secret),
+		SecurityToken:   tea.StringValue(token),
+	}
 }
 
 func NewClient(endpoint string) (*oss.Client, error) {
@@ -62,7 +69,7 @@ func NewClient(endpoint string) (*oss.Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	provider := &ossCredentialsProvider{cred: cred}
+	provider := &CredentialsProvider{cred: cred}
 	client, err := oss.New(endpoint, "", "", oss.SetCredentialsProvider(provider))
 	return client, err
 }

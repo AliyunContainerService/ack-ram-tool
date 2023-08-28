@@ -1,5 +1,7 @@
 # python3-sdk
 
+Using [Alibaba Could Python 3 SDK](https://github.com/aliyun/alibabacloud-python-sdk) with RRSA Auth.
+
 ## Usage
 
 1. Enable RRSA:

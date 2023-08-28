@@ -1,4 +1,6 @@
-# golang-sdk
+# go-sdk
+
+Using [Alibaba Could Go SDK](https://github.com/aliyun/alibabacloud-go-sdk) with RRSA Auth.
 
 ## Usage
 

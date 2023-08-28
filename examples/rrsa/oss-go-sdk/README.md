@@ -1,4 +1,6 @@
-# golang-sdk
+# oss-go-sdk
+
+Using [aliyun-oss-go-sdk](https://github.com/aliyun/aliyun-oss-go-sdk) with RRSA Auth.
 
 ## Usage
 

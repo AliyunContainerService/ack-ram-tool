@@ -1,6 +1,6 @@
-# java-sdk
+# log-go-sdk
 
-Using [aliyun-oss-java-sdk](https://github.com/aliyun/aliyun-oss-java-sdk) with RRSA Auth.
+Using [aliyun-log-java-sdk](https://github.com/aliyun/aliyun-log-java-sdk) with RRSA Auth.
 
 ## Usage
 
@@ -17,17 +17,16 @@ ack-ram-tool rrsa enable --cluster-id "${CLUSTER_ID}"
 ack-ram-tool rrsa install-helper-addon --cluster-id "${CLUSTER_ID}"
 ```
 
-
 3. Create an RAM Policy:
 
 ```
-aliyun ram CreatePolicy --PolicyName oss-list-buckets --PolicyDocument '{
+aliyun ram CreatePolicy --PolicyName log-list-project --PolicyDocument '{
   "Version": "1",
   "Statement": [
     {
       "Effect": "Allow",
       "Action": [
-        "oss:ListBuckets"
+        "log:ListProject"
       ],
       "Resource": [
         "*"
@@ -42,11 +41,11 @@ aliyun ram CreatePolicy --PolicyName oss-list-buckets --PolicyDocument '{
 
 ```
 ack-ram-tool rrsa associate-role --cluster-id "${CLUSTER_ID}" \
-    --namespace rrsa-demo-oss-java-sdk \
+    --namespace rrsa-demo-log-java-sdk \
     --service-account demo-sa \
     --role-name test-rrsa-demo \
     --create-role-if-not-exist \
-    --attach-custom-policy oss-list-buckets
+    --attach-custom-policy log-list-project
 ```
 
 5. Deploy demo job:
@@ -59,16 +58,16 @@ kubectl --kubeconfig ./kubeconfig apply -f deploy.yaml
 6. Get logs:
 
 ```
-kubectl --kubeconfig ./kubeconfig -n rrsa-demo-oss-java-sdk wait --for=condition=complete job/demo --timeout=240s
-kubectl --kubeconfig ./kubeconfig -n rrsa-demo-oss-java-sdk logs job/demo
+kubectl --kubeconfig ./kubeconfig -n rrsa-demo-log-java-sdk wait --for=condition=complete job/demo --timeout=240s
+kubectl --kubeconfig ./kubeconfig -n rrsa-demo-log-java-sdk logs job/demo
 ```
 
 Outputs:
 
 ```
-2023/05/19 10:58:55 test oss sdk using rrsa oidc token
-call oss.listBuckets via oidc token success:
+2023/05/19 10:58:55 test log sdk using rrsa oidc token
+call log.ListProject via oidc token success:
 - test-***
-- cri-***
+- k8s-log-***
 
 ```
