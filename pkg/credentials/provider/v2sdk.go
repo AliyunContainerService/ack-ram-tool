@@ -22,7 +22,7 @@ func NewCredentialForV2SDK(p CredentialsProvider, opts CredentialForV2SDKOptions
 	}
 }
 
-func (c CredentialForV2SDK) GetAccessKeyId() (*string, error) {
+func (c *CredentialForV2SDK) GetAccessKeyId() (*string, error) {
 	cred, err := c.p.Credentials(context.TODO())
 	if err != nil {
 		return nil, err
@@ -30,7 +30,7 @@ func (c CredentialForV2SDK) GetAccessKeyId() (*string, error) {
 	return stringPointer(cred.AccessKeyId), nil
 }
 
-func (c CredentialForV2SDK) GetAccessKeySecret() (*string, error) {
+func (c *CredentialForV2SDK) GetAccessKeySecret() (*string, error) {
 	cred, err := c.p.Credentials(context.TODO())
 	if err != nil {
 		return nil, err
@@ -38,7 +38,7 @@ func (c CredentialForV2SDK) GetAccessKeySecret() (*string, error) {
 	return stringPointer(cred.AccessKeySecret), nil
 }
 
-func (c CredentialForV2SDK) GetSecurityToken() (*string, error) {
+func (c *CredentialForV2SDK) GetSecurityToken() (*string, error) {
 	cred, err := c.p.Credentials(context.TODO())
 	if err != nil {
 		return nil, err
@@ -46,15 +46,15 @@ func (c CredentialForV2SDK) GetSecurityToken() (*string, error) {
 	return stringPointer(cred.SecurityToken), nil
 }
 
-func (c CredentialForV2SDK) GetBearerToken() *string {
+func (c *CredentialForV2SDK) GetBearerToken() *string {
 	return stringPointer("")
 }
 
-func (c CredentialForV2SDK) GetType() *string {
+func (c *CredentialForV2SDK) GetType() *string {
 	return stringPointer("CredentialForV2SDK")
 }
 
-func (c CredentialForV2SDK) logger() Logger {
+func (c *CredentialForV2SDK) logger() Logger {
 	if c.Logger != nil {
 		return c.Logger
 	}
