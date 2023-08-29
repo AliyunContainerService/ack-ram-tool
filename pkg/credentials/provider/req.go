@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"hash"
 	"math/rand"
+	"net/http"
 	"net/url"
 	"strings"
 	"time"
@@ -150,4 +151,24 @@ func getUUID() (uuidHex string) {
 	uuid := newUUID()
 	uuidHex = hex.EncodeToString(uuid[:])
 	return
+}
+
+func genDebugReqMessages(req *http.Request) []string {
+	var ret []string
+	ret = append(ret, fmt.Sprintf("%s %s", req.Method, req.URL.String()))
+	ret = append(ret, "Request Headers:")
+	for k, vs := range req.Header {
+		ret = append(ret, fmt.Sprintf("    %s: %s", k, strings.Join(vs, ", ")))
+	}
+	return ret
+}
+
+func genDebugRespMessages(resp *http.Response) []string {
+	var ret []string
+	ret = append(ret, fmt.Sprintf("Response Status: %s", resp.Status))
+	ret = append(ret, "Response Headers:")
+	for k, vs := range resp.Header {
+		ret = append(ret, fmt.Sprintf("    %s: %s", k, strings.Join(vs, ", ")))
+	}
+	return ret
 }

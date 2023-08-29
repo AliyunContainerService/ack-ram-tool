@@ -27,6 +27,7 @@ type ECSMetadataProvider struct {
 	metadataTokenExp        time.Time
 
 	client *http.Client
+	Logger Logger
 }
 
 type ECSMetadataProviderOptions struct {
@@ -54,6 +55,7 @@ func NewECSMetadataProvider(opts ECSMetadataProviderOptions) *ECSMetadataProvide
 		roleName:                opts.RoleName,
 		metadataTokenTTLSeconds: opts.MetadataTokenTTLSeconds,
 		client:                  client,
+		Logger:                  opts.Logger,
 	}
 	e.u = NewUpdater(e.getCredentials, UpdaterOptions{
 		ExpiryWindow:  opts.ExpiryWindow,
@@ -175,11 +177,23 @@ func (e *ECSMetadataProvider) getMedataData(ctx context.Context, method, path st
 		}
 	}
 
+	if debugMode {
+		for _, item := range genDebugReqMessages(req) {
+			e.logger().Debug(item)
+		}
+	}
+
 	resp, err := e.client.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("request %s failed: %w", url, err)
 	}
 	defer resp.Body.Close()
+
+	if debugMode {
+		for _, item := range genDebugRespMessages(resp) {
+			e.logger().Debug(item)
+		}
+	}
 
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -193,6 +207,13 @@ func (e *ECSMetadataProvider) getMedataData(ctx context.Context, method, path st
 		}
 	}
 	return string(data), nil
+}
+
+func (e *ECSMetadataProvider) logger() Logger {
+	if e.Logger != nil {
+		return e.Logger
+	}
+	return defaultLog
 }
 
 func (o *ECSMetadataProviderOptions) applyDefaults() {

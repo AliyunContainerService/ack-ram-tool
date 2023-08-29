@@ -21,6 +21,8 @@ type RoleArnProvider struct {
 
 	roleArn string
 	cp      CredentialsProvider
+
+	Logger Logger
 }
 
 type RoleArnProviderOptions struct {
@@ -50,6 +52,7 @@ func NewRoleArnProvider(cp CredentialsProvider, roleArn string, opts RoleArnProv
 		sessionName: opts.SessionName,
 		roleArn:     roleArn,
 		cp:          cp,
+		Logger:      opts.Logger,
 	}
 	e.u = NewUpdater(e.getCredentials, UpdaterOptions{
 		ExpiryWindow:  opts.ExpiryWindow,
@@ -106,6 +109,10 @@ func (r *RoleArnProvider) assumeRole(ctx context.Context, roleArn string) (*Cred
 	reqOpts.Headers["content-type"] = "application/x-www-form-urlencoded"
 	reqOpts.URL = reqOpts.BuildURL()
 
+	if debugMode {
+		r.logger().Debug(fmt.Sprintf("%s %s", reqOpts.Method, reqOpts.URL))
+	}
+
 	req, err := http.NewRequest(reqOpts.Method, reqOpts.URL, nil)
 	if err != nil {
 		return nil, err
@@ -116,11 +123,24 @@ func (r *RoleArnProvider) assumeRole(ctx context.Context, roleArn string) (*Cred
 	req.Header.Set("User-Agent", UserAgent)
 	req = req.WithContext(ctx)
 
+	if debugMode {
+		for _, item := range genDebugReqMessages(req) {
+			r.logger().Debug(item)
+		}
+	}
+
 	resp, err := r.client.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("request %s failed: %w", req.URL, err)
 	}
 	defer resp.Body.Close()
+
+	if debugMode {
+		for _, item := range genDebugRespMessages(resp) {
+			r.logger().Debug(item)
+		}
+	}
+
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
@@ -145,6 +165,13 @@ func (r *RoleArnProvider) assumeRole(ctx context.Context, roleArn string) (*Cred
 		SecurityToken:   obj.Credentials.SecurityToken,
 		Expiration:      exp,
 	}, nil
+}
+
+func (r *RoleArnProvider) logger() Logger {
+	if r.Logger != nil {
+		return r.Logger
+	}
+	return defaultLog
 }
 
 func (o *RoleArnProviderOptions) applyDefaults() {

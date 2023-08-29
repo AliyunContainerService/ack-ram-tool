@@ -1,6 +1,12 @@
 package provider
 
-import "log"
+import (
+	"log"
+	"os"
+	"strings"
+)
+
+var debugMode bool
 
 type Logger interface {
 	Info(msg string)
@@ -10,6 +16,13 @@ type Logger interface {
 
 var defaultLog Logger = defaultLogger{}
 
+func init() {
+	debugEnv := strings.ToLower(os.Getenv("DEBUG"))
+	if debugEnv == "sdk" || debugEnv == "tea" || debugEnv == "credentials-provider" {
+		debugMode = true
+	}
+}
+
 type defaultLogger struct {
 }
 
@@ -18,7 +31,9 @@ func (d defaultLogger) Info(msg string) {
 }
 
 func (d defaultLogger) Debug(msg string) {
-	// log.Print(msg)
+	if debugMode {
+		log.Print(msg)
+	}
 }
 
 func (d defaultLogger) Error(err error, msg string) {

@@ -33,6 +33,8 @@ type OIDCProvider struct {
 	envRoleArn         string
 	envOIDCProviderArn string
 	envOIDCTokenFile   string
+
+	Logger Logger
 }
 
 type OIDCProviderOptions struct {
@@ -67,6 +69,7 @@ func NewOIDCProvider(opts OIDCProviderOptions) *OIDCProvider {
 		envRoleArn:         opts.EnvRoleArn,
 		envOIDCProviderArn: opts.EnvOIDCProviderArn,
 		envOIDCTokenFile:   opts.EnvOIDCTokenFile,
+		Logger:             opts.Logger,
 	}
 	e.u = NewUpdater(e.getCredentials, UpdaterOptions{
 		ExpiryWindow:  opts.ExpiryWindow,
@@ -140,11 +143,24 @@ func (o *OIDCProvider) assumeRoleWithOIDC(ctx context.Context, roleArn, oidcProv
 	req.Header.Set("User-Agent", UserAgent)
 	req = req.WithContext(ctx)
 
+	if debugMode {
+		for _, item := range genDebugReqMessages(req) {
+			o.logger().Debug(item)
+		}
+	}
+
 	resp, err := o.client.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("request %s failed: %w", req.URL, err)
 	}
 	defer resp.Body.Close()
+
+	if debugMode {
+		for _, item := range genDebugRespMessages(resp) {
+			o.logger().Debug(item)
+		}
+	}
+
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
@@ -169,6 +185,13 @@ func (o *OIDCProvider) assumeRoleWithOIDC(ctx context.Context, roleArn, oidcProv
 		SecurityToken:   obj.Credentials.SecurityToken,
 		Expiration:      exp,
 	}, nil
+}
+
+func (o *OIDCProvider) logger() Logger {
+	if o.Logger != nil {
+		return o.Logger
+	}
+	return defaultLog
 }
 
 func (o *OIDCProviderOptions) applyDefaults() {
