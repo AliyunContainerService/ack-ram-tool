@@ -28,7 +28,7 @@ func (s SignerForV1SDK) GetName() string {
 }
 
 func (s SignerForV1SDK) GetType() string {
-	return "SignerForV1SDK"
+	return ""
 }
 
 func (s SignerForV1SDK) GetVersion() string {
