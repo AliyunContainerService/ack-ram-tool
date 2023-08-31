@@ -59,8 +59,10 @@ func (c *ChainProvider) logger() Logger {
 }
 
 type DefaultChainProviderOptions struct {
-	STSEndpoint string
-	Logger      Logger
+	STSEndpoint   string
+	ExpiryWindow  time.Duration
+	RefreshPeriod time.Duration
+	Logger        Logger
 }
 
 func NewDefaultChainProvider(opts DefaultChainProviderOptions) *ChainProvider {
@@ -68,15 +70,18 @@ func NewDefaultChainProvider(opts DefaultChainProviderOptions) *ChainProvider {
 		NewEnvProvider(EnvProviderOptions{}),
 		NewOIDCProvider(OIDCProviderOptions{
 			STSEndpoint:   opts.STSEndpoint,
-			RefreshPeriod: time.Minute * 10,
+			ExpiryWindow:  opts.ExpiryWindow,
+			RefreshPeriod: opts.RefreshPeriod,
 			Logger:        opts.Logger,
 		}),
 		NewEncryptedFileProvider(EncryptedFileProviderOptions{
-			RefreshPeriod: time.Minute * 10,
+			ExpiryWindow:  opts.ExpiryWindow,
+			RefreshPeriod: opts.RefreshPeriod,
 			Logger:        opts.Logger,
 		}),
 		NewECSMetadataProvider(ECSMetadataProviderOptions{
-			RefreshPeriod: time.Minute * 10,
+			ExpiryWindow:  opts.ExpiryWindow,
+			RefreshPeriod: opts.RefreshPeriod,
 			Logger:        opts.Logger,
 		}),
 	)
