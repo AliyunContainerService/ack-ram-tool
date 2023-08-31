@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudgo"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudsdkgo/helper/env"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/aliyuncli"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/openapi"
@@ -23,6 +25,7 @@ type ClientConfig struct {
 	profileName             string
 	ignoreEnv               bool
 	ignoreAliyuncli         bool
+	roleArn                 string
 }
 
 func NewClient(config ClientConfig) (*openapi.Client, error) {
@@ -36,9 +39,20 @@ func NewClient(config ClientConfig) (*openapi.Client, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	var p provider.CredentialsProvider
+	p = alibabacloudgo.NewCredentialsProviderWrapper(crd)
+	if config.roleArn != "" {
+		p = provider.NewRoleArnProvider(p, config.roleArn, provider.RoleArnProviderOptions{
+			SessionName: version.BinName(),
+			Logger:      &log.ProviderLogWrapper{ZP: log.Logger},
+		})
+	}
+	cred := provider.NewCredentialForV2SDK(p, provider.CredentialForV2SDKOptions{})
+
 	return openapi.NewClient(&client.Config{
 		RegionId:   tea.String(config.regionId),
-		Credential: crd,
+		Credential: cred,
 		UserAgent:  tea.String(version.UserAgent()),
 	})
 }
@@ -110,6 +124,7 @@ func GetClientOrDie() *openapi.Client {
 			profileName:             ctl.GlobalOption.GetProfileName(),
 			ignoreEnv:               ctl.GlobalOption.GetIgnoreEnv(),
 			ignoreAliyuncli:         ctl.GlobalOption.GetIgnoreAliyuncliConfig(),
+			roleArn:                 ctl.GlobalOption.GetRoleArn(),
 		},
 	)
 	if err != nil {

@@ -29,9 +29,10 @@ type globalOption struct {
 	UseSpecifiedCredentialFile bool
 	CredentialFilePath         string
 
-	ProfileName           string
-	IgnoreEnv             bool
-	IgnoreAliyuncliConfig bool
+	ProfileName                   string
+	IgnoreEnv                     bool
+	IgnoreAliyuncliConfig         bool
+	FinalAssumeRoleAnotherRoleArn string
 
 	LogLevel  string
 	ClusterId string
@@ -40,7 +41,7 @@ type globalOption struct {
 
 var GlobalOption = &globalOption{}
 
-func (g globalOption) GetRegion() string {
+func (g *globalOption) GetRegion() string {
 	return g.Region
 }
 
@@ -85,36 +86,40 @@ func (g *globalOption) UpdateValues() {
 	}
 }
 
-func (g globalOption) GetCredentialFilePath() string {
+func (g *globalOption) GetCredentialFilePath() string {
 	if strings.HasSuffix(g.CredentialFilePath, ".json") {
 		return ""
 	}
 	return g.CredentialFilePath
 }
 
-func (g globalOption) GetAliyuncliConfigFilePath() string {
+func (g *globalOption) GetAliyuncliConfigFilePath() string {
 	if strings.HasSuffix(g.CredentialFilePath, ".json") {
 		return g.CredentialFilePath
 	}
 	return ""
 }
 
-func (g globalOption) GetProfileName() string {
+func (g *globalOption) GetProfileName() string {
 	return g.ProfileName
 }
 
-func (g globalOption) GetIgnoreEnv() bool {
+func (g *globalOption) GetIgnoreEnv() bool {
 	return g.IgnoreEnv
 }
 
-func (g globalOption) GetIgnoreAliyuncliConfig() bool {
+func (g *globalOption) GetIgnoreAliyuncliConfig() bool {
 	return g.IgnoreAliyuncliConfig
 }
 
-func (g globalOption) GetClusterId() string {
+func (g *globalOption) GetClusterId() string {
 	return g.ClusterId
 }
 
-func (g globalOption) GetLogLevel() string {
+func (g *globalOption) GetLogLevel() string {
 	return g.LogLevel
+}
+
+func (g *globalOption) GetRoleArn() string {
+	return g.FinalAssumeRoleAnotherRoleArn
 }
