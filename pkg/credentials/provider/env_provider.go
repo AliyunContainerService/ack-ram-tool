@@ -9,6 +9,7 @@ import (
 const (
 	envAccessKeyId     = "ALIBABA_CLOUD_ACCESS_KEY_ID"
 	envAccessKeySecret = "ALIBABA_CLOUD_ACCESS_KEY_SECRET"
+	envSecurityToken   = "ALIBABA_CLOUD_SECURITY_TOKEN"
 )
 
 type EnvProvider struct {
@@ -16,11 +17,13 @@ type EnvProvider struct {
 
 	envAccessKeyId     string
 	envAccessKeySecret string
+	envSecurityToken   string
 }
 
 type EnvProviderOptions struct {
 	EnvAccessKeyId     string
 	EnvAccessKeySecret string
+	EnvSecurityToken   string
 }
 
 func NewEnvProvider(opts EnvProviderOptions) *EnvProvider {
@@ -30,9 +33,11 @@ func NewEnvProvider(opts EnvProviderOptions) *EnvProvider {
 		cred: &Credentials{
 			AccessKeyId:     os.Getenv(opts.EnvAccessKeyId),
 			AccessKeySecret: os.Getenv(opts.EnvAccessKeySecret),
+			SecurityToken:   os.Getenv(opts.EnvSecurityToken),
 		},
 		envAccessKeyId:     opts.EnvAccessKeyId,
 		envAccessKeySecret: opts.EnvAccessKeySecret,
+		envSecurityToken:   opts.EnvSecurityToken,
 	}
 }
 
@@ -51,5 +56,8 @@ func (o *EnvProviderOptions) applyDefaults() {
 	}
 	if o.EnvAccessKeySecret == "" {
 		o.EnvAccessKeySecret = envAccessKeySecret
+	}
+	if o.EnvSecurityToken == "" {
+		o.EnvSecurityToken = envSecurityToken
 	}
 }
