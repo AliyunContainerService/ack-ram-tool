@@ -23,3 +23,18 @@ test:
 e2e:
 	bash ./examples/rrsa/e2e-test/e2e.sh $(cid)
 	bash ./examples/credential-plugin/e2e.sh $(cid)
+
+.PHONY: lint
+lint: deps fmt vet
+
+.PHONY: fmt
+fmt: ## Run go fmt against code.
+	go fmt ./...
+
+.PHONY: vet
+vet: ## Run go vet against code.
+	go vet ./...
+
+.PHONY: deps
+deps:
+	go mod tidy && go mod vendor
