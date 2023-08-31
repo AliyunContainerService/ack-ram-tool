@@ -17,9 +17,12 @@ type Logger interface {
 var defaultLog Logger = defaultLogger{}
 
 func init() {
-	debugEnv := strings.ToLower(os.Getenv("DEBUG"))
-	if debugEnv == "sdk" || debugEnv == "tea" || debugEnv == "credentials-provider" {
-		debugMode = true
+	debugEnv := strings.Split(strings.ToLower(os.Getenv("DEBUG")), ",")
+	for _, item := range debugEnv {
+		if item == "sdk" || item == "tea" || item == "credentials-provider" {
+			debugMode = true
+			break
+		}
 	}
 }
 

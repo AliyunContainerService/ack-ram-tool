@@ -109,10 +109,6 @@ func (r *RoleArnProvider) assumeRole(ctx context.Context, roleArn string) (*Cred
 	reqOpts.Headers["content-type"] = "application/x-www-form-urlencoded"
 	reqOpts.URL = reqOpts.BuildURL()
 
-	if debugMode {
-		r.logger().Debug(fmt.Sprintf("%s %s", reqOpts.Method, reqOpts.URL))
-	}
-
 	req, err := http.NewRequest(reqOpts.Method, reqOpts.URL, nil)
 	if err != nil {
 		return nil, err

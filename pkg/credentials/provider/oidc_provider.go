@@ -122,8 +122,8 @@ func (o *OIDCProvider) assumeRoleWithOIDC(ctx context.Context, roleArn, oidcProv
 	reqOpts.QueryParams["Timestamp"] = getTimeInFormatISO8601()
 	reqOpts.QueryParams["Action"] = "AssumeRoleWithOIDC"
 	reqOpts.QueryParams["Format"] = "JSON"
-	reqOpts.BodyParams["RoleArn"] = roleArn
-	reqOpts.BodyParams["OIDCProviderArn"] = oidcProviderArn
+	reqOpts.QueryParams["RoleArn"] = roleArn
+	reqOpts.QueryParams["OIDCProviderArn"] = oidcProviderArn
 	reqOpts.BodyParams["OIDCToken"] = token
 	//reqOpts.QueryParams["Policy"] = policy
 	reqOpts.QueryParams["RoleSessionName"] = o.sessionName
