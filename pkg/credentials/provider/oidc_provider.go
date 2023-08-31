@@ -14,12 +14,13 @@ import (
 const (
 	defaultSTSEndpoint = "sts.aliyuncs.com"
 	defaultSTSScheme   = "HTTPS"
-	defaultSessionName = "default-session-name"
 
 	defaultEnvRoleArn         = "ALIBABA_CLOUD_ROLE_ARN"
 	defaultEnvOIDCProviderArn = "ALIBABA_CLOUD_OIDC_PROVIDER_ARN"
 	defaultEnvOIDCTokenFile   = "ALIBABA_CLOUD_OIDC_TOKEN_FILE"
 )
+
+var defaultSessionName = "default-session-name"
 
 type OIDCProvider struct {
 	u *Updater
@@ -52,6 +53,13 @@ type OIDCProviderOptions struct {
 	ExpiryWindow  time.Duration
 	RefreshPeriod time.Duration
 	Logger        Logger
+}
+
+func init() {
+	sessionName := getRoleSessionNameFromEnv()
+	if sessionName != "" {
+		defaultSessionName = sessionName
+	}
 }
 
 func NewOIDCProvider(opts OIDCProviderOptions) *OIDCProvider {
