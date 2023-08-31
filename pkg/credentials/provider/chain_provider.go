@@ -58,26 +58,40 @@ func (c *ChainProvider) logger() Logger {
 	return defaultLog
 }
 
-func DefaultChainProvider() *ChainProvider {
-	return DefaultChainProviderWithLogger(nil)
+type DefaultChainProviderOptions struct {
+	STSEndpoint string
+	Logger      Logger
 }
 
-func DefaultChainProviderWithLogger(l Logger) *ChainProvider {
+func NewDefaultChainProvider(opts DefaultChainProviderOptions) *ChainProvider {
 	p := NewChainProvider(
 		NewEnvProvider(EnvProviderOptions{}),
 		NewOIDCProvider(OIDCProviderOptions{
+			STSEndpoint:   opts.STSEndpoint,
 			RefreshPeriod: time.Minute * 10,
-			Logger:        l,
+			Logger:        opts.Logger,
 		}),
 		NewEncryptedFileProvider(EncryptedFileProviderOptions{
 			RefreshPeriod: time.Minute * 10,
-			Logger:        l,
+			Logger:        opts.Logger,
 		}),
 		NewECSMetadataProvider(ECSMetadataProviderOptions{
 			RefreshPeriod: time.Minute * 10,
-			Logger:        l,
+			Logger:        opts.Logger,
 		}),
 	)
-	p.Logger = l
+	p.Logger = opts.Logger
 	return p
+}
+
+// Deprecated: use NewDefaultChainProvider instead
+func DefaultChainProvider() *ChainProvider {
+	return NewDefaultChainProvider(DefaultChainProviderOptions{})
+}
+
+// Deprecated: use NewDefaultChainProvider instead
+func DefaultChainProviderWithLogger(l Logger) *ChainProvider {
+	return NewDefaultChainProvider(DefaultChainProviderOptions{
+		Logger: l,
+	})
 }
