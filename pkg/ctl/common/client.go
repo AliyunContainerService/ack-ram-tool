@@ -31,6 +31,7 @@ type ClientConfig struct {
 }
 
 func NewClient(config ClientConfig) (*openapi.Client, error) {
+	log.Logger.Debugf("use %s as sts endpoint", config.stsEndpoint)
 	preP, err := getCredential(getCredentialOption{
 		credentialFilePath:      config.credentialFilePath,
 		aliyuncliConfigFilePath: config.aliyuncliConfigFilePath,
