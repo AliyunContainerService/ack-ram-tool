@@ -47,7 +47,7 @@ func NewClient(config ClientConfig) (*openapi.Client, error) {
 
 	p := preP
 	if config.roleArn != "" {
-		log.Logger.Debugf("will assume role arn %s to get credentails with pre credentials", config.roleArn)
+		log.Logger.Debug("will use assume role to get credentails with pre credentials")
 		p = provider.NewRoleArnProvider(preP, config.roleArn, provider.RoleArnProviderOptions{
 			STSEndpoint: config.stsEndpoint,
 			SessionName: config.SessionName(),
