@@ -1,7 +1,7 @@
 package credentialplugin
 
 import (
-	"crypto/sha1"
+	"crypto/sha1" // #nosec G505
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -80,10 +80,14 @@ func getCacheFilePath(cacheDir string, opts GetCredentialOpts) string {
 
 	roleArn := ctl.GlobalOption.GetRoleArn()
 	profileName := ctl.GlobalOption.GetProfileName()
-	if roleArn != "" || profileName != "" {
-		sh := sha1.New()
+	cpath := ctl.GlobalOption.GetCredentialFilePath()
+	apath := ctl.GlobalOption.GetAliyuncliConfigFilePath()
+	if roleArn != "" || profileName != "" || cpath != "" || apath != "" {
+		sh := sha1.New() // #nosec G401
 		sh.Write([]byte(roleArn))
 		sh.Write([]byte(profileName))
+		sh.Write([]byte(cpath))
+		sh.Write([]byte(apath))
 		h := sh.Sum(nil)
 		filename = fmt.Sprintf("%s-%x", filename, h)
 	}

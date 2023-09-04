@@ -105,9 +105,11 @@ func getCredential(opt getCredentialOption) (provider.CredentialsProvider, error
 	}
 	if aliyuncliConfigFilePath == "" {
 		aliyuncliConfigFilePath, _ = utils.ExpandPath("~/.aliyun/config.json")
-		if _, err := os.ReadFile(aliyuncliConfigFilePath); err != nil && os.IsNotExist(err) {
+		if path, err := checkFileExist(aliyuncliConfigFilePath); err != nil && os.IsNotExist(err) {
 			log.Logger.Debugf("file %s not exist, ignore it", utils.ShortHomePath(aliyuncliConfigFilePath))
 			ignoreAliyuncli = true
+		} else {
+			aliyuncliConfigFilePath = path
 		}
 	}
 
@@ -191,6 +193,6 @@ func checkFileExist(filepath string) (string, error) {
 	if err == nil {
 		filepath = path
 	}
-	_, err = os.ReadFile(filepath)
+	_, err = os.ReadFile(filepath) // #nosec G304
 	return filepath, err
 }
