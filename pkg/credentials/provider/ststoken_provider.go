@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"errors"
+	"time"
 )
 
 type STSTokenProvider struct {
@@ -26,4 +27,9 @@ func (a *STSTokenProvider) Credentials(ctx context.Context) (*Credentials, error
 	}
 
 	return a.cred, nil
+}
+
+func (a *STSTokenProvider) SetExpiration(exp time.Time) *STSTokenProvider {
+	a.cred.Expiration = exp
+	return a
 }
