@@ -3,9 +3,6 @@
 github.com/AlecAivazis/survey/v2
 github.com/AlecAivazis/survey/v2/core
 github.com/AlecAivazis/survey/v2/terminal
-# github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudsdkgo/helper v0.0.0 => ./pkg/credentials/alibabacloudsdkgo/helper
-## explicit; go 1.17
-github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudsdkgo/helper/env
 # github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider v0.0.0 => ./pkg/credentials/provider
 ## explicit; go 1.16
 github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider
@@ -562,5 +559,4 @@ sigs.k8s.io/structured-merge-diff/v4/value
 # sigs.k8s.io/yaml v1.3.0
 ## explicit; go 1.12
 sigs.k8s.io/yaml
-# github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudsdkgo/helper => ./pkg/credentials/alibabacloudsdkgo/helper
 # github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider => ./pkg/credentials/provider

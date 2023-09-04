@@ -68,5 +68,5 @@ func SetupCmd(rootCmd *cobra.Command) {
 		fmt.Sprintf("The output format to display credentials (%s)",
 			strings.Join(formats, ", ")))
 	cmd.Flags().StringVarP(&opt.serve, "serve", "s", "",
-		"start a server to export credentials")
+		"start a server to export credentials (e.g. 127.0.0.1:6666")
 }

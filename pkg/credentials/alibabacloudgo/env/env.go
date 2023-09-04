@@ -2,8 +2,12 @@ package env
 
 import (
 	"errors"
+	"fmt"
 	"os"
 
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudgo"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
 	"github.com/aliyun/credentials-go/credentials"
 )
 
@@ -70,8 +74,12 @@ var (
 	}
 )
 
-// NewCredential return a Credential base on environment variables
-func NewCredential() (credentials.Credential, error) {
+type CredentialsProviderOptions struct {
+	STSEndpoint string
+}
+
+// NewCredentialsProvider return a CredentialsProvider base on environment variables
+func NewCredentialsProvider(opts CredentialsProviderOptions) (provider.CredentialsProvider, error) {
 	keyId := GetAccessKeyId()
 	keySecret := GetAccessKeySecret()
 	stsToken := GetSecurityToken()
@@ -92,18 +100,32 @@ func NewCredential() (credentials.Credential, error) {
 		RoleSessionName:   stringPoint(sessionName),
 	}
 	if keyId != "" && keySecret != "" && stsToken != "" {
-		config.Type = stringPoint("sts")
-	} else if credURI != "" {
+		return provider.NewSTSTokenProvider(keyId, keySecret, stsToken), nil
+	}
+	if roleArn != "" && oidcProviderArn != "" && oidcTokenFile != "" {
+		return provider.NewOIDCProvider(provider.OIDCProviderOptions{
+			STSEndpoint:     opts.STSEndpoint,
+			SessionName:     sessionName,
+			RoleArn:         roleArn,
+			OIDCProviderArn: oidcProviderArn,
+			OIDCTokenFile:   oidcTokenFile,
+			Logger:          &log.ProviderLogWrapper{ZP: log.Logger},
+		}), nil
+	}
+	if keyId != "" && keySecret != "" {
+		return provider.NewAccessKeyProvider(keyId, keySecret), nil
+	}
+	if credURI != "" {
 		config.Type = stringPoint("credentials_uri")
-	} else if keyId != "" && keySecret != "" {
-		config.Type = stringPoint("access_key")
-	} else if roleArn != "" && oidcProviderArn != "" && oidcTokenFile != "" {
-		config.Type = stringPoint("oidc_role_arn")
 	} else {
 		return nil, errors.New("not found credentials related environment variables")
 	}
 
-	return credentials.NewCredential(config)
+	cred, err := credentials.NewCredential(config)
+	if err != nil {
+		return nil, fmt.Errorf("init credential failed: %w", err)
+	}
+	return alibabacloudgo.NewCredentialsProviderWrapper(cred), nil
 }
 
 func GetAccessKeyId() string {

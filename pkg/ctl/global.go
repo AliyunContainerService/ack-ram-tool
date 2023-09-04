@@ -4,6 +4,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider"
 )
 
 const (
@@ -15,7 +17,7 @@ const (
 	EnvLogLevel                   = "ACK_RAM_TOOL_LOG_LEVEL"
 	EnvRegionId                   = "ACK_RAM_TOOL_REGION_ID"
 
-	DefaultRegion   = "cn-hangzhou"
+	DefaultRegion   = ""
 	DefaultLogLevel = "info"
 	debugLogLevel   = "debug"
 )
@@ -84,6 +86,14 @@ func (g *globalOption) UpdateValues() {
 	if g.Verbose {
 		g.LogLevel = debugLogLevel
 	}
+
+	debugEnv := strings.Split(strings.ToLower(os.Getenv("DEBUG")), ",")
+	for _, item := range debugEnv {
+		if item == "sdk" || item == "tea" || item == "ack-ram-tool" {
+			g.LogLevel = debugLogLevel
+			break
+		}
+	}
 }
 
 func (g *globalOption) GetCredentialFilePath() string {
@@ -122,4 +132,9 @@ func (g *globalOption) GetLogLevel() string {
 
 func (g *globalOption) GetRoleArn() string {
 	return g.FinalAssumeRoleAnotherRoleArn
+}
+
+func (g *globalOption) GetSTSEndpoint() string {
+	region := g.GetRegion()
+	return provider.GetSTSEndpoint(region, g.UseVPCEndpoint)
 }

@@ -11,5 +11,5 @@ const (
 	//envOldSdkPrivateKey            = "ALICLOUD_PRIVATE_KEY"
 	//envOldSdkPublicKeyID           = "ALICLOUD_PUBLIC_KEY_ID"
 	//envOldSdkSessionExpiration     = "ALICLOUD_SESSION_EXPIRATION"
-	//envOldSdkRoleName              = "ALICLOUD_ROLE_NAME"
+	//envOldSdkRoleName = "ALICLOUD_ROLE_NAME"
 )

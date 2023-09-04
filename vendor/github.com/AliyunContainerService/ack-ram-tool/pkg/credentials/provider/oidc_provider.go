@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -14,12 +15,13 @@ import (
 const (
 	defaultSTSEndpoint = "sts.aliyuncs.com"
 	defaultSTSScheme   = "HTTPS"
-	defaultSessionName = "default-session-name"
 
 	defaultEnvRoleArn         = "ALIBABA_CLOUD_ROLE_ARN"
 	defaultEnvOIDCProviderArn = "ALIBABA_CLOUD_OIDC_PROVIDER_ARN"
 	defaultEnvOIDCTokenFile   = "ALIBABA_CLOUD_OIDC_TOKEN_FILE"
 )
+
+var defaultSessionName = "default-session-name"
 
 type OIDCProvider struct {
 	u *Updater
@@ -30,9 +32,9 @@ type OIDCProvider struct {
 	stsScheme   string
 	sessionName string
 
-	envRoleArn         string
-	envOIDCProviderArn string
-	envOIDCTokenFile   string
+	roleArn         string
+	oidcProviderArn string
+	oidcTokenFile   string
 
 	Logger Logger
 }
@@ -42,8 +44,11 @@ type OIDCProviderOptions struct {
 	stsScheme   string
 	SessionName string
 
+	RoleArn            string
 	EnvRoleArn         string
+	OIDCProviderArn    string
 	EnvOIDCProviderArn string
+	OIDCTokenFile      string
 	EnvOIDCTokenFile   string
 
 	Timeout   time.Duration
@@ -54,6 +59,13 @@ type OIDCProviderOptions struct {
 	Logger        Logger
 }
 
+func init() {
+	sessionName := getRoleSessionNameFromEnv()
+	if sessionName != "" {
+		defaultSessionName = sessionName
+	}
+}
+
 func NewOIDCProvider(opts OIDCProviderOptions) *OIDCProvider {
 	opts.applyDefaults()
 
@@ -62,14 +74,14 @@ func NewOIDCProvider(opts OIDCProviderOptions) *OIDCProvider {
 		Timeout:   opts.Timeout,
 	}
 	e := &OIDCProvider{
-		client:             client,
-		stsEndpoint:        opts.STSEndpoint,
-		stsScheme:          opts.stsScheme,
-		sessionName:        opts.SessionName,
-		envRoleArn:         opts.EnvRoleArn,
-		envOIDCProviderArn: opts.EnvOIDCProviderArn,
-		envOIDCTokenFile:   opts.EnvOIDCTokenFile,
-		Logger:             opts.Logger,
+		client:          client,
+		stsEndpoint:     opts.STSEndpoint,
+		stsScheme:       opts.stsScheme,
+		sessionName:     opts.SessionName,
+		roleArn:         opts.getRoleArn(),
+		oidcProviderArn: opts.getOIDCProviderArn(),
+		oidcTokenFile:   opts.getOIDCTokenFile(),
+		Logger:          opts.Logger,
 	}
 	e.u = NewUpdater(e.getCredentials, UpdaterOptions{
 		ExpiryWindow:  opts.ExpiryWindow,
@@ -87,12 +99,11 @@ func (o *OIDCProvider) Credentials(ctx context.Context) (*Credentials, error) {
 }
 
 func (o *OIDCProvider) getCredentials(ctx context.Context) (*Credentials, error) {
-	roleArn := os.Getenv(o.envRoleArn)
-	oidcProviderArn := os.Getenv(o.envOIDCProviderArn)
-	tokenFile := os.Getenv(o.envOIDCTokenFile)
+	roleArn := o.roleArn
+	oidcProviderArn := o.oidcProviderArn
+	tokenFile := o.oidcTokenFile
 	if roleArn == "" || oidcProviderArn == "" || tokenFile == "" {
-		return nil, NewNotEnableError(fmt.Errorf("env %s, %s or %s is empty",
-			o.envRoleArn, o.envOIDCProviderArn, o.envOIDCTokenFile))
+		return nil, NewNotEnableError(errors.New("roleArn, oidcProviderArn or tokenFile is empty"))
 	}
 
 	tokenData, err := os.ReadFile(tokenFile)
@@ -238,4 +249,25 @@ func (o *OIDCProviderOptions) applyDefaults() {
 	if o.Logger == nil {
 		o.Logger = defaultLog
 	}
+}
+
+func (o *OIDCProviderOptions) getRoleArn() string {
+	if o.RoleArn != "" {
+		return o.RoleArn
+	}
+	return os.Getenv(o.EnvRoleArn)
+}
+
+func (o *OIDCProviderOptions) getOIDCProviderArn() string {
+	if o.OIDCProviderArn != "" {
+		return o.OIDCProviderArn
+	}
+	return os.Getenv(o.EnvOIDCProviderArn)
+}
+
+func (o *OIDCProviderOptions) getOIDCTokenFile() string {
+	if o.OIDCTokenFile != "" {
+		return o.OIDCTokenFile
+	}
+	return os.Getenv(o.EnvOIDCTokenFile)
 }

@@ -16,10 +16,6 @@ package aliyuncli
 
 import (
 	"fmt"
-	openapi "github.com/alibabacloud-go/darabonba-openapi/client"
-	sts "github.com/alibabacloud-go/sts-20150401/client"
-	"github.com/alibabacloud-go/tea/tea"
-	"github.com/aliyun/credentials-go/credentials"
 )
 
 type AuthenticateMode string
@@ -143,32 +139,4 @@ func (cp *Profile) ValidateAK() error {
 		return fmt.Errorf("invaild access_key_secret: %s", cp.AccessKeySecret)
 	}
 	return nil
-}
-
-func (cp *Profile) GetSessionCredential(client *sts.Client) (*sts.AssumeRoleResponseBodyCredentials, error) {
-	req := &sts.AssumeRoleRequest{
-		DurationSeconds: tea.Int64(int64(cp.ExpiredSeconds)),
-		Policy:          nil,
-		RoleArn:         tea.String(cp.RamRoleArn),
-		RoleSessionName: tea.String(cp.RoleSessionName),
-	}
-	resp, err := client.AssumeRole(req)
-	if err != nil {
-		return nil, err
-	}
-	return resp.Body.Credentials, nil
-}
-
-func (cp *Profile) GetSTSClientByEcsRamRole() (*sts.Client, error) {
-	conf := &credentials.Config{
-		Type:     tea.String("ecs_ram_role"),
-		RoleName: tea.String(cp.RamRoleName),
-	}
-	cred, err := credentials.NewCredential(conf)
-	if err != nil {
-		return nil, err
-	}
-	return sts.NewClient(&openapi.Config{
-		Credential: cred,
-	})
 }

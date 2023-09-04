@@ -5,8 +5,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudsdkgo/helper/aliyuncli"
-	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudsdkgo/helper/env"
 	"github.com/aliyun/credentials-go/credentials"
 )
 
@@ -15,45 +13,6 @@ const (
 	EnvOidcProviderArn = "ALIBABA_CLOUD_OIDC_PROVIDER_ARN"
 	EnvOidcTokenFile   = "ALIBABA_CLOUD_OIDC_TOKEN_FILE"
 )
-
-// NewCredential return a Credential base on:
-// * environment variables
-// * credentialFilePath: credential file
-// * aliyuncliConfigFilePath: aliyun cli config file
-// * aliyuncliProfileName: profile name of aliyun cli
-func NewCredential(credentialFilePath, aliyuncliConfigFilePath, aliyuncliProfileName, sessionName string) (credentials.Credential, error) {
-	if credentialFilePath == "" {
-		credentialFilePath = env.GetCredentialsFile()
-	}
-	if credentialFilePath != "" {
-		credentialFilePath, _ = expandPath(credentialFilePath)
-	}
-	if credentialFilePath != "" {
-		if _, err := os.Stat(credentialFilePath); err == nil {
-			_ = os.Setenv(credentials.ENVCredentialFile, credentialFilePath)
-		}
-	}
-	if aliyuncliProfileName == "" {
-		aliyuncliProfileName = env.GetAliyuncliProfileName()
-	}
-	if sessionName != "" {
-		_ = os.Setenv(env.EnvRoleSessionName, sessionName)
-	}
-	if rawP := env.GetAliyuncliProfilePath(); aliyuncliConfigFilePath == "" && rawP != "" {
-		if path, err := expandPath(rawP); err == nil && path != "" {
-			if _, err := os.Stat(path); err == nil {
-				aliyuncliConfigFilePath = path
-			}
-		}
-	}
-	if aliyuncliConfigFilePath == "" || env.GetAliyuncliIgnoreProfile() == "TRUE" {
-		if cred, err := env.NewCredential(); err == nil && cred != nil {
-			return cred, err
-		}
-	}
-	cred, err := aliyuncli.NewCredential(aliyuncliConfigFilePath, aliyuncliProfileName)
-	return cred, err
-}
 
 func HaveOidcCredentialRequiredEnv() bool {
 	return os.Getenv(EnvRoleArn) != "" &&
