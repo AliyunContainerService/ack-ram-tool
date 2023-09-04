@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
 	ctlcommon "github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/common"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
 	"github.com/spf13/cobra"
@@ -69,4 +70,8 @@ func SetupCmd(rootCmd *cobra.Command) {
 			strings.Join(formats, ", ")))
 	cmd.Flags().StringVarP(&opt.serve, "serve", "s", "",
 		"start a server to export credentials (e.g. 127.0.0.1:6666")
+
+	cmd.Flags().StringVar(
+		&ctl.GlobalOption.FinalAssumeRoleAnotherRoleArn, "role-arn", "",
+		"Assume an RAM Role ARN when send request or sign token")
 }

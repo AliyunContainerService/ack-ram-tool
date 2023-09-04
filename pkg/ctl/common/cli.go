@@ -30,5 +30,6 @@ func SetupClusterIdFlag(cmd *cobra.Command) {
 	ExitIfError(cmd.MarkFlagRequired("cluster-id"))
 
 	cmd.Flags().StringVar(
-		&ctl.GlobalOption.FinalAssumeRoleAnotherRoleArn, "role-arn", "", "Assume an RAM Role ARN before send request")
+		&ctl.GlobalOption.FinalAssumeRoleAnotherRoleArn, "role-arn", "",
+		"Assume an RAM Role ARN when send request or sign token")
 }
