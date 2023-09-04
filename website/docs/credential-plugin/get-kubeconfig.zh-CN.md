@@ -115,6 +115,7 @@ Flags:
   -h, --help                          help for get-kubeconfig
   -m, --mode string                   credential mode: certificate or ram-authenticator-token (default "certificate")
       --private-address               Use private ip as api-server address
+      --role-arn string               Assume an RAM Role ARN when send request or sign token
 
 Global Flags:
   -y, --assume-yes                      Automatic yes to prompts; assume "yes" as answer to all prompts and run non-interactively
@@ -136,3 +137,4 @@ Global Flags:
 | --private-address      | false                                          | 否    | 是否使用内网 api server 地址                                                                                                      |
 | --api-version          | v1beta1                                        | 否    | 指定返回的数据中使用哪个版本的 apiVersion。v1beta1 表示 `client.authentication.k8s.io/v1beta1`，v1 表示 `client.authentication.k8s.io/v1beta1` |
 | --credential-cache-dir | `~/.kube/cache/ack-ram-tool/credential-plugin` | 否    | 用于缓存证书的目录，只在 `--mode` 被设置为 `certificate` 时有效                                                                              |
+| --role-arn             |                                                | 否    | 使用扮演这个角色后的身份访问阿里云API                                                                                                      |

@@ -121,6 +121,7 @@ Flags:
   -f, --format string   The output format to display credentials (aliyun-cli-config-json, aliyun-cli-uri-json, ecs-metadata-json, credential-file-ini, environment-variables) (default "aliyun-cli-config-json")
   -h, --help            help for export-credentials
   -s, --serve string    start a server to export credentials
+  --role-arn string     Assume an RAM Role ARN when send request or sign token
 
 Global Flags:
   -y, --assume-yes                      Automatic yes to prompts; assume "yes" as answer to all prompts and run non-interactively
@@ -138,3 +139,4 @@ Global Flags:
 |--------------|------------------------|------|---------------------------------------------|
 | -f, --format | aliyun-cli-config-json | 否    | 指定输出格式，详见使用示例                               |
 | -s, --serve  | 无                      | 否    | 启动一个监听指定地址的 HTTP Server，访问该服务将返回凭证信息，详见使用示例 |
+| --role-arn   | 无                      | 否    | 扮演该角色                                       |

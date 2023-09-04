@@ -44,6 +44,7 @@ Flags:
       --credential-cache-dir string   Directory to cache credential (default "~/.kube/cache/ack-ram-tool/credential-plugin")
       --expiration duration           The credential expiration (default 3h0m0s)
   -h, --help                          help for get-credential
+      --role-arn string               Assume an RAM Role ARN when send request or sign token
 
 Global Flags:
   -y, --assume-yes                      Automatic yes to prompts; assume "yes" as answer to all prompts and run non-interactively
@@ -64,3 +65,4 @@ Descriptions：
 | --api-version          | v1beta1                                        |          | Specify which version of apiVersion to use in the returned data. `v1beta1` represents `client.authentication.k8s.io/v1beta1`, and `v1` represents `client.authentication.k8s.io/v1`.                      |
 | --expiration           | 3h0m0s                                         |          | Specify the certificate expiration time. When it is 0, it means not to use a temporary certificate but to use a longer valid certificate (the expiration time is automatically determined by the server). |
 | --credential-cache-dir | `~/.kube/cache/ack-ram-tool/credential-plugin` |          | Directory used to cache the certificate                                                                                                                                                                   |
+| --role-arn             |                                                |          | Assume an RAM Role ARN when send request or sign token                                                                                                                                                    |

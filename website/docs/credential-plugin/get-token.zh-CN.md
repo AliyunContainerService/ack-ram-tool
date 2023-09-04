@@ -35,6 +35,7 @@ Flags:
       --api-version string   v1 or v1beta1 (default "v1beta1")
   -c, --cluster-id string    The cluster id to use
   -h, --help                 help for get-token
+      --role-arn string      Assume an RAM Role ARN when send request or sign token
 
 Global Flags:
   -y, --assume-yes                      Automatic yes to prompts; assume "yes" as answer to all prompts and run non-interactively
@@ -52,3 +53,4 @@ Global Flags:
 |------------------|---------|------|---------------------------------------------------------------------------------------------------------------------------|
 | -c, --cluster-id | 无       | 是    | 集群 ID                                                                                                                     |
 | --api-version    | v1beta1 | 否    | 指定返回的数据中使用哪个版本的 apiVersion。v1beta1 表示 `client.authentication.k8s.io/v1beta1`，v1 表示 `client.authentication.k8s.io/v1beta1` |
+| --role-arn       |         | 否    | 使用扮演这个角色后的身份访问阿里云API                                                                                                      |

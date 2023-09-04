@@ -34,6 +34,7 @@ Flags:
       --api-version string   v1 or v1beta1 (default "v1beta1")
   -c, --cluster-id string    The cluster id to use
   -h, --help                 help for get-token
+      --role-arn string      Assume an RAM Role ARN when send request or sign token
 
 Global Flags:
   -y, --assume-yes                      Automatic yes to prompts; assume "yes" as answer to all prompts and run non-interactively
@@ -47,7 +48,8 @@ Global Flags:
 
 Descriptions：
 
-| Flag                   | Default                                        | Required | Description                                                                                                                                                                                                                                                       |
-|------------------------|------------------------------------------------|----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| -c, --cluster-id       |                                                | Yes      | Cluster ID                                                                                                                                                                                                                                                        |
-| --api-version          | v1beta1                                        |          | Specify which version of apiVersion to use in the returned data. `v1beta1` represents `client.authentication.k8s.io/v1beta1`, and `v1` represents `client.authentication.k8s.io/v1`.                                                                              |
+| Flag             | Default | Required | Description                                                                                                                                                                          |
+|------------------|---------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -c, --cluster-id |         | Yes      | Cluster ID                                                                                                                                                                           |
+| --api-version    | v1beta1 |          | Specify which version of apiVersion to use in the returned data. `v1beta1` represents `client.authentication.k8s.io/v1beta1`, and `v1` represents `client.authentication.k8s.io/v1`. |
+| --role-arn       |         |          | Assume an RAM Role ARN when send request or sign token                                                                                                                               |

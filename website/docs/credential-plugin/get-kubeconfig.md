@@ -114,6 +114,7 @@ Flags:
   -h, --help                          help for get-kubeconfig
   -m, --mode string                   credential mode: certificate or ram-authenticator-token (default "certificate")
       --private-address               Use private ip as api-server address
+      --role-arn string               Assume an RAM Role ARN when send request or sign token
 
 Global Flags:
   -y, --assume-yes                      Automatic yes to prompts; assume "yes" as answer to all prompts and run non-interactively
@@ -135,3 +136,4 @@ Descriptions：
 | --private-address      | false                                          |          | Whether to use the intranet API server address?                                                                                                                                                                                                                   |
 | --api-version          | v1beta1                                        |          | Specify which version of apiVersion to use in the returned data. `v1beta1` represents `client.authentication.k8s.io/v1beta1`, and `v1` represents `client.authentication.k8s.io/v1`.                                                                              |
 | --credential-cache-dir | `~/.kube/cache/ack-ram-tool/credential-plugin` |          | The directory used to cache the certificate is only valid when `--mode` is set to `certificate`                                                                                                                                                                   |
+| --role-arn             |                                                |          | Assume an RAM Role ARN when send request or sign token                                                                                                                                                                                                            |

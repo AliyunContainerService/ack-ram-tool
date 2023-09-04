@@ -45,6 +45,7 @@ Flags:
       --credential-cache-dir string   Directory to cache credential (default "~/.kube/cache/ack-ram-tool/credential-plugin")
       --expiration duration           The credential expiration (default 3h0m0s)
   -h, --help                          help for get-credential
+      --role-arn string               Assume an RAM Role ARN when send request or sign token
 
 Global Flags:
   -y, --assume-yes                      Automatic yes to prompts; assume "yes" as answer to all prompts and run non-interactively
@@ -58,9 +59,10 @@ Global Flags:
 
 参数说明：
 
-| 参数名称             | 默认值                                            | 必需参数 | 说明                                                                                                                        |
-|------------------|------------------------------------------------|------|---------------------------------------------------------------------------------------------------------------------------|
-| -c, --cluster-id | 无                                              | 是    | 集群 ID                                                                                                                     |
-| --api-version    | v1beta1                                        | 否    | 指定返回的数据中使用哪个版本的 apiVersion。v1beta1 表示 `client.authentication.k8s.io/v1beta1`，v1 表示 `client.authentication.k8s.io/v1beta1` |
-| --expiration    | 3h0m0s                                         | 否    | 指定证书过期时间。为 0 时表示不使用临时证书而是使用有效期更长的证书（过期时间由服务端自动确定）                                                                         |
-| --credential-cache-dir    | `~/.kube/cache/ack-ram-tool/credential-plugin` | 否    | 用于缓存证书的目录                                                                                                                 |
+| 参数名称                   | 默认值                                            | 必需参数 | 说明                                                                                                                        |
+|------------------------|------------------------------------------------|------|---------------------------------------------------------------------------------------------------------------------------|
+| -c, --cluster-id       | 无                                              | 是    | 集群 ID                                                                                                                     |
+| --api-version          | v1beta1                                        | 否    | 指定返回的数据中使用哪个版本的 apiVersion。v1beta1 表示 `client.authentication.k8s.io/v1beta1`，v1 表示 `client.authentication.k8s.io/v1beta1` |
+| --expiration           | 3h0m0s                                         | 否    | 指定证书过期时间。为 0 时表示不使用临时证书而是使用有效期更长的证书（过期时间由服务端自动确定）                                                                         |
+| --credential-cache-dir | `~/.kube/cache/ack-ram-tool/credential-plugin` | 否    | 用于缓存证书的目录                                                                                                                 |
+| --role-arn             |                                                | 否    | 使用扮演这个角色后的身份访问阿里云API                                                                                                      |
