@@ -44,7 +44,7 @@ func (c *ChainProvider) Credentials(ctx context.Context) (*Credentials, error) {
 				c.preProvider = pT
 				c.logger().Info(fmt.Sprintf("%s switch to using provider %s", c.logPrefix, pT))
 			}
-			return cred, nil
+			return cred.DeepCopy(), nil
 		}
 		return cred, fmt.Errorf("get credentials via %s failed: %w", pT, err)
 	}

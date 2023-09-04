@@ -26,7 +26,7 @@ func (a *STSTokenProvider) Credentials(ctx context.Context) (*Credentials, error
 			errors.New("AccessKeyId, AccessKeySecret or SecurityToken is empty"))
 	}
 
-	return a.cred, nil
+	return a.cred.DeepCopy(), nil
 }
 
 func (a *STSTokenProvider) SetExpiration(exp time.Time) *STSTokenProvider {

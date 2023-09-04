@@ -9,8 +9,11 @@ type Credentials struct {
 	Expiration      time.Time
 }
 
-func (c Credentials) DeepCopy() Credentials {
-	return Credentials{
+func (c *Credentials) DeepCopy() *Credentials {
+	if c == nil {
+		return nil
+	}
+	return &Credentials{
 		AccessKeyId:     c.AccessKeyId,
 		AccessKeySecret: c.AccessKeySecret,
 		SecurityToken:   c.SecurityToken,

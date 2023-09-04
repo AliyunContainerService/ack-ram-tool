@@ -47,7 +47,7 @@ func (e *EnvProvider) Credentials(ctx context.Context) (*Credentials, error) {
 			e.envAccessKeyId, e.envAccessKeySecret))
 	}
 
-	return e.cred, nil
+	return e.cred.DeepCopy(), nil
 }
 
 func (o *EnvProviderOptions) applyDefaults() {

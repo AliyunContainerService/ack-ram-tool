@@ -23,5 +23,5 @@ func (a *AccessKeyProvider) Credentials(ctx context.Context) (*Credentials, erro
 		return nil, NewNotEnableError(errors.New("AccessKeyId or AccessKeySecret is empty"))
 	}
 
-	return a.cred, nil
+	return a.cred.DeepCopy(), nil
 }

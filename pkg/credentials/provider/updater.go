@@ -82,7 +82,7 @@ func (u *Updater) Credentials(ctx context.Context) (*Credentials, error) {
 	}
 
 	cred := u.getCred().DeepCopy()
-	return &cred, nil
+	return cred, nil
 }
 
 func (u *Updater) refreshCredForLoop(ctx context.Context) {
@@ -122,20 +122,20 @@ func (u *Updater) refreshCred(ctx context.Context) error {
 	u.logger().Debug(fmt.Sprintf("%s refreshed credentials, expiration: %s",
 		u.logPrefix, cred.Expiration.Format("2006-01-02T15:04:05Z")))
 
-	u.setCred(*cred)
+	u.setCred(cred)
 	return nil
 }
 
-func (u *Updater) setCred(cred Credentials) {
+func (u *Updater) setCred(cred *Credentials) {
 	u.lockForCred.Lock()
 	defer u.lockForCred.Unlock()
 
-	cred = cred.DeepCopy()
-	cred.Expiration = cred.Expiration.Round(0)
+	newCred := cred.DeepCopy()
+	newCred.Expiration = newCred.Expiration.Round(0)
 	if u.expiryWindow > 0 {
-		cred.Expiration = cred.Expiration.Add(-u.expiryWindow)
+		newCred.Expiration = newCred.Expiration.Add(-u.expiryWindow)
 	}
-	u.cred = &cred
+	u.cred = newCred
 }
 
 func (u *Updater) getCred() *Credentials {
