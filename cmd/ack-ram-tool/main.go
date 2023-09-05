@@ -41,7 +41,7 @@ func init() {
 	exportcredentials.SetupCmd(rootCmd)
 
 	rootCmd.PersistentFlags().StringVar(&ctl.GlobalOption.Region, "region-id",
-		"", fmt.Sprintf("The region to use (default \"%s\")", ctl.DefaultRegion)+
+		"", "The region to use"+
 			" (env: \"ACK_RAM_TOOL_REGION_ID\")")
 	rootCmd.PersistentFlags().BoolVarP(&ctl.GlobalOption.AssumeYes, "assume-yes", "y", false,
 		"Automatic yes to prompts; assume \"yes\" as answer to all prompts and run non-interactively"+

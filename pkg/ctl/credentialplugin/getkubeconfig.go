@@ -86,9 +86,8 @@ func generateExecKubeconfig(clusterId string, config *types.KubeConfig, mode cre
 }
 
 func fillGlobalFlags(args []string) []string {
-	args = append(args, "--log-level", log.LogLevelError)
 	if ctl.GlobalOption.GetProfileName() != "" {
-		args = append(args, []string{"--profile-name", ctl.GlobalOption.ProfileName}...)
+		args = append(args, "--profile-name", ctl.GlobalOption.GetProfileName())
 	}
 	if ctl.GlobalOption.GetIgnoreAliyuncliConfig() {
 		args = append(args, "--ignore-aliyun-cli-credentials")
@@ -96,6 +95,10 @@ func fillGlobalFlags(args []string) []string {
 	if ctl.GlobalOption.GetIgnoreEnv() {
 		args = append(args, "--ignore-env-credentials")
 	}
+	if ctl.GlobalOption.GetRoleArn() != "" {
+		args = append(args, "--role-arn", ctl.GlobalOption.GetRoleArn())
+	}
+	args = append(args, "--log-level", log.LogLevelError)
 	return args
 }
 

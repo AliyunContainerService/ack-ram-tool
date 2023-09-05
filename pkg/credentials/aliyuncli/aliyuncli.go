@@ -11,38 +11,45 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+	"time"
 
-	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudsdkgo/helper/env"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudgo/env"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
-	"github.com/alibabacloud-go/tea/tea"
-	"github.com/aliyun/credentials-go/credentials"
 )
 
 type ProfileWrapper struct {
 	cp   Profile
 	conf *Configuration
+
+	stsEndpoint string
+	client      *http.Client
 }
 
 type CredentialHelper struct {
 	profile *ProfileWrapper
 }
 
-func NewCredentialHelper(configPath, profileName string) (*CredentialHelper, error) {
+func NewCredentialHelper(configPath, profileName, stsEndpoint string) (*CredentialHelper, error) {
 	if configPath == "" {
 		configPath = getDefaultConfigPath()
 	}
 	conf, profile, err := LoadProfile(configPath, profileName)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("load profile: %w", err)
 	}
 	if err := profile.Validate(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("validate profile: %w", err)
 	}
 	log.Logger.Debugf("use profile name: %s", profile.Name)
 	c := &CredentialHelper{
 		profile: &ProfileWrapper{
-			cp:   profile,
-			conf: conf,
+			cp:          profile,
+			conf:        conf,
+			stsEndpoint: stsEndpoint,
+			client: &http.Client{
+				Timeout: time.Second * 30,
+			},
 		},
 	}
 	return c, nil
@@ -52,7 +59,7 @@ func LoadProfile(path string, name string) (*Configuration, Profile, error) {
 	var p Profile
 	conf, err := LoadConfiguration(path)
 	if err != nil {
-		return nil, p, fmt.Errorf("init config failed %v", err)
+		return nil, p, fmt.Errorf("init config: %w", err)
 	}
 	if name == "" {
 		name = conf.CurrentProfile
@@ -64,142 +71,128 @@ func LoadProfile(path string, name string) (*Configuration, Profile, error) {
 	return conf, p, nil
 }
 
-func (c CredentialHelper) GetCredentials() (credentials.Credential, error) {
-	return c.profile.GetCredentials()
+func (c CredentialHelper) GetCredentials() (provider.CredentialsProvider, error) {
+	return c.profile.GetProvider()
 }
 
-func (p *ProfileWrapper) GetCredentials() (credentials.Credential, error) {
+func (p *ProfileWrapper) GetProvider() (provider.CredentialsProvider, error) {
 	cp := p.cp
 
 	switch cp.Mode {
 	case AK:
+		log.Logger.Debugf("using %s mode", cp.Mode)
 		return p.GetCredentialsByAK()
 	case StsToken:
+		log.Logger.Debugf("using %s mode", cp.Mode)
 		return p.GetCredentialsBySts()
 	case RamRoleArn:
+		log.Logger.Debugf("using %s mode", cp.Mode)
 		return p.GetCredentialsByRoleArn()
 	case EcsRamRole:
+		log.Logger.Debugf("using %s mode", cp.Mode)
 		return p.GetCredentialsByEcsRamRole()
 	//case config.RsaKeyPair:
 	//	return p.GetCredentialsByPrivateKey()
 	case RamRoleArnWithEcs:
+		log.Logger.Debugf("using %s mode", cp.Mode)
 		return p.GetCredentialsByRamRoleArnWithEcs()
 	case ChainableRamRoleArn:
+		log.Logger.Debugf("using %s mode", cp.Mode)
 		return p.GetCredentialsByChainableRamRoleArn()
 	case External:
+		log.Logger.Debugf("using %s mode", cp.Mode)
 		return p.GetCredentialsByExternal()
 	case CredentialsURI:
+		log.Logger.Debugf("using %s mode", cp.Mode)
 		return p.GetCredentialsByCredentialsURI()
 	default:
 		return nil, fmt.Errorf("unexcepted certificate mode: %s", cp.Mode)
 	}
 }
 
-func (p *ProfileWrapper) GetCredentialsByAK() (credentials.Credential, error) {
+func (p *ProfileWrapper) GetCredentialsByAK() (provider.CredentialsProvider, error) {
 	cp := p.cp
-	conf := &credentials.Config{
-		Type:            tea.String("access_key"),
-		AccessKeyId:     tea.String(cp.AccessKeyId),
-		AccessKeySecret: tea.String(cp.AccessKeySecret),
-	}
-	cred, err := credentials.NewCredential(conf)
-	return cred, err
+
+	return provider.NewAccessKeyProvider(cp.AccessKeyId, cp.AccessKeySecret), nil
 }
 
-func (p *ProfileWrapper) GetCredentialsBySts() (credentials.Credential, error) {
+func (p *ProfileWrapper) GetCredentialsBySts() (provider.CredentialsProvider, error) {
 	cp := p.cp
-	conf := &credentials.Config{
-		Type:            tea.String("sts"),
-		AccessKeyId:     tea.String(cp.AccessKeyId),
-		AccessKeySecret: tea.String(cp.AccessKeySecret),
-		SecurityToken:   tea.String(cp.StsToken),
-	}
-	cred, err := credentials.NewCredential(conf)
-	return cred, err
+
+	return provider.NewSTSTokenProvider(cp.AccessKeyId, cp.AccessKeySecret, cp.StsToken), nil
 }
 
-func (p *ProfileWrapper) GetCredentialsByRoleArn() (credentials.Credential, error) {
+func (p *ProfileWrapper) GetCredentialsByRoleArn() (provider.CredentialsProvider, error) {
 	cp := p.cp
-	conf := &credentials.Config{
-		Type:            tea.String("ram_role_arn"),
-		AccessKeyId:     tea.String(cp.AccessKeyId),
-		AccessKeySecret: tea.String(cp.AccessKeySecret),
-		RoleArn:         tea.String(cp.RamRoleArn),
-		RoleSessionName: tea.String(cp.RoleSessionName),
-	}
-	if cp.ExpiredSeconds > 0 {
-		conf.RoleSessionExpiration = tea.Int(cp.ExpiredSeconds)
-	}
-	cred, err := credentials.NewCredential(conf)
-	return cred, err
+
+	preP := provider.NewAccessKeyProvider(cp.AccessKeyId, cp.AccessKeySecret)
+
+	return p.GetCredentialsByRoleArnWithPro(preP)
 }
 
-func (p *ProfileWrapper) GetCredentialsByEcsRamRole() (credentials.Credential, error) {
+func (p *ProfileWrapper) GetCredentialsByRoleArnWithPro(preP provider.CredentialsProvider) (provider.CredentialsProvider, error) {
 	cp := p.cp
-	conf := &credentials.Config{
-		Type:     tea.String("ecs_ram_role"),
-		RoleName: tea.String(cp.RamRoleName),
-	}
-	cred, err := credentials.NewCredential(conf)
-	return cred, err
+
+	credP := provider.NewRoleArnProvider(preP, cp.RamRoleArn, provider.RoleArnProviderOptions{
+		STSEndpoint: p.stsEndpoint,
+		SessionName: cp.RoleSessionName,
+		Logger:      &log.ProviderLogWrapper{ZP: log.Logger},
+	})
+	return credP, nil
+}
+
+func (p *ProfileWrapper) GetCredentialsByEcsRamRole() (provider.CredentialsProvider, error) {
+	cp := p.cp
+
+	credP := provider.NewECSMetadataProvider(provider.ECSMetadataProviderOptions{
+		RoleName: cp.RamRoleName,
+		Logger:   &log.ProviderLogWrapper{ZP: log.Logger},
+	})
+	return credP, nil
 }
 
 //func (p *ProfileWrapper) GetCredentialsByPrivateKey() (credentials.Credential, error) {
 //
 //}
 
-func (p *ProfileWrapper) GetCredentialsByRamRoleArnWithEcs() (credentials.Credential, error) {
-	cp := p.cp
-	client, err := cp.GetSTSClientByEcsRamRole()
+func (p *ProfileWrapper) GetCredentialsByRamRoleArnWithEcs() (provider.CredentialsProvider, error) {
+	preP, err := p.GetCredentialsByEcsRamRole()
 	if err != nil {
 		return nil, err
 	}
-	resp, err := cp.GetSessionCredential(client)
-	if err != nil {
-		return nil, err
-	}
-	conf := &credentials.Config{
-		Type:            tea.String("sts"),
-		AccessKeyId:     resp.AccessKeyId,
-		AccessKeySecret: resp.AccessKeySecret,
-		SecurityToken:   resp.SecurityToken,
-	}
-	cred, err := credentials.NewCredential(conf)
-	return cred, err
+	return p.GetCredentialsByRoleArnWithPro(preP)
 }
 
-func (p *ProfileWrapper) GetCredentialsByChainableRamRoleArn() (credentials.Credential, error) {
+func (p *ProfileWrapper) GetCredentialsByChainableRamRoleArn() (provider.CredentialsProvider, error) {
 	cp := p.cp
 	profileName := cp.SourceProfile
 
-	// 从 configuration 中重新获取 source profile
+	log.Logger.Debugf("get credentials from source profile %s", profileName)
 	source, loaded := p.conf.GetProfile(profileName)
 	if !loaded {
 		return nil, fmt.Errorf("can not load the source profile: " + profileName)
 	}
+	newP := &ProfileWrapper{
+		cp:          source,
+		conf:        p.conf,
+		stsEndpoint: p.stsEndpoint,
+		client:      p.client,
+	}
+	preP, err := newP.GetProvider()
+	if err != nil {
+		return nil, err
+	}
 
-	client, err := source.GetSTSClientByEcsRamRole()
-	if err != nil {
-		return nil, err
-	}
-	resp, err := cp.GetSessionCredential(client)
-	if err != nil {
-		return nil, err
-	}
-	conf := &credentials.Config{
-		Type:            tea.String("sts"),
-		AccessKeyId:     resp.AccessKeyId,
-		AccessKeySecret: resp.AccessKeySecret,
-		SecurityToken:   resp.SecurityToken,
-	}
-	cred, err := credentials.NewCredential(conf)
-	return cred, err
+	log.Logger.Debugf("using role arn by current profile %s", cp.Name)
+	return p.GetCredentialsByRoleArnWithPro(preP)
 }
 
-func (p *ProfileWrapper) GetCredentialsByExternal() (credentials.Credential, error) {
+func (p *ProfileWrapper) GetCredentialsByExternal() (provider.CredentialsProvider, error) {
 	cp := p.cp
 	args := strings.Fields(cp.ProcessCommand)
 	cmd := exec.Command(args[0], args[1:]...) // #nosec G204
+	log.Logger.Debugf("running external program: %s", cp.ProcessCommand)
+
 	genmsg := func(buf []byte, err error) string {
 		message := fmt.Sprintf(`run external program to get credentials faild:
   command: %s
@@ -208,6 +201,7 @@ func (p *ProfileWrapper) GetCredentialsByExternal() (credentials.Credential, err
 			cp.ProcessCommand, string(buf), err.Error())
 		return message
 	}
+
 	stdout := bytes.Buffer{}
 	stderr := bytes.Buffer{}
 	cmd.Stdout = &stdout
@@ -231,11 +225,12 @@ func (p *ProfileWrapper) GetCredentialsByExternal() (credentials.Credential, err
 		}
 	}
 
+	log.Logger.Debug("using profile from output of external program")
 	newP := &ProfileWrapper{
 		cp:   newCP,
 		conf: p.conf,
 	}
-	return newP.GetCredentials()
+	return newP.GetProvider()
 }
 
 var regexpCredJSON = regexp.MustCompile(`{\s*"mode": [^}]+}`)
@@ -253,7 +248,7 @@ func tryToParseProfileFromOutput(output string) *Profile {
 	return nil
 }
 
-func (p *ProfileWrapper) GetCredentialsByCredentialsURI() (credentials.Credential, error) {
+func (p *ProfileWrapper) GetCredentialsByCredentialsURI() (provider.CredentialsProvider, error) {
 	cp := p.cp
 	uri := cp.CredentialsURI
 	if uri == "" {
@@ -262,8 +257,9 @@ func (p *ProfileWrapper) GetCredentialsByCredentialsURI() (credentials.Credentia
 	if uri == "" {
 		return nil, fmt.Errorf("invalid credentials uri")
 	}
+	log.Logger.Debugf("get credentials from %s", uri)
 
-	res, err := http.Get(uri) // #nosec G107
+	res, err := p.client.Get(uri) // #nosec G107
 	if err != nil {
 		return nil, err
 	}
@@ -293,14 +289,10 @@ func (p *ProfileWrapper) GetCredentialsByCredentialsURI() (credentials.Credentia
 	if response.Code != "Success" {
 		return nil, fmt.Errorf("get sts token err, Code is not Success")
 	}
-	conf := &credentials.Config{
-		Type:            tea.String("sts"),
-		AccessKeyId:     tea.String(response.AccessKeyId),
-		AccessKeySecret: tea.String(response.AccessKeySecret),
-		SecurityToken:   tea.String(response.SecurityToken),
-	}
-	cred, err := credentials.NewCredential(conf)
-	return cred, err
+
+	return provider.NewSTSTokenProvider(
+		response.AccessKeyId, response.AccessKeySecret,
+		response.SecurityToken), nil
 }
 
 func (c CredentialHelper) ProfileName() string {

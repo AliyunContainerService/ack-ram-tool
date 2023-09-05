@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
-	github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudsdkgo/helper v0.0.0
+	github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider v0.0.0
 	github.com/alibabacloud-go/cs-20151215/v3 v3.0.35
 	github.com/alibabacloud-go/darabonba-openapi v0.2.1
 	github.com/alibabacloud-go/darabonba-openapi/v2 v2.0.2
@@ -87,4 +87,4 @@ require (
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
 
-replace github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudsdkgo/helper v0.0.0 => ./pkg/credentials/alibabacloudsdkgo/helper
+replace github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider => ./pkg/credentials/provider

@@ -1,10 +1,11 @@
 package credentialplugin
 
 import (
+	"crypto/sha1" // #nosec G505
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
 	"os"
 	"path/filepath"
 	"time"
@@ -43,13 +44,14 @@ func NewCredentialCache(cacheDir string, opts GetCredentialOpts) *CredentialCach
 }
 
 func (c *CredentialCache) GetCredential() (*types.ExecCredential, error) {
-	data, err := ioutil.ReadFile(c.cacheFilePath)
+	data, err := os.ReadFile(c.cacheFilePath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, errNoValidCache
 		}
 		return nil, err
 	}
+	// TODO: base64 decode the data
 	var cred types.ExecCredential
 	if err := json.Unmarshal(data, &cred); err != nil {
 		return nil, errNoValidCache
@@ -68,11 +70,28 @@ func (c *CredentialCache) SaveCredential(cred *types.ExecCredential) error {
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(c.cacheFilePath, d, 0600)
+	// TODO: base64 encode the data
+	return os.WriteFile(c.cacheFilePath, d, 0600)
 }
 
 func getCacheFilePath(cacheDir string, opts GetCredentialOpts) string {
-	filename := fmt.Sprintf("%s-exec-auth-credential-%s.json",
+	filename := fmt.Sprintf("%s-exec-auth-credential-%s",
 		opts.clusterId, opts.apiVersion)
+
+	roleArn := ctl.GlobalOption.GetRoleArn()
+	profileName := ctl.GlobalOption.GetProfileName()
+	cpath := ctl.GlobalOption.GetCredentialFilePath()
+	apath := ctl.GlobalOption.GetAliyuncliConfigFilePath()
+	if roleArn != "" || profileName != "" || cpath != "" || apath != "" {
+		sh := sha1.New() // #nosec G401
+		sh.Write([]byte(roleArn))
+		sh.Write([]byte(profileName))
+		sh.Write([]byte(cpath))
+		sh.Write([]byte(apath))
+		h := sh.Sum(nil)
+		filename = fmt.Sprintf("%s-%x", filename, h)
+	}
+
+	filename = fmt.Sprintf("%s.json", filename)
 	return filepath.Join(cacheDir, filename)
 }
