@@ -61,8 +61,6 @@ func (u *Updater) startRefreshLoop(ctx context.Context) {
 	ticket := time.NewTicker(u.refreshPeriod)
 	defer ticket.Stop()
 
-	u.refreshCredForLoop(ctx)
-
 loop:
 	for {
 		select {
