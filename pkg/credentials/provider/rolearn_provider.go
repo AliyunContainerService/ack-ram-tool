@@ -200,7 +200,7 @@ func (o *RoleArnProviderOptions) applyDefaults() {
 		o.SessionName = defaultSessionName
 	}
 	if o.ExpiryWindow == 0 {
-		o.ExpiryWindow = defaultExpiryWindow
+		o.ExpiryWindow = defaultExpiryWindowForAssumeRole
 	}
 	if o.Logger == nil {
 		o.Logger = defaultLog

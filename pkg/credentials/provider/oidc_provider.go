@@ -19,6 +19,8 @@ const (
 	defaultEnvRoleArn         = "ALIBABA_CLOUD_ROLE_ARN"
 	defaultEnvOIDCProviderArn = "ALIBABA_CLOUD_OIDC_PROVIDER_ARN"
 	defaultEnvOIDCTokenFile   = "ALIBABA_CLOUD_OIDC_TOKEN_FILE"
+
+	defaultExpiryWindowForAssumeRole = time.Minute * 10
 )
 
 var defaultSessionName = "default-session-name"
@@ -235,7 +237,7 @@ func (o *OIDCProviderOptions) applyDefaults() {
 		o.SessionName = defaultSessionName
 	}
 	if o.ExpiryWindow == 0 {
-		o.ExpiryWindow = defaultExpiryWindow
+		o.ExpiryWindow = defaultExpiryWindowForAssumeRole
 	}
 	if o.EnvRoleArn == "" {
 		o.EnvRoleArn = defaultEnvRoleArn
