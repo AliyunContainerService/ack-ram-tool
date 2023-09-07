@@ -3,7 +3,6 @@ package provider
 import (
 	"context"
 	"fmt"
-	"strings"
 	"sync"
 	"time"
 )
@@ -56,6 +55,10 @@ func (c *ChainProvider) Credentials(ctx context.Context) (*Credentials, error) {
 	return c.getCredentials(ctx)
 }
 
+func (c *ChainProvider) SelectProvider(ctx context.Context) (CredentialsProvider, error) {
+	return c.selectProvider(ctx)
+}
+
 func (c *ChainProvider) getCredentials(ctx context.Context) (*Credentials, error) {
 	p := c.getCurrentProvider()
 	if p != nil {
@@ -84,7 +87,7 @@ func (c *ChainProvider) selectProvider(ctx context.Context) (CredentialsProvider
 		}
 		return p, nil
 	}
-	return nil, fmt.Errorf("no available credentials provider: %s", strings.Join(notEnableErrors, ", "))
+	return nil, fmt.Errorf("no available credentials provider: %v", notEnableErrors)
 }
 
 func (c *ChainProvider) getCurrentProvider() CredentialsProvider {
