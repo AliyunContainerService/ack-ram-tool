@@ -59,6 +59,16 @@ func (c *ChainProvider) SelectProvider(ctx context.Context) (CredentialsProvider
 	return c.selectProvider(ctx)
 }
 
+func (c *ChainProvider) Stop(ctx context.Context) {
+	c.logger().Debug(fmt.Sprintf("%s start to stop...", c.logPrefix))
+
+	for _, p := range c.providers {
+		if s, ok := p.(Stopper); ok {
+			s.Stop(ctx)
+		}
+	}
+}
+
 func (c *ChainProvider) getCredentials(ctx context.Context) (*Credentials, error) {
 	p := c.getCurrentProvider()
 	if p != nil {

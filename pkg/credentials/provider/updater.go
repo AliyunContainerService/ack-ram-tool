@@ -25,6 +25,9 @@ type Updater struct {
 	Logger    Logger
 	nowFunc   func() time.Time
 	logPrefix string
+
+	doneCh  chan struct{}
+	stopped bool
 }
 
 type UpdaterOptions struct {
@@ -45,6 +48,7 @@ func NewUpdater(getter getCredentialsFunc, opts UpdaterOptions) *Updater {
 		Logger:                     opts.Logger,
 		nowFunc:                    time.Now,
 		logPrefix:                  opts.LogPrefix,
+		doneCh:                     make(chan struct{}),
 	}
 	return u
 }
@@ -57,6 +61,25 @@ func (u *Updater) Start(ctx context.Context) {
 	go u.startRefreshLoop(ctx)
 }
 
+func (u *Updater) Stop(shutdownCtx context.Context) {
+	u.logger().Debug(fmt.Sprintf("%s start to stop...", u.logPrefix))
+
+	go func() {
+		u.lockForCred.Lock()
+		defer u.lockForCred.Unlock()
+		if u.stopped {
+			return
+		}
+		u.stopped = true
+		close(u.doneCh)
+	}()
+
+	select {
+	case <-shutdownCtx.Done():
+	case <-u.doneCh:
+	}
+}
+
 func (u *Updater) startRefreshLoop(ctx context.Context) {
 	ticket := time.NewTicker(u.refreshPeriod)
 	defer ticket.Stop()
@@ -65,6 +88,8 @@ loop:
 	for {
 		select {
 		case <-ctx.Done():
+			break loop
+		case <-u.doneCh:
 			break loop
 		case <-ticket.C:
 			u.refreshCredForLoop(ctx)

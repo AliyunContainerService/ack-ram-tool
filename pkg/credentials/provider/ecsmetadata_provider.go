@@ -72,6 +72,10 @@ func (e *ECSMetadataProvider) Credentials(ctx context.Context) (*Credentials, er
 	return e.u.Credentials(ctx)
 }
 
+func (e *ECSMetadataProvider) Stop(ctx context.Context) {
+	e.u.Stop(ctx)
+}
+
 type ecsMetadataStsResponse struct {
 	AccessKeyId     string `json:"AccessKeyId"`
 	AccessKeySecret string `json:"AccessKeySecret"`

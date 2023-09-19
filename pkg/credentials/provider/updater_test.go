@@ -164,3 +164,45 @@ func TestUpdater_expired(t *testing.T) {
 		}
 	})
 }
+
+func TestUpdater_stop(t *testing.T) {
+	var callCount int
+	fakeCred := Credentials{
+		Expiration: time.Now().Add(-time.Minute),
+	}
+	u := NewUpdater(func(ctx context.Context) (*Credentials, error) {
+		callCount++
+		return &fakeCred, nil
+	}, UpdaterOptions{
+		ExpiryWindow:  0,
+		RefreshPeriod: time.Millisecond * 100,
+		Logger:        TLogger{t: t},
+	})
+
+	u.Start(context.TODO())
+
+	t.Run("test-refresh", func(t *testing.T) {
+		time.Sleep(time.Second)
+		if callCount < 1 {
+			t.Errorf("callCount should be >1 but got %d", callCount)
+		}
+	})
+
+	t.Run("test-stop", func(t *testing.T) {
+		u.Stop(context.TODO())
+		time.Sleep(time.Second)
+
+		curr := callCount
+		time.Sleep(time.Second)
+
+		if callCount != curr {
+			t.Errorf("callCount should be %d but got %d", curr, callCount)
+		}
+	})
+
+	t.Run("test-stop-multiple-times", func(t *testing.T) {
+		u.Stop(context.TODO())
+		u.Stop(context.TODO())
+		u.Stop(context.TODO())
+	})
+}

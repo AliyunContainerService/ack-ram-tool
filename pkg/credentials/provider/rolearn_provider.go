@@ -69,6 +69,10 @@ func (r *RoleArnProvider) Credentials(ctx context.Context) (*Credentials, error)
 	return r.u.Credentials(ctx)
 }
 
+func (r *RoleArnProvider) Stop(ctx context.Context) {
+	r.u.Stop(ctx)
+}
+
 func (r *RoleArnProvider) getCredentials(ctx context.Context) (*Credentials, error) {
 	return r.assumeRole(ctx, r.roleArn)
 }

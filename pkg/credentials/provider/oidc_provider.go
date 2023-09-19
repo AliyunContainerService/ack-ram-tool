@@ -100,6 +100,10 @@ func (o *OIDCProvider) Credentials(ctx context.Context) (*Credentials, error) {
 	return o.u.Credentials(ctx)
 }
 
+func (o *OIDCProvider) Stop(ctx context.Context) {
+	o.u.Stop(ctx)
+}
+
 func (o *OIDCProvider) getCredentials(ctx context.Context) (*Credentials, error) {
 	roleArn := o.roleArn
 	oidcProviderArn := o.oidcProviderArn
