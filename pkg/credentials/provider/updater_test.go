@@ -107,35 +107,60 @@ func TestUpdater_Credentials_refresh(t *testing.T) {
 		Logger:        TLogger{t: t},
 	})
 
-	u.Credentials(context.TODO())
-	if callCount != 1 {
-		t.Errorf("callCount should be 1 but got %d", callCount)
-	}
-	ret := u.Expired()
-	if ret {
-		t.Errorf("should not expired")
-	}
+	t.Run("Credentials use cache", func(t *testing.T) {
+		u.Credentials(context.TODO())
+		if callCount != 1 {
+			t.Errorf("callCount should be 1 but got %d", callCount)
+		}
+		ret := u.Expired()
+		if ret {
+			t.Errorf("should not expired")
+		}
 
-	u.Credentials(context.TODO())
-	if callCount != 1 {
-		t.Errorf("callCount should be 1 but got %d", callCount)
-	}
+		u.Credentials(context.TODO())
+		if callCount != 1 {
+			t.Errorf("callCount should be 1 but got %d", callCount)
+		}
+	})
 
-	u.nowFunc = func() time.Time {
-		return time.Now().Add(time.Minute)
-	}
-	ret = u.Expired()
-	if !ret {
-		t.Errorf("should expired")
-	}
+	t.Run("Credentials expired", func(t *testing.T) {
+		u.nowFunc = func() time.Time {
+			return time.Now().Add(time.Minute * 2)
+		}
+		ret := u.Expired()
+		if !ret {
+			t.Errorf("should expired")
+		}
+	})
 
-	fakeCred.Expiration = time.Now().Add(time.Minute * 5)
-	u.Credentials(context.TODO())
-	if callCount != 2 {
-		t.Errorf("callCount should be 2 but got %d", callCount)
-	}
-	ret = u.Expired()
-	if ret {
-		t.Errorf("should not expired")
-	}
+	t.Run("not expire, should not refresh", func(t *testing.T) {
+		fakeCred.Expiration = time.Now().Add(time.Minute * 5)
+		u.Credentials(context.TODO())
+		if callCount != 2 {
+			t.Errorf("callCount should be 2 but got %d", callCount)
+		}
+		ret := u.Expired()
+		if ret {
+			t.Errorf("should not expired")
+		}
+	})
+}
+
+func TestUpdater_expired(t *testing.T) {
+	u := &Updater{}
+	u.setCred(&Credentials{Expiration: time.Now().Add(time.Minute)})
+
+	t.Run("expiryDelta=0", func(t *testing.T) {
+		ret := u.expired(0)
+		if ret {
+			t.Errorf("should be false")
+		}
+	})
+
+	t.Run("expiryDelta > 0", func(t *testing.T) {
+		ret := u.expired(time.Minute * 5)
+		if !ret {
+			t.Errorf("should be true")
+		}
+	})
 }

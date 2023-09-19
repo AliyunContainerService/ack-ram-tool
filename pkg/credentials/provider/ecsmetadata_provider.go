@@ -136,6 +136,7 @@ func (e *ECSMetadataProvider) getMedataToken(ctx context.Context) (string, error
 		return e.metadataToken, nil
 	}
 
+	e.logger().Debug("start to get metadata token")
 	h := http.Header{}
 	h.Set("X-aliyun-ecs-metadata-token-ttl-seconds", fmt.Sprintf("%d", e.metadataTokenTTLSeconds))
 	body, err := e.getMedataData(ctx, http.MethodPut, "/latest/api/token", h)

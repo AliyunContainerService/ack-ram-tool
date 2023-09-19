@@ -149,8 +149,11 @@ func (u *Updater) Expired() bool {
 
 func (u *Updater) expired(expiryDelta time.Duration) bool {
 	exp := u.expiration()
+	if expiryDelta > 0 {
+		exp = exp.Add(-expiryDelta)
+	}
 
-	return exp.Add(-expiryDelta).Before(u.now())
+	return exp.Before(u.now())
 }
 
 func (u *Updater) expiration() time.Time {

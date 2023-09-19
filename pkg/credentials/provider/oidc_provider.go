@@ -105,7 +105,7 @@ func (o *OIDCProvider) getCredentials(ctx context.Context) (*Credentials, error)
 	oidcProviderArn := o.oidcProviderArn
 	tokenFile := o.oidcTokenFile
 	if roleArn == "" || oidcProviderArn == "" || tokenFile == "" {
-		return nil, NewNotEnableError(errors.New("roleArn, oidcProviderArn or tokenFile is empty"))
+		return nil, NewNotEnableError(errors.New("roleArn, oidcProviderArn or oidcTokenFile is empty"))
 	}
 
 	tokenData, err := os.ReadFile(tokenFile)
