@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 )
@@ -88,16 +89,17 @@ func (c *ChainProvider) selectProvider(ctx context.Context) (CredentialsProvider
 	var notEnableErrors []string
 	for _, p := range c.providers {
 		if _, err := p.Credentials(ctx); err != nil {
-			if _, ok := err.(*NotEnableError); ok {
-				c.logger().Debug(fmt.Sprintf("%s provider %T not enabled will try to next: %s",
+			if isNotEnableError(err) {
+				c.logger().Debug(fmt.Sprintf("%s provider %T is not enabled will try to next: %s",
 					c.logPrefix, p, err.Error()))
-				notEnableErrors = append(notEnableErrors, fmt.Sprintf("provider %T not enabled: %s", p, err.Error()))
+				notEnableErrors = append(notEnableErrors, fmt.Sprintf("provider %T is not enabled: %s", p, err.Error()))
 				continue
 			}
 		}
 		return p, nil
 	}
-	return nil, fmt.Errorf("no available credentials provider: %v", notEnableErrors)
+
+	return nil, fmt.Errorf("no available credentials provider: [%s]", strings.Join(notEnableErrors, ", "))
 }
 
 func (c *ChainProvider) getCurrentProvider() CredentialsProvider {

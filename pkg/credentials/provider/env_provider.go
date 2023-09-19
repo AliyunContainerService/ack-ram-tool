@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 )
 
 const (
@@ -13,41 +14,58 @@ const (
 )
 
 type EnvProvider struct {
-	cred *Credentials
-
-	envAccessKeyId     string
-	envAccessKeySecret string
-	envSecurityToken   string
+	cp *ChainProvider
 }
 
 type EnvProviderOptions struct {
 	EnvAccessKeyId     string
 	EnvAccessKeySecret string
 	EnvSecurityToken   string
+
+	EnvRoleArn         string
+	EnvOIDCProviderArn string
+	EnvOIDCTokenFile   string
 }
 
 func NewEnvProvider(opts EnvProviderOptions) *EnvProvider {
 	opts.applyDefaults()
 
-	return &EnvProvider{
-		cred: &Credentials{
-			AccessKeyId:     os.Getenv(opts.EnvAccessKeyId),
-			AccessKeySecret: os.Getenv(opts.EnvAccessKeySecret),
-			SecurityToken:   os.Getenv(opts.EnvSecurityToken),
-		},
-		envAccessKeyId:     opts.EnvAccessKeyId,
-		envAccessKeySecret: opts.EnvAccessKeySecret,
-		envSecurityToken:   opts.EnvSecurityToken,
-	}
+	e := &EnvProvider{}
+	e.cp = e.getProvider(opts)
+
+	return e
 }
 
 func (e *EnvProvider) Credentials(ctx context.Context) (*Credentials, error) {
-	if e.cred.AccessKeyId == "" || e.cred.AccessKeySecret == "" {
-		return nil, NewNotEnableError(fmt.Errorf("env %s or %s is empty",
-			e.envAccessKeyId, e.envAccessKeySecret))
+	cred, err := e.cp.Credentials(ctx)
+
+	if err != nil {
+		if strings.Contains(err.Error(), "no available credentials provider") {
+			return nil, NewNotEnableError(fmt.Errorf("not found credentials from env: %w", err))
+		}
+		return nil, err
 	}
 
-	return e.cred.DeepCopy(), nil
+	return cred.DeepCopy(), nil
+}
+
+func (e *EnvProvider) getProvider(opts EnvProviderOptions) *ChainProvider {
+	p1 := NewSTSTokenProvider(
+		os.Getenv(opts.EnvAccessKeyId),
+		os.Getenv(opts.EnvAccessKeySecret),
+		os.Getenv(opts.EnvSecurityToken),
+	)
+	p2 := NewOIDCProvider(OIDCProviderOptions{
+		RoleArn:         os.Getenv(opts.EnvRoleArn),
+		OIDCProviderArn: os.Getenv(opts.EnvOIDCProviderArn),
+		OIDCTokenFile:   os.Getenv(opts.EnvOIDCTokenFile),
+	})
+	p3 := NewAccessKeyProvider(
+		os.Getenv(opts.EnvAccessKeyId),
+		os.Getenv(opts.EnvAccessKeySecret),
+	)
+	cp := NewChainProvider(p1, p2, p3)
+	return cp
 }
 
 func (o *EnvProviderOptions) applyDefaults() {
@@ -59,5 +77,15 @@ func (o *EnvProviderOptions) applyDefaults() {
 	}
 	if o.EnvSecurityToken == "" {
 		o.EnvSecurityToken = envSecurityToken
+	}
+
+	if o.EnvRoleArn == "" {
+		o.EnvRoleArn = defaultEnvRoleArn
+	}
+	if o.EnvOIDCProviderArn == "" {
+		o.EnvOIDCProviderArn = defaultEnvOIDCProviderArn
+	}
+	if o.EnvOIDCTokenFile == "" {
+		o.EnvOIDCTokenFile = defaultEnvOIDCTokenFile
 	}
 }
