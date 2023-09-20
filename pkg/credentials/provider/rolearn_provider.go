@@ -71,6 +71,9 @@ func (r *RoleArnProvider) Credentials(ctx context.Context) (*Credentials, error)
 
 func (r *RoleArnProvider) Stop(ctx context.Context) {
 	r.u.Stop(ctx)
+	if s, ok := r.cp.(Stopper); ok {
+		s.Stop(ctx)
+	}
 }
 
 func (r *RoleArnProvider) getCredentials(ctx context.Context) (*Credentials, error) {
