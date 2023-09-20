@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -38,9 +39,9 @@ func TestChainProvider_Credentials_no_provider(t *testing.T) {
 }
 
 func TestChainProvider_Stop(t *testing.T) {
-	callCount := 0
+	var callCount int32
 	s := setupHttpTestServer(t, func(w http.ResponseWriter, r *http.Request) {
-		callCount++
+		atomic.AddInt32(&callCount, 1)
 		fmt.Fprint(w, `
 {}
 `)
@@ -60,22 +61,25 @@ func TestChainProvider_Stop(t *testing.T) {
 	cp.Logger = TLogger{t: t}
 	cp.Credentials(context.TODO())
 
-	if callCount < 1 {
-		t.Errorf("callCount should >= 1: %v", callCount)
+	cv := atomic.LoadInt32(&callCount)
+	if cv < 1 {
+		t.Errorf("callCount should >= 1: %v", cv)
 	}
 
 	time.Sleep(time.Second)
-	if callCount <= 1 {
-		t.Errorf("callCount should > 1: %v", callCount)
+	cv = atomic.LoadInt32(&callCount)
+	if cv <= 1 {
+		t.Errorf("callCount should > 1: %v", cv)
 	}
 
 	cp.Stop(context.TODO())
 	time.Sleep(time.Second)
-	curr := callCount
+	curr := atomic.LoadInt32(&callCount)
 	time.Sleep(time.Second)
 
-	if callCount != curr {
-		t.Errorf("callCount should == %v: %v", curr, callCount)
+	cv = atomic.LoadInt32(&callCount)
+	if cv != curr {
+		t.Errorf("callCount should == %v: %v", curr, cv)
 	}
 
 	cp.Stop(context.TODO())
