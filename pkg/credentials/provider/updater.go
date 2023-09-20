@@ -124,7 +124,7 @@ func (u *Updater) refreshCredForLoop(ctx context.Context) {
 		if err == nil {
 			return
 		}
-		if isNotEnableError(err) {
+		if IsNotEnableError(err) {
 			return
 		}
 		if i < maxRetry-1 {
@@ -136,7 +136,7 @@ func (u *Updater) refreshCredForLoop(ctx context.Context) {
 func (u *Updater) refreshCred(ctx context.Context) error {
 	cred, err := u.getCredentials(ctx)
 	if err != nil {
-		if isNotEnableError(err) {
+		if IsNotEnableError(err) {
 			return err
 		}
 		u.logger().Error(err, fmt.Sprintf("%s refresh credentials failed: %s", u.logPrefix, err))

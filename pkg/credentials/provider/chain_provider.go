@@ -89,7 +89,7 @@ func (c *ChainProvider) selectProvider(ctx context.Context) (CredentialsProvider
 	var notEnableErrors []string
 	for _, p := range c.providers {
 		if _, err := p.Credentials(ctx); err != nil {
-			if isNotEnableError(err) {
+			if IsNotEnableError(err) {
 				c.logger().Debug(fmt.Sprintf("%s provider %T is not enabled will try to next: %s",
 					c.logPrefix, p, err.Error()))
 				notEnableErrors = append(notEnableErrors, fmt.Sprintf("provider %T is not enabled: %s", p, err.Error()))
@@ -99,7 +99,8 @@ func (c *ChainProvider) selectProvider(ctx context.Context) (CredentialsProvider
 		return p, nil
 	}
 
-	return nil, fmt.Errorf("no available credentials provider: [%s]", strings.Join(notEnableErrors, ", "))
+	err := fmt.Errorf("no available credentials provider: [%s]", strings.Join(notEnableErrors, ", "))
+	return nil, NewNoAvailableProviderError(err)
 }
 
 func (c *ChainProvider) getCurrentProvider() CredentialsProvider {

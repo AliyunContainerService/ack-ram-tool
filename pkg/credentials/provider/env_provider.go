@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strings"
 )
 
 const (
@@ -40,7 +39,7 @@ func (e *EnvProvider) Credentials(ctx context.Context) (*Credentials, error) {
 	cred, err := e.cp.Credentials(ctx)
 
 	if err != nil {
-		if strings.Contains(err.Error(), "no available credentials provider") {
+		if IsNoAvailableProviderError(err) {
 			return nil, NewNotEnableError(fmt.Errorf("not found credentials from env: %w", err))
 		}
 		return nil, err
