@@ -217,3 +217,22 @@ func TestUpdater_stop(t *testing.T) {
 		u.Stop(context.TODO())
 	})
 }
+
+func TestUpdater_stop_no_start(t *testing.T) {
+	var callCount int32
+	fakeCred := Credentials{
+		Expiration: time.Now().Add(-time.Minute),
+	}
+	u := NewUpdater(func(ctx context.Context) (*Credentials, error) {
+		atomic.AddInt32(&callCount, 1)
+		return &fakeCred, nil
+	}, UpdaterOptions{
+		ExpiryWindow:  0,
+		RefreshPeriod: 0,
+		Logger:        TLogger{t: t},
+	})
+
+	u.Stop(context.TODO())
+	u.Stop(context.TODO())
+	u.Stop(context.TODO())
+}
