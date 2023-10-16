@@ -1,6 +1,24 @@
 # aliyun cli demo
 
-## Usage
+config.json:
+
+```
+{
+  "current": "default",
+  "profiles": [
+    {
+      "name": "default",
+      "mode": "External",
+      "region_id": "cn-hangzhou",
+      "process_command": "ack-ram-tool export-credentials --ignore-aliyun-cli-credentials --log-level=ERROR",
+      "credentials_uri": ""
+    }
+  ],
+  "meta_path": ""
+}
+```
+
+## Demo
 
 1. Enable RRSA:
 

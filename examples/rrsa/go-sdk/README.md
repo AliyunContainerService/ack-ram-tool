@@ -2,7 +2,14 @@
 
 Using [Alibaba Could Go SDK](https://github.com/aliyun/alibabacloud-go-sdk) with RRSA Auth.
 
-## Usage
+```
+go get github.com/aliyun/credentials-go@v1.2.7
+```
+
+https://github.com/aliyun/credentials-go
+
+
+## Demo
 
 1. Enable RRSA:
 

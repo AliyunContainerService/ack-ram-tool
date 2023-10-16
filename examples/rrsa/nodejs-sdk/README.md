@@ -2,7 +2,14 @@
 
 Using [Alibaba Could Node.js/TypeScript SDK](https://github.com/aliyun/alibabacloud-typescript-sdk) with RRSA Auth.
 
-## Usage
+```
+npm install @alicloud/credentials
+```
+
+https://github.com/aliyun/credentials-nodejs
+
+
+## Demo
 
 1. Enable RRSA:
 

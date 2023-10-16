@@ -2,7 +2,18 @@
 
 Using [aliyun-log-java-sdk](https://github.com/aliyun/aliyun-log-java-sdk) with RRSA Auth.
 
-## Usage
+```
+<dependency>
+    <groupId>com.aliyun</groupId>
+    <artifactId>credentials-java</artifactId>
+    <version>0.2.12</version>
+</dependency>
+```
+
+https://github.com/aliyun/credentials-java
+
+
+## Demo
 
 1. Enable RRSA:
 
