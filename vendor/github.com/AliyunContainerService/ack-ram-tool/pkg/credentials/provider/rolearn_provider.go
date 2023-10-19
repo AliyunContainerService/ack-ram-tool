@@ -69,6 +69,13 @@ func (r *RoleArnProvider) Credentials(ctx context.Context) (*Credentials, error)
 	return r.u.Credentials(ctx)
 }
 
+func (r *RoleArnProvider) Stop(ctx context.Context) {
+	r.u.Stop(ctx)
+	if s, ok := r.cp.(Stopper); ok {
+		s.Stop(ctx)
+	}
+}
+
 func (r *RoleArnProvider) getCredentials(ctx context.Context) (*Credentials, error) {
 	return r.assumeRole(ctx, r.roleArn)
 }
@@ -200,7 +207,7 @@ func (o *RoleArnProviderOptions) applyDefaults() {
 		o.SessionName = defaultSessionName
 	}
 	if o.ExpiryWindow == 0 {
-		o.ExpiryWindow = defaultExpiryWindow
+		o.ExpiryWindow = defaultExpiryWindowForAssumeRole
 	}
 	if o.Logger == nil {
 		o.Logger = defaultLog

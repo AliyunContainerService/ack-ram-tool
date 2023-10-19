@@ -19,6 +19,8 @@ const (
 	defaultEnvRoleArn         = "ALIBABA_CLOUD_ROLE_ARN"
 	defaultEnvOIDCProviderArn = "ALIBABA_CLOUD_OIDC_PROVIDER_ARN"
 	defaultEnvOIDCTokenFile   = "ALIBABA_CLOUD_OIDC_TOKEN_FILE"
+
+	defaultExpiryWindowForAssumeRole = time.Minute * 10
 )
 
 var defaultSessionName = "default-session-name"
@@ -98,12 +100,16 @@ func (o *OIDCProvider) Credentials(ctx context.Context) (*Credentials, error) {
 	return o.u.Credentials(ctx)
 }
 
+func (o *OIDCProvider) Stop(ctx context.Context) {
+	o.u.Stop(ctx)
+}
+
 func (o *OIDCProvider) getCredentials(ctx context.Context) (*Credentials, error) {
 	roleArn := o.roleArn
 	oidcProviderArn := o.oidcProviderArn
 	tokenFile := o.oidcTokenFile
 	if roleArn == "" || oidcProviderArn == "" || tokenFile == "" {
-		return nil, NewNotEnableError(errors.New("roleArn, oidcProviderArn or tokenFile is empty"))
+		return nil, NewNotEnableError(errors.New("roleArn, oidcProviderArn or oidcTokenFile is empty"))
 	}
 
 	tokenData, err := os.ReadFile(tokenFile)
@@ -235,7 +241,7 @@ func (o *OIDCProviderOptions) applyDefaults() {
 		o.SessionName = defaultSessionName
 	}
 	if o.ExpiryWindow == 0 {
-		o.ExpiryWindow = defaultExpiryWindow
+		o.ExpiryWindow = defaultExpiryWindowForAssumeRole
 	}
 	if o.EnvRoleArn == "" {
 		o.EnvRoleArn = defaultEnvRoleArn
