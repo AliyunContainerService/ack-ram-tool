@@ -30,7 +30,7 @@ require (
 	github.com/alibabacloud-go/openapi-util v0.1.0
 	github.com/alibabacloud-go/tea-utils v1.4.5
 	github.com/go-logr/zapr v1.2.4
-	go.uber.org/zap v1.25.0
+	go.uber.org/zap v1.26.0
 	k8s.io/klog/v2 v2.100.1
 )
 
