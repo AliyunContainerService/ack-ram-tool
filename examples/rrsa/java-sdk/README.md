@@ -2,8 +2,18 @@
 
 Using [Alibaba Could Java SDK](https://github.com/aliyun/alibabacloud-java-sdk) with RRSA Auth.
 
+```
+<dependency>
+    <groupId>com.aliyun</groupId>
+    <artifactId>credentials-java</artifactId>
+    <version>0.2.12</version>
+</dependency>
+```
 
-## Usage
+https://github.com/aliyun/credentials-java
+
+
+## Demo
 
 1. Enable RRSA:
 

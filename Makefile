@@ -17,7 +17,8 @@ build:
 
 .PHONY: test
 test:
-	go test -v ./...
+	go test -race -v ./...
+	cd pkg/credentials/provider && go test -race -v ./...
 
 .PHONY: e2e
 e2e:

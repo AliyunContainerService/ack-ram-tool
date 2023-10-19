@@ -1,6 +1,11 @@
 # aliyunlog cli demo
 
-## Usage
+```
+ack-ram-tool export-credentials --format=environment-variables -- \
+    aliyunlog log list_project --region-endpoint=cn-hangzhou.log.aliyuncs.com
+```
+
+## Demo
 
 1. Enable RRSA:
 

@@ -43,6 +43,10 @@ func (f *FileProvider) Credentials(ctx context.Context) (*Credentials, error) {
 	return f.u.Credentials(ctx)
 }
 
+func (f *FileProvider) Stop(ctx context.Context) {
+	f.u.Stop(ctx)
+}
+
 func (f *FileProvider) getCredentials(ctx context.Context) (*Credentials, error) {
 	data, err := os.ReadFile(f.filepath)
 	if err != nil {

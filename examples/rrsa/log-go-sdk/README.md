@@ -2,7 +2,8 @@
 
 Using [aliyun-log-go-sdk](https://github.com/aliyun/aliyun-log-go-sdk) with RRSA Auth.
 
-## Usage
+
+## Demo
 
 1. Enable RRSA:
 
