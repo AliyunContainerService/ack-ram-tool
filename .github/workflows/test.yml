@@ -76,7 +76,7 @@ jobs:
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
       - uses: docker/build-push-action@v5
         with:
           context: ./
@@ -94,7 +94,7 @@ jobs:
 #        uses: docker/setup-qemu-action@v2
 #      - name: Set up Docker Buildx
 #        id: buildx
-#        uses: docker/setup-buildx-action@v2
+#        uses: docker/setup-buildx-action@v3
 #      - uses: docker/build-push-action@v5
 #        with:
 #          context: ./examples/rrsa/go-sdk/
@@ -112,7 +112,7 @@ jobs:
 #        uses: docker/setup-qemu-action@v2
 #      - name: Set up Docker Buildx
 #        id: buildx
-#        uses: docker/setup-buildx-action@v2
+#        uses: docker/setup-buildx-action@v3
 #      - uses: docker/build-push-action@v5
 #        with:
 #          context: ./examples/rrsa/java-sdk/
@@ -130,7 +130,7 @@ jobs:
 #        uses: docker/setup-qemu-action@v2
 #      - name: Set up Docker Buildx
 #        id: buildx
-#        uses: docker/setup-buildx-action@v2
+#        uses: docker/setup-buildx-action@v3
 #      - uses: docker/build-push-action@v5
 #        with:
 #          context: ./examples/rrsa/nodejs-sdk/
@@ -148,7 +148,7 @@ jobs:
 #        uses: docker/setup-qemu-action@v2
 #      - name: Set up Docker Buildx
 #        id: buildx
-#        uses: docker/setup-buildx-action@v2
+#        uses: docker/setup-buildx-action@v3
 #      - uses: docker/build-push-action@v5
 #        with:
 #          context: ./examples/rrsa/python3-sdk/
