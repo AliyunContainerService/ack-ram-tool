@@ -23,3 +23,6 @@ kubeconfig
 /examples/rrsa/kaniko-in-ack/deploy.yaml
 /ci/ossutil/ossutil
 /cputil
+.terraform/
+.terraform.*
+terraform.tfstate*
