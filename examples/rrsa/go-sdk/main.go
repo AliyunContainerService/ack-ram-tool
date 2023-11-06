@@ -61,6 +61,9 @@ func newOidcCredential() (credentials.Credential, error) {
 		SetOIDCTokenFilePath(os.Getenv(EnvOidcTokenFile)).
 		SetRoleSessionName("test-rrsa-oidc-token")
 
+	// https://next.api.aliyun.com/product/Sts
+	// config.SetSTSEndpoint("sts-vpc.cn-hangzhou.aliyuncs.com")
+
 	oidcCredential, err := credentials.NewCredential(config)
 	return oidcCredential, err
 }
