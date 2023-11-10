@@ -3,7 +3,6 @@ package credentialplugin
 import (
 	"encoding/json"
 	"fmt"
-
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/common"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ramauthenticator"
@@ -38,8 +37,7 @@ var getTokenCmd = &cobra.Command{
 		clusterId := ctl.GlobalOption.ClusterId
 		getCredentialOpts.clusterId = clusterId
 
-		token, err := ramauthenticator.GenerateToken(
-			clusterId, getTokenOpts.stsEndpoint, client.Credential())
+		token, err := ramauthenticator.GenerateToken(clusterId, client.Credential())
 		common.ExitIfError(err)
 
 		cred, err := newTokenExecCredential(token)
