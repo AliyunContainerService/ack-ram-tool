@@ -20,13 +20,6 @@ type GetTokenOpts struct {
 	//disableCache bool
 }
 
-var getTokenOpts = GetTokenOpts{
-	privateIpAddress: false,
-	apiVersion:       versionV1beta1,
-	stsEndpoint:      "sts.aliyuncs.com",
-	cacheDir:         defaultCacheDir,
-}
-
 var getTokenCmd = &cobra.Command{
 	Use:   "get-token",
 	Short: "Get token for ack-ram-authenticator",
