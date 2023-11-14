@@ -44,6 +44,12 @@ var getTokenCmd = &cobra.Command{
 
 func newTokenExecCredential(token *ramauthenticator.Token) (*types.ExecCredential, error) {
 	version := getApiVersion(getCredentialOpts.apiVersion)
+	var exp *types.KubeTime
+	if !token.Expiration.IsZero() {
+		t := types.NewKubeTime(token.Expiration)
+		exp = &t
+	}
+
 	cred := &types.ExecCredential{
 		KubeTypeMeta: types.KubeTypeMeta{
 			Kind:       kindExecCredential,
@@ -53,7 +59,8 @@ func newTokenExecCredential(token *ramauthenticator.Token) (*types.ExecCredentia
 			Interactive: false,
 		},
 		Status: &types.ExecCredentialStatus{
-			Token: token.String(),
+			ExpirationTimestamp: exp,
+			Token:               token.String(),
 		},
 	}
 

@@ -11,11 +11,14 @@ import (
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/credentials-go/credentials"
 	"strings"
+	"time"
 )
 
 const (
 	tokenPrefixV1 = "k8s-ack-v2." // #nosec G101
 )
+
+var tokenExpiration = time.Minute * 15 // #nosec G101
 
 var signParamsWhitelist = map[string]bool{
 	"x-acs-action":          true,
@@ -36,6 +39,8 @@ type Token struct {
 	Path    string            `json:"path"`
 	Query   map[string]string `json:"query"`
 	Headers map[string]string `json:"headers"`
+
+	Expiration time.Time `json:"-"`
 }
 
 func GenerateToken(clusterId string, cred credentials.Credential) (*Token, error) {
@@ -79,6 +84,8 @@ func GenerateToken(clusterId string, cred credentials.Credential) (*Token, error
 		}
 		t.Query[k] = tea.StringValue(v)
 	}
+
+	t.Expiration = time.Now().Add(tokenExpiration - 5*time.Minute).UTC()
 
 	return t, nil
 }
