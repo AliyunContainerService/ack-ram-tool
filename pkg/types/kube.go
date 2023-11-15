@@ -115,6 +115,10 @@ type KubeTime struct {
 	time.Time
 }
 
+func NewKubeTime(t time.Time) KubeTime {
+	return KubeTime{t}
+}
+
 func (t KubeTime) MarshalJSON() ([]byte, error) {
 	if t.IsZero() {
 		// Encode unset/nil objects as JSON's "null".
