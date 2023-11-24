@@ -1,5 +1,46 @@
 # RBAC
 
+## 配置命令行使用的凭证
+
+可以参考如下文档：[凭证信息](https://aliyuncontainerservice.github.io/ack-ram-tool/zh-CN/getting-started#%E5%87%AD%E8%AF%81%E4%BF%A1%E6%81%AF)
+
+
+## 执行命令行时使用的账号凭证所需的权限
+
+执行命令行时使用的账号凭证需要至少被授予如下 **RAM 权限和 RBAC 权限** 。
+
+
+### RAM 权限
+
+至少需要如下 RAM 权限策略：
+
+```json
+{
+  "Version": "1",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "cs:DescribeClusterUserKubeconfig",
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ram:ListUsers",
+        "ram:ListRoles"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+### RBAC 权限
+
+至少需要如下 RBAC 权限：
+
+* 目标集群的管理员权限。
+
 
 ## scan-user-permissions
 
