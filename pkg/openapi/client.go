@@ -15,6 +15,11 @@ var (
 	defaultStsApiEndpoint = "sts.aliyuncs.com"
 )
 
+type ClientInterface interface {
+	RamClientInterface
+	CSClientInterface
+}
+
 type Client struct {
 	ramClient *ram.Client
 	csClient  *cs.Client

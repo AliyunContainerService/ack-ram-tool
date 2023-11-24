@@ -23,7 +23,9 @@ type CSClientInterface interface {
 	UpdateCluster(ctx context.Context, clusterId string, opt UpdateClusterOption) (*types.ClusterTask, error)
 	GetTask(ctx context.Context, taskId string) (*types.ClusterTask, error)
 	GetUserKubeConfig(ctx context.Context, clusterId string, privateIpAddress bool, temporaryDuration time.Duration) (*types.KubeConfig, error)
+	// Deprecated: use ListClustersV1 instead
 	ListClusters(ctx context.Context) ([]types.Cluster, error)
+	ListClustersV1(ctx context.Context) ([]types.Cluster, error)
 	GetAddonMetaData(ctx context.Context, clusterId string, name string) (*types.ClusterAddon, error)
 	GetAddonStatus(ctx context.Context, clusterId string, name string) (*types.ClusterAddon, error)
 	InstallAddon(ctx context.Context, clusterId string, addon types.ClusterAddon) error
@@ -41,6 +43,7 @@ func (c *Client) GetCluster(ctx context.Context, clusterId string) (*types.Clust
 	return cluster, nil
 }
 
+// Deprecated: use ListClustersV1 instead
 func (c *Client) ListClusters(ctx context.Context) ([]types.Cluster, error) {
 	client := c.csClient
 	resp, err := client.DescribeClusters(&cs.DescribeClustersRequest{})
@@ -49,6 +52,35 @@ func (c *Client) ListClusters(ctx context.Context) ([]types.Cluster, error) {
 	}
 
 	return convertDescribeClustersResponse(resp), nil
+}
+
+func (c *Client) ListClustersV1(ctx context.Context) ([]types.Cluster, error) {
+	client := c.csClient
+	var ret []types.Cluster
+	var pageNumber int64
+
+	for {
+		resp, err := client.DescribeClustersV1(&cs.DescribeClustersV1Request{
+			ClusterSpec: nil,
+			ClusterType: nil,
+			Name:        nil,
+			PageNumber:  tea.Int64(pageNumber),
+			//PageSize:    tea.Int64(),
+			Profile:  nil,
+			RegionId: nil,
+		})
+		if err != nil {
+			return nil, err
+		}
+		clusters := convertDescribeClustersV1Response(resp)
+		if len(clusters) == 0 {
+			break
+		}
+		ret = append(ret, clusters...)
+		pageNumber++
+	}
+
+	return ret, nil
 }
 
 func (c *Client) UpdateCluster(ctx context.Context, clusterId string, opt UpdateClusterOption) (*types.ClusterTask, error) {
@@ -256,6 +288,29 @@ func convertDescribeClustersResponse(resp *cs.DescribeClustersResponse) []types.
 	}
 	var clusters []types.Cluster
 	for _, item := range body {
+		c := types.Cluster{}
+		c.ClusterId = tea.StringValue(item.ClusterId)
+		c.ClusterType = types.ClusterType(tea.StringValue(item.ClusterType))
+		c.Name = tea.StringValue(item.Name)
+		c.RegionId = tea.StringValue(item.RegionId)
+		c.State = types.ClusterState(tea.StringValue(item.State))
+
+		metadata := &types.ClusterMetaData{}
+		_ = json.Unmarshal([]byte(tea.StringValue(item.MetaData)), metadata)
+		c.MetaData = *metadata
+		clusters = append(clusters, c)
+	}
+
+	return clusters
+}
+
+func convertDescribeClustersV1Response(resp *cs.DescribeClustersV1Response) []types.Cluster {
+	body := resp.Body
+	if body == nil {
+		return nil
+	}
+	var clusters []types.Cluster
+	for _, item := range body.Clusters {
 		c := types.Cluster{}
 		c.ClusterId = tea.StringValue(item.ClusterId)
 		c.ClusterType = types.ClusterType(tea.StringValue(item.ClusterType))
