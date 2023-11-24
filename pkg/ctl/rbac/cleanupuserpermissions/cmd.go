@@ -16,7 +16,7 @@ import (
 )
 
 type Option struct {
-	userId int64
+	userId uint64
 
 	clusterId         string
 	privateIpAddress  bool
@@ -46,13 +46,11 @@ func run() {
 }
 
 func oneCluster(ctx context.Context, openAPIClient openapi.ClientInterface, clusterId string) {
-	kubeClient := getKubeClient(ctx, openAPIClient, clusterId)
-
 	log.Logger.Info("Start to scan users and bindings")
 	spin := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
 	spin.Start()
-	defer spin.Stop()
 
+	kubeClient := getKubeClient(ctx, openAPIClient, clusterId)
 	rawBindings, err := binding.ListBindings(ctx, kubeClient)
 	ctlcommon.ExitIfError(err)
 	accounts, err := binding.ListAccounts(ctx, openAPIClient)
@@ -60,17 +58,17 @@ func oneCluster(ctx context.Context, openAPIClient openapi.ClientInterface, clus
 	spin.Stop()
 
 	bindings := rawBindings.SortByUid()
-	cleanup(ctx, bindings, accounts, kubeClient)
+	cleanup(ctx, bindings, accounts, kubeClient, clusterId)
 }
 
 func cleanup(ctx context.Context, bindings []binding.Binding,
-	accounts map[int64]types.Account, kube kubernetes.Interface) {
+	accounts map[int64]types.Account, kube kubernetes.Interface, clusterId string) {
 	var newBindings []binding.Binding
 	for _, b := range bindings {
 		if b.AliUid == 0 {
 			continue
 		}
-		if opts.userId != 0 && b.AliUid != opts.userId {
+		if opts.userId != 0 && b.AliUid != int64(opts.userId) {
 			continue
 		}
 		acc, ok := accounts[b.AliUid]
@@ -82,11 +80,17 @@ func cleanup(ctx context.Context, bindings []binding.Binding,
 		newBindings = append(newBindings, b)
 	}
 
-	log.Logger.Info("Will cleanup RBAC bindings as blow:")
+	log.Logger.Info("will cleanup RBAC bindings as blow:")
 	scanuserpermissions.OutputBindingsTable(newBindings, accounts, false)
 
 	ctlcommon.YesOrExit("Are you sure you want to cleanup these bindings?")
 	for _, b := range newBindings {
+		log.Logger.Infof("start to backup binding: %s", b.String())
+		if p, err := binding.SaveBindingToFile(ctx, clusterId, b, kube); err != nil {
+			ctlcommon.ExitIfError(err)
+		} else {
+			log.Logger.Infof("the origin binding %s have been backed up to file %s", b.String(), p)
+		}
 		log.Logger.Infof("start to cleanup binding: %s", b.String())
 		if err := binding.RemoveBinding(ctx, b, kube); err != nil {
 			ctlcommon.ExitIfError(err)
@@ -108,7 +112,7 @@ func getKubeClient(ctx context.Context, openAPIClient openapi.ClientInterface, c
 
 func SetupCmd(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(cmd)
-	cmd.Flags().Int64VarP(&opts.userId, "user-id", "u", 0, "limit user id")
+	cmd.Flags().Uint64VarP(&opts.userId, "user-id", "u", 0, "limit user id")
 	cmd.Flags().StringVarP(&opts.clusterId, "cluster-id", "c", "", "cluster id")
 	//cmd.Flags().BoolVarP(&opts.allUsers, "all-users", "A", false, "list all users")
 	ctlcommon.ExitIfError(cmd.MarkFlagRequired("cluster-id"))

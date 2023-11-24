@@ -20,7 +20,7 @@ import (
 )
 
 type Option struct {
-	userId int64
+	userId uint64
 
 	clusterId         string
 	privateIpAddress  bool
@@ -50,12 +50,11 @@ func run() {
 }
 
 func oneCluster(ctx context.Context, openAPIClient openapi.ClientInterface, clusterId string) {
-	kubeClient := getKubeClient(ctx, openAPIClient, clusterId)
-
 	log.Logger.Info("Start to scan users and bindings")
 	spin := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
 	spin.Start()
 
+	kubeClient := getKubeClient(ctx, openAPIClient, clusterId)
 	rawBindings, err := binding.ListBindings(ctx, kubeClient)
 	ctlcommon.ExitIfError(err)
 	accounts, err := binding.ListAccounts(ctx, openAPIClient)
@@ -72,7 +71,7 @@ func outputTable(bindings []binding.Binding, accounts map[int64]types.Account) {
 		if b.AliUid == 0 {
 			continue
 		}
-		if opts.userId != 0 && b.AliUid != opts.userId {
+		if opts.userId != 0 && b.AliUid != int64(opts.userId) {
 			continue
 		}
 		acc, ok := accounts[b.AliUid]
@@ -163,7 +162,7 @@ func getKubeClient(ctx context.Context, openAPIClient openapi.ClientInterface, c
 
 func SetupCmd(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(cmd)
-	cmd.Flags().Int64Var(&opts.userId, "user-id", 0, "limit user id")
+	cmd.Flags().Uint64VarP(&opts.userId, "user-id", "u", 0, "limit user id")
 	cmd.Flags().StringVarP(&opts.clusterId, "cluster-id", "c", "", "cluster id")
 	cmd.Flags().BoolVarP(&opts.allUsers, "all-users", "A", false, "list all users")
 	err := cmd.MarkFlagRequired("cluster-id")

@@ -2,8 +2,11 @@ package binding
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
+	"path"
 	"regexp"
 	"sort"
 	"strconv"
@@ -209,6 +212,38 @@ func listClusterRoleBindings(ctx context.Context, kube kubernetes.Interface) (*r
 	return allList, nil
 }
 
+func SaveBindingToFile(ctx context.Context, dir string, b Binding, client kubernetes.Interface) (string, error) {
+	var r interface{}
+	var err error
+	switch b.Kind {
+	case KindRoleBinding:
+		r, err = getRoleBinding(ctx, b, client)
+		if err != nil {
+			return "", err
+		}
+	case KindClusterRoleBinding:
+		r, err = getClusterRoleBinding(ctx, b, client)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			return "", fmt.Errorf("mkdir %s: %w", dir, err)
+		}
+	}
+	filePath := path.Join(dir, fmt.Sprintf("%s-%s-%s.json", b.Kind, b.Namespace, b.Name))
+	data, err := json.Marshal(r)
+	if err != nil {
+		return "", err
+	}
+	if err := os.WriteFile(filePath, data, 0644); err != nil {
+		return "", err
+	}
+	return filePath, nil
+}
+
 func RemoveBinding(ctx context.Context, b Binding, client kubernetes.Interface) error {
 	switch b.Kind {
 	case KindRoleBinding:
@@ -217,6 +252,16 @@ func RemoveBinding(ctx context.Context, b Binding, client kubernetes.Interface) 
 		return removeClusterRoleBinding(ctx, b, client)
 	}
 	return nil
+}
+
+func getClusterRoleBinding(ctx context.Context, b Binding, client kubernetes.Interface) (*rbacv1.ClusterRoleBinding, error) {
+	obj, err := client.RbacV1().ClusterRoleBindings().Get(ctx, b.Name, metav1.GetOptions{})
+	return obj, err
+}
+
+func getRoleBinding(ctx context.Context, b Binding, client kubernetes.Interface) (*rbacv1.RoleBinding, error) {
+	obj, err := client.RbacV1().RoleBindings(b.Namespace).Get(ctx, b.Name, metav1.GetOptions{})
+	return obj, err
 }
 
 func removeClusterRoleBinding(ctx context.Context, b Binding, client kubernetes.Interface) error {
