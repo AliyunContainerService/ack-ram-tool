@@ -236,5 +236,5 @@ func (b Binding) String() string {
 	case KindClusterRoleBinding:
 		return fmt.Sprintf("%s/-/%s", b.Kind, b.Name)
 	}
-	return fmt.Sprintf("%v", b)
+	return fmt.Sprintf("%#v", b)
 }

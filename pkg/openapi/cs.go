@@ -23,7 +23,7 @@ type CSClientInterface interface {
 	UpdateCluster(ctx context.Context, clusterId string, opt UpdateClusterOption) (*types.ClusterTask, error)
 	GetTask(ctx context.Context, taskId string) (*types.ClusterTask, error)
 	GetUserKubeConfig(ctx context.Context, clusterId string, privateIpAddress bool, temporaryDuration time.Duration) (*types.KubeConfig, error)
-	// Deprecated: use ListClustersV1 instead
+	// XXXDeprecated: use ListClustersV1 instead
 	ListClusters(ctx context.Context) ([]types.Cluster, error)
 	ListClustersV1(ctx context.Context) ([]types.Cluster, error)
 	GetAddonMetaData(ctx context.Context, clusterId string, name string) (*types.ClusterAddon, error)
@@ -43,7 +43,7 @@ func (c *Client) GetCluster(ctx context.Context, clusterId string) (*types.Clust
 	return cluster, nil
 }
 
-// Deprecated: use ListClustersV1 instead
+// XXXDeprecated: use ListClustersV1 instead
 func (c *Client) ListClusters(ctx context.Context) ([]types.Cluster, error) {
 	client := c.csClient
 	resp, err := client.DescribeClusters(&cs.DescribeClustersRequest{})
