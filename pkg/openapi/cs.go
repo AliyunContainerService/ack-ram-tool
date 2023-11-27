@@ -57,9 +57,15 @@ func (c *Client) ListClusters(ctx context.Context) ([]types.Cluster, error) {
 func (c *Client) ListClustersV1(ctx context.Context) ([]types.Cluster, error) {
 	client := c.csClient
 	var ret []types.Cluster
-	var pageNumber int64
+	pageNumber := int64(1)
 
 	for {
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		default:
+		}
+
 		resp, err := client.DescribeClustersV1(&cs.DescribeClustersV1Request{
 			ClusterSpec: nil,
 			ClusterType: nil,

@@ -299,6 +299,12 @@ func (c *Client) ListUsers(ctx context.Context) ([]types.RamUser, error) {
 	var users []types.RamUser
 	var marker string
 	for {
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		default:
+		}
+
 		req := &ram.ListUsersRequest{
 			Marker:   nil,
 			MaxItems: tea.Int32(1000),
@@ -326,6 +332,12 @@ func (c *Client) ListRoles(ctx context.Context) ([]types.RamRole, error) {
 	var roles []types.RamRole
 	var marker string
 	for {
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		default:
+		}
+
 		req := &ram.ListRolesRequest{
 			Marker:   nil,
 			MaxItems: tea.Int32(1000),

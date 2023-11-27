@@ -29,6 +29,8 @@ type Option struct {
 	allUsers bool
 }
 
+const allClustersFlag = "all"
+
 var opts = Option{
 	temporaryDuration: time.Hour,
 }
@@ -36,33 +38,78 @@ var opts = Option{
 var cmd = &cobra.Command{
 	Use:   "scan-user-permissions",
 	Short: "scan RBAC permissions for one or all users",
-	Long:  ``,
+	Long: `
+scan RBAC permissions for one or all users
+
+Examples:
+  # list all deleted users/roles for one cluster
+  ack-ram-tool rbac scan-user-permissions -c <clusterId>
+
+  # list all users/roles for one cluster
+  ack-ram-tool rbac scan-user-permissions -c <clusterId> --all-users
+
+  # list all deleted users/roles for all clusters
+  ack-ram-tool rbac scan-user-permissions -c all
+
+`,
 	Run: func(cmd *cobra.Command, args []string) {
-		run()
+		ctx := ctlcommon.SetupSignalHandler(context.Background())
+		run(ctx)
 	},
 }
 
-func run() {
-	ctx := context.Background()
+func run(ctx context.Context) {
 	openAPIClient := ctlcommon.GetClientOrDie()
 
-	oneCluster(ctx, openAPIClient, opts.clusterId)
+	if opts.clusterId == allClustersFlag {
+		err := scanAllClusters(ctx, openAPIClient)
+		ctlcommon.ExitIfError(err)
+	} else {
+		err := scanOneCluster(ctx, openAPIClient, opts.clusterId)
+		ctlcommon.ExitIfError(err)
+	}
 }
 
-func oneCluster(ctx context.Context, openAPIClient openapi.ClientInterface, clusterId string) {
-	log.Logger.Info("Start to scan users and bindings")
+func scanOneCluster(ctx context.Context, openAPIClient openapi.ClientInterface, clusterId string) error {
+	log.Logger.Infof("Start to scan users and bindings for cluster %s", clusterId)
 	spin := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
 	spin.Start()
 
-	kubeClient := getKubeClient(ctx, openAPIClient, clusterId)
-	rawBindings, err := binding.ListBindings(ctx, kubeClient)
-	ctlcommon.ExitIfError(err)
-	accounts, err := binding.ListAccounts(ctx, openAPIClient)
-	ctlcommon.ExitIfError(err)
-	spin.Stop()
+	var kubeClient kubernetes.Interface
+	var accounts map[int64]types.Account
+	var bindings []binding.Binding
+	var err error
 
-	bindings := rawBindings.SortByUid()
+	func() {
+		defer spin.Stop()
+		kubeClient, err = getKubeClient(ctx, openAPIClient, clusterId)
+		if err != nil {
+			return
+		}
+		accounts, err = binding.ListAccounts(ctx, openAPIClient)
+		if err != nil {
+			return
+		}
+		bindings, err = GetClusterBindings(ctx, kubeClient)
+		if err != nil {
+			return
+		}
+	}()
+	if err != nil {
+		return err
+	}
+
 	outputTable(bindings, accounts)
+	return nil
+}
+
+func GetClusterBindings(ctx context.Context, kubeClient kubernetes.Interface) ([]binding.Binding, error) {
+	rawBindings, err := binding.ListBindings(ctx, kubeClient)
+	if err != nil {
+		return nil, err
+	}
+	bindings := rawBindings.SortByUid()
+	return bindings, nil
 }
 
 func outputTable(bindings []binding.Binding, accounts map[int64]types.Account) {
@@ -111,7 +158,7 @@ func OutputBindingsTable(bindings []binding.Binding, accounts map[int64]types.Ac
 		tablewriter.FgRedColor,
 	}
 	redColors := []tablewriter.Colors{
-		redColor, redColor, redColor, redColor, redColor, redColor,
+		redColor,
 	}
 
 	sort.Slice(bindings, func(i, j int) bool {
@@ -150,14 +197,16 @@ func OutputBindingsTable(bindings []binding.Binding, accounts map[int64]types.Ac
 	table.Render()
 }
 
-func getKubeClient(ctx context.Context, openAPIClient openapi.ClientInterface, clusterId string) kubernetes.Interface {
+func getKubeClient(ctx context.Context, openAPIClient openapi.ClientInterface,
+	clusterId string) (kubernetes.Interface, error) {
 	kubeconfig, err := openAPIClient.GetUserKubeConfig(ctx, clusterId,
 		opts.privateIpAddress, opts.temporaryDuration)
-	ctlcommon.ExitIfError(err)
+	if err != nil {
+		return nil, err
+	}
 
 	client, err := ctlcommon.NewKubeClient(kubeconfig.RawData)
-	ctlcommon.ExitIfError(err)
-	return client
+	return client, err
 }
 
 func SetupCmd(rootCmd *cobra.Command) {
