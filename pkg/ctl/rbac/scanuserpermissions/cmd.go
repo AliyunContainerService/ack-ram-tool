@@ -38,8 +38,7 @@ var opts = Option{
 var cmd = &cobra.Command{
 	Use:   "scan-user-permissions",
 	Short: "scan RBAC permissions for one or all users",
-	Long: `
-scan RBAC permissions for one or all users
+	Long: `scan RBAC permissions for one or all users
 
 Examples:
   # list all deleted users/roles for one cluster

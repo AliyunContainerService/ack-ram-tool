@@ -256,11 +256,21 @@ func RemoveBinding(ctx context.Context, b Binding, client kubernetes.Interface) 
 
 func getClusterRoleBinding(ctx context.Context, b Binding, client kubernetes.Interface) (*rbacv1.ClusterRoleBinding, error) {
 	obj, err := client.RbacV1().ClusterRoleBindings().Get(ctx, b.Name, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+	obj.APIVersion = "rbac.authorization.k8s.io/v1"
+	obj.Kind = "ClusterRoleBinding"
 	return obj, err
 }
 
 func getRoleBinding(ctx context.Context, b Binding, client kubernetes.Interface) (*rbacv1.RoleBinding, error) {
 	obj, err := client.RbacV1().RoleBindings(b.Namespace).Get(ctx, b.Name, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+	obj.APIVersion = "rbac.authorization.k8s.io/v1"
+	obj.Kind = "RoleBinding"
 	return obj, err
 }
 
