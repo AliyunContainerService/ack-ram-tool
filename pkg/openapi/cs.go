@@ -9,6 +9,8 @@ import (
 
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/types"
 	cs "github.com/alibabacloud-go/cs-20151215/v3/client"
+	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
+	util "github.com/alibabacloud-go/tea-utils/v2/service"
 	"github.com/alibabacloud-go/tea/tea"
 	"gopkg.in/yaml.v3"
 )
@@ -30,6 +32,7 @@ type CSClientInterface interface {
 	GetAddonStatus(ctx context.Context, clusterId string, name string) (*types.ClusterAddon, error)
 	InstallAddon(ctx context.Context, clusterId string, addon types.ClusterAddon) error
 	ListAddons(ctx context.Context, clusterId string) ([]types.ClusterAddon, error)
+	CleanClusterUserPermissions(ctx context.Context, clusterId string, uid int64) error
 }
 
 func (c *Client) GetCluster(ctx context.Context, clusterId string) (*types.Cluster, error) {
@@ -227,6 +230,38 @@ func (c *Client) ListAddons(ctx context.Context, clusterId string) ([]types.Clus
 
 	addons := convertDescribeClusterAddonsVersionResponse(resp)
 	return addons, nil
+}
+
+type cleanClusterUserPermissions struct {
+	Headers    map[string]*string `json:"headers,omitempty" xml:"headers,omitempty" require:"true"`
+	StatusCode *int32             `json:"statusCode,omitempty" xml:"statusCode,omitempty" require:"true"`
+}
+
+func (c *Client) CleanClusterUserPermissions(ctx context.Context, clusterId string, uid int64) error {
+	client := c.csClient
+
+	req := &openapi.OpenApiRequest{
+		Headers: make(map[string]*string),
+	}
+	params := &openapi.Params{
+		Action:      tea.String("CleanClusterUserPermissions"),
+		Version:     tea.String("2015-12-15"),
+		Protocol:    tea.String("HTTPS"),
+		Pathname:    tea.String(fmt.Sprintf("/cluster/%s/user/%d/permissions", clusterId, uid)),
+		Method:      tea.String("DELETE"),
+		AuthType:    tea.String("AK"),
+		Style:       tea.String("ROA"),
+		ReqBodyType: tea.String("json"),
+		BodyType:    tea.String("none"),
+	}
+
+	_result := &cleanClusterUserPermissions{}
+	_body, _err := client.CallApi(params, req, &util.RuntimeOptions{})
+	if _err != nil {
+		return _err
+	}
+	_err = tea.Convert(_body, &_result)
+	return _err
 }
 
 func convertDescribeClusterAddonsVersionResponse(resp *cs.DescribeClusterAddonsVersionResponse) []types.ClusterAddon {
