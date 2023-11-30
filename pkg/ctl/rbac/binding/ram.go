@@ -8,8 +8,16 @@ import (
 	"strconv"
 )
 
-func ListAccounts(ctx context.Context, client openapi.RamClientInterface) (map[int64]types.Account, error) {
+func ListAccounts(ctx context.Context, client openapi.ClientInterface) (map[int64]types.Account, error) {
 	accounts := make(map[int64]types.Account, 0)
+	if acc, err := client.GetCallerIdentity(ctx); err != nil {
+		log.Logger.Errorf("GetCallerIdentity failed: %s", err)
+		return nil, err
+	} else {
+		id, _ := strconv.ParseInt(acc.RootUId, 10, 64)
+		accounts[id] = types.NewRootAccount(id)
+	}
+
 	users, err := client.ListUsers(ctx)
 	if err != nil {
 		log.Logger.Errorf("list users failed: %s", err)

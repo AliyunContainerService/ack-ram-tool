@@ -12,17 +12,21 @@ import (
 	"time"
 )
 
+var noKubeconfigClusterState = []types.ClusterState{}
+
 func scanAllClusters(ctx context.Context, openAPIClient openapi.ClientInterface) error {
 	log.Logger.Info("Start to scan users and bindings for all clusters")
-	clusters, accounts, err := getAllClustersAndAccountsWithSpin(ctx, openAPIClient)
+	clusters, accounts, err := GetAllClustersAndAccountsWithSpin(ctx, openAPIClient)
 	if err != nil {
 		return err
 	}
 	for _, cluster := range clusters {
 		clusterId := cluster.ClusterId
 		log.Logger.Infof("---- %s (%s) ----", clusterId, cluster.Name)
-		if err := scanOneClusterWithAccounts(ctx, openAPIClient, clusterId, accounts); err != nil {
-			log.Logger.Errorf("scan bindings for cluster %s failed: %s", clusterId, err)
+		logger := log.Named(clusterId)
+		clusterCtx := log.IntoContext(ctx, logger)
+		if err := scanOneClusterWithAccounts(clusterCtx, openAPIClient, clusterId, accounts); err != nil {
+			logger.Errorf("scan bindings for cluster %s failed: %s", clusterId, err)
 		}
 	}
 	return nil
@@ -30,7 +34,8 @@ func scanAllClusters(ctx context.Context, openAPIClient openapi.ClientInterface)
 
 func scanOneClusterWithAccounts(ctx context.Context, openAPIClient openapi.ClientInterface,
 	clusterId string, accounts map[int64]types.Account) error {
-	log.Logger.Infof("Start to scan bindings for cluster %s", clusterId)
+	logger := log.FromContext(ctx)
+	logger.Infof("Start to scan bindings for cluster %s", clusterId)
 	spin := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
 	spin.Start()
 
@@ -58,7 +63,7 @@ func scanOneClusterWithAccounts(ctx context.Context, openAPIClient openapi.Clien
 	return nil
 }
 
-func getAllClustersAndAccountsWithSpin(ctx context.Context,
+func GetAllClustersAndAccountsWithSpin(ctx context.Context,
 	openAPIClient openapi.ClientInterface) ([]types.Cluster, map[int64]types.Account, error) {
 	log.Logger.Info("Start to get all clusters, users and roles")
 	spin := spinner.New(spinner.CharSets[9], 100*time.Millisecond)

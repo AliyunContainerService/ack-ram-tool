@@ -6,6 +6,7 @@ import (
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/rbac/scanuserpermissions"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
 	"github.com/briandowns/spinner"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"time"
 
 	ctlcommon "github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/common"
@@ -26,6 +27,8 @@ type Option struct {
 	allDeletedUsers bool
 }
 
+const allClustersFlag = "all"
+
 var opts = Option{
 	temporaryDuration: time.Hour,
 }
@@ -41,6 +44,12 @@ Examples:
 
   # cleanup RBAC permissions for one cluster and all deleted users
   ack-ram-tool rbac cleanup-user-permissions -c <clusterId> --all-deleted-users
+
+  # cleanup RBAC permissions for all cluster and one user
+  ack-ram-tool rbac cleanup-user-permissions -c all -u <uid>
+
+  # cleanup RBAC permissions for all cluster and all deleted users
+  ack-ram-tool rbac cleanup-user-permissions -c all --all-deleted-users
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		if !opts.allDeletedUsers && opts.userId == 0 {
@@ -57,13 +66,20 @@ Examples:
 func run(ctx context.Context) {
 	openAPIClient := ctlcommon.GetClientOrDie()
 
-	if err := cleanOneCluster(ctx, openAPIClient, opts.clusterId); err != nil {
-		ctlcommon.ExitIfError(err)
+	if opts.clusterId == allClustersFlag {
+		if err := cleanAllClusters(ctx, openAPIClient); err != nil {
+			ctlcommon.ExitIfError(err)
+		}
+	} else {
+		if err := cleanOneCluster(ctx, openAPIClient, opts.clusterId); err != nil {
+			ctlcommon.ExitIfError(err)
+		}
 	}
 }
 
 func cleanOneCluster(ctx context.Context, openAPIClient openapi.ClientInterface, clusterId string) error {
-	log.Logger.Info("Start to scan users and bindings")
+	logger := log.FromContext(ctx)
+	logger.Info("Start to scan users and bindings")
 	spin := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
 	spin.Start()
 
@@ -91,12 +107,17 @@ func cleanOneCluster(ctx context.Context, openAPIClient openapi.ClientInterface,
 		return err
 	}
 
-	return cleanupOneCluster(ctx, bindings, accounts, kubeClient, clusterId)
+	return cleanupOneCluster(ctx, bindings, accounts, kubeClient, openAPIClient, clusterId)
 }
 
 func cleanupOneCluster(ctx context.Context, bindings []binding.Binding,
-	accounts map[int64]types.Account, kube kubernetes.Interface, clusterId string) error {
+	accounts map[int64]types.Account, kube kubernetes.Interface, openAPIClient openapi.ClientInterface,
+	clusterId string) error {
 	var newBindings []binding.Binding
+	var toCleanupUids []int64
+	logger := log.FromContext(ctx)
+	toCleanupUidsDup := make(map[int64]bool)
+
 	for _, b := range bindings {
 		if b.AliUid == 0 {
 			continue
@@ -114,27 +135,68 @@ func cleanupOneCluster(ctx context.Context, bindings []binding.Binding,
 			continue
 		}
 		newBindings = append(newBindings, b)
+		if _, ok := toCleanupUidsDup[b.AliUid]; !ok {
+			toCleanupUids = append(toCleanupUids, b.AliUid)
+			toCleanupUidsDup[b.AliUid] = true
+		}
 	}
 
-	log.Logger.Info("will cleanup RBAC bindings as below:")
+	logger.Info("will cleanup RBAC bindings as below:")
 	scanuserpermissions.OutputBindingsTable(newBindings, accounts, false)
 
 	ctlcommon.YesOrExit("Are you sure you want to cleanup these bindings?")
 
 	for _, b := range newBindings {
-		log.Logger.Infof("start to backup binding: %s", b.String())
-		if p, err := binding.SaveBindingToFile(ctx, clusterId, b, kube); err != nil {
-			return fmt.Errorf("backup binding %s: %w", b.String(), err)
-		} else {
-			log.Logger.Infof("the origin binding %s have been backed up to file %s", b.String(), p)
+		if err := removeRBACBinding(ctx, b, kube, clusterId); err != nil {
+			return err
 		}
-		log.Logger.Infof("start to delete binding: %s", b.String())
-		if err := binding.RemoveBinding(ctx, b, kube); err != nil {
-			return fmt.Errorf("delete binding %s: %w", b.String(), err)
-		}
-		log.Logger.Infof("deleted binding: %s", b.String())
 	}
-	log.Logger.Info("all bindings have been cleanup")
+
+	logger.Info("will cleanup kubeconfig permissions for users as below:")
+	for _, uid := range toCleanupUids {
+		fmt.Printf("UID: %d\n", uid)
+	}
+	ctlcommon.YesOrExit("Are you sure you want to cleanup these permissions?")
+
+	if err := removePermissions(ctx, openAPIClient, clusterId, toCleanupUids); err != nil {
+		return err
+	}
+
+	logger.Info("all bindings and permissions have been cleanup")
+	return nil
+}
+
+func removePermissions(ctx context.Context, openAPIClient openapi.ClientInterface,
+	clusterId string, uids []int64) error {
+	logger := log.FromContext(ctx)
+	for _, uid := range uids {
+		logger.Infof("start to cleanup kubeconfig permissions for uid %d", uid)
+		if err := openAPIClient.CleanClusterUserPermissions(ctx, clusterId, uid); err != nil {
+			return fmt.Errorf("cleanup kubeconfig permissions for uid %d: %w", uid, err)
+		}
+		logger.Infof("finished cleanup kubeconfig permissions for uid %d", uid)
+	}
+	return nil
+}
+
+func removeRBACBinding(ctx context.Context, b binding.Binding, kube kubernetes.Interface, clusterId string) error {
+	logger := log.FromContext(ctx)
+	logger.Infof("start to backup binding %s", b.String())
+	if p, err := binding.SaveBindingToFile(ctx, clusterId, b, kube); err != nil {
+		if errors.IsNotFound(err) {
+			logger.Infof("skip binding %s which is not founds", b.String())
+			return nil
+		}
+		return fmt.Errorf("backup binding %s: %w", b.String(), err)
+	} else {
+		logger.Infof("the origin binding %s have been backed up to file %s", b.String(), p)
+	}
+
+	logger.Infof("start to delete binding %s", b.String())
+	if err := binding.RemoveBinding(ctx, b, kube); err != nil {
+		return fmt.Errorf("delete binding %s: %w", b.String(), err)
+	}
+	logger.Infof("deleted binding %s", b.String())
 	return nil
 }
 

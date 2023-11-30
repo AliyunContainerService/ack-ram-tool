@@ -30,9 +30,10 @@ const (
 )
 
 type Account struct {
-	Type AccountType
-	User RamUser
-	Role RamRole
+	Type    AccountType
+	RootUId string
+	User    RamUser
+	Role    RamRole
 }
 
 type RamRole struct {
@@ -230,6 +231,17 @@ func (a Account) Deleted() bool {
 		return a.Role.Deleted
 	}
 	return false
+}
+
+func NewRootAccount(uid int64) Account {
+	idStr := fmt.Sprintf("%d", uid)
+	return Account{
+		RootUId: idStr,
+		Type:    AccountTypeRoot,
+		User: RamUser{
+			Id: idStr,
+		},
+	}
 }
 
 func NewFakeAccount(uid int64) Account {

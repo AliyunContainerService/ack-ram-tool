@@ -21,10 +21,7 @@
     {
       "Effect": "Allow",
       "Action": [
-        "cs:DescribeClusterUserKubeconfig",
-        "cs:DescribeClustersV1",
-        "cs:GetClusters",
-        "cs:DescribeClusterDetail"
+        "cs:*"
       ],
       "Resource": "*"
     },
@@ -68,6 +65,13 @@ UID                     UserType  UserName  Binding
 2342********            RamUser   foobar    ClusterRoleBinding/-/23*****-clusterrolebinding 
 
 ```
+
+UserType 表示 UID 对应用户的类型：
+
+* RamUser: RAM 用户
+* RamRole: RAM 角色
+* Root: 阿里云账号（主账号）
+
 
 * 扫描所有集群中存在的 RAM 用户和角色的 RBAC bindings.
 
@@ -116,7 +120,12 @@ start to cleanup binding: RoleBinding/default/300***-default-rolebinding
 finished cleanup binding: RoleBinding/default/300***-default-rolebinding
 start to cleanup binding: ClusterRoleBinding/-/300***-clusterrolebinding
 finished cleanup binding: ClusterRoleBinding/-/300***-clusterrolebinding
-all bindings have been cleanup
+will cleanup RBAC permissions for users as below:
+UID: 300***
+? Are you sure you want to cleanup these permissions? Yes
+start to cleanup permissions for uid 300***
+finished cleanup permissions for uid 300***
+all bindings and permissions have been cleanup
 
 ```
 
@@ -136,5 +145,10 @@ start to backup binding: ClusterRoleBinding/-/300***-clusterrolebinding
 the origin binding ClusterRoleBinding/-/300***-clusterrolebinding have been backed up to file cbbXXX/ClusterRoleBinding--300***-clusterrolebinding.json
 start to delete binding: ClusterRoleBinding/-/300***-clusterrolebinding
 deleted binding: ClusterRoleBinding/-/300***-clusterrolebinding
-
-all bindings have been cleanup
+will cleanup RBAC permissions for users as below:
+UID: 300***
+? Are you sure you want to cleanup these permissions? Yes
+start to cleanup permissions for uid 300***
+finished cleanup permissions for uid 300***
+all bindings and permissions have been cleanup
+```

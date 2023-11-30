@@ -70,7 +70,8 @@ func run(ctx context.Context) {
 }
 
 func scanOneCluster(ctx context.Context, openAPIClient openapi.ClientInterface, clusterId string) error {
-	log.Logger.Infof("Start to scan users and bindings for cluster %s", clusterId)
+	logger := log.FromContext(ctx)
+	logger.Infof("Start to scan users and bindings for cluster %s", clusterId)
 	spin := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
 	spin.Start()
 
