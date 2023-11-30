@@ -17,6 +17,13 @@ build:
 	GOARCH=$(GOARCH) GOOS=$(GOOS) CGO_ENABLED=$(CGO_ENABLED) \
 	go build -ldflags "$(LDFLAGS)" -a -o ack-ram-tool cmd/ack-ram-tool/main.go
 
+.PHONY: build-all
+build-all:
+	@MAKE build GOARCH=amd64 && mv ack-ram-tool bin/ack-ram-tool_amd64
+	@MAKE build GOARCH=arm64 && mv ack-ram-tool bin/ack-ram-tool_arm64
+	zip ack-ram-tool.zip bin/ack-ram-tool_*
+
+
 .PHONY: test
 test:
 	go test -race -v ./...
