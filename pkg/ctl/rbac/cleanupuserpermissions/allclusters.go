@@ -21,7 +21,7 @@ func cleanAllClusters(ctx context.Context, openAPIClient openapi.ClientInterface
 	for _, cluster := range clusters {
 		clusterId := cluster.ClusterId
 		log.Logger.Infof("---- %s (%s) ----", clusterId, cluster.Name)
-		logger := log.Named("clusterId")
+		logger := log.Named(clusterId)
 		clusterCtx := log.IntoContext(ctx, logger)
 		logger.Infof("start to cleanup bindings and permissions for cluster %s", clusterId)
 		if err := cleanOneClusterWithAccounts(clusterCtx, openAPIClient, clusterId, accounts); err != nil {

@@ -144,19 +144,20 @@ func cleanupOneCluster(ctx context.Context, bindings []binding.Binding,
 	logger.Info("will cleanup RBAC bindings as below:")
 	scanuserpermissions.OutputBindingsTable(newBindings, accounts, false)
 
-	ctlcommon.YesOrExit("Are you sure you want to cleanup these bindings?")
-
-	for _, b := range newBindings {
-		if err := removeRBACBinding(ctx, b, kube, clusterId); err != nil {
-			return err
-		}
-	}
-
 	logger.Info("will cleanup kubeconfig permissions for users as below:")
 	for _, uid := range toCleanupUids {
 		fmt.Printf("UID: %d\n", uid)
 	}
-	ctlcommon.YesOrExit("Are you sure you want to cleanup these permissions?")
+
+	ctlcommon.YesOrExit("Are you sure you want to cleanup these bindings and permissions?")
+
+	for _, b := range newBindings {
+		if err := backupRBACBinding(ctx, b, kube, clusterId); err != nil {
+			return err
+		}
+	}
+
+	//ctlcommon.YesOrExit("Are you sure you want to cleanup these permissions?")
 
 	if err := removePermissions(ctx, openAPIClient, clusterId, toCleanupUids); err != nil {
 		return err
@@ -175,6 +176,21 @@ func removePermissions(ctx context.Context, openAPIClient openapi.ClientInterfac
 			return fmt.Errorf("cleanup kubeconfig permissions for uid %d: %w", uid, err)
 		}
 		logger.Infof("finished cleanup kubeconfig permissions for uid %d", uid)
+	}
+	return nil
+}
+
+func backupRBACBinding(ctx context.Context, b binding.Binding, kube kubernetes.Interface, clusterId string) error {
+	logger := log.FromContext(ctx)
+	logger.Infof("start to backup binding %s", b.String())
+	if p, err := binding.SaveBindingToFile(ctx, clusterId, b, kube); err != nil {
+		if errors.IsNotFound(err) {
+			logger.Infof("skip binding %s which is not founds", b.String())
+			return nil
+		}
+		return fmt.Errorf("backup binding %s: %w", b.String(), err)
+	} else {
+		logger.Infof("the origin binding %s have been backed up to file %s", b.String(), p)
 	}
 	return nil
 }
