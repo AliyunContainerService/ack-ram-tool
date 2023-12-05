@@ -99,6 +99,10 @@ func scanOneCluster(ctx context.Context, openAPIClient openapi.ClientInterface, 
 		return err
 	}
 
+	if opts.userId == 0 && !opts.allUsers {
+		logger.Warn("only include deleted users, you can use --all-users to include all users")
+	}
+
 	outputTable(bindings, accounts)
 	return nil
 }

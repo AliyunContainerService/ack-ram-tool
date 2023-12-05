@@ -58,6 +58,9 @@ func scanOneClusterWithAccounts(ctx context.Context, openAPIClient openapi.Clien
 		return err
 	}
 
+	if opts.userId == 0 && !opts.allUsers {
+		logger.Warn("only include deleted users, you can use --all-users to include all users")
+	}
 	fmt.Printf("ClusterId: %s\n", clusterId)
 	outputTable(bindings, accounts)
 	return nil
