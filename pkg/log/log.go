@@ -15,15 +15,15 @@ import (
 var logLevelEncoders = map[string]zapcore.LevelEncoder{
 	"lower":        zapcore.LowercaseLevelEncoder,
 	"capital":      zapcore.CapitalLevelEncoder,
-	"color":        zapcore.LowercaseColorLevelEncoder,
-	"capitalcolor": zapcore.CapitalColorLevelEncoder,
+	"color":        lowercaseColorLevelEncoder,
+	"capitalcolor": capitalColorLevelEncoder,
 }
 
 var Logger *zap.SugaredLogger
 var (
 	DefaultLogLevel        = "INFO"
 	DefaultLogLevelKey     = "level"
-	DefaultLogLevelEncoder = "capital"
+	DefaultLogLevelEncoder = "capitalcolor"
 )
 
 const (
