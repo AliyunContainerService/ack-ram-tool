@@ -33,6 +33,7 @@ type CSClientInterface interface {
 	InstallAddon(ctx context.Context, clusterId string, addon types.ClusterAddon) error
 	ListAddons(ctx context.Context, clusterId string) ([]types.ClusterAddon, error)
 	CleanClusterUserPermissions(ctx context.Context, clusterId string, uid int64) error
+	DescribeUserClusterActivityState(ctx context.Context, clusterId string, uid int64) (*UserClusterActivityState, error)
 }
 
 func (c *Client) GetCluster(ctx context.Context, clusterId string) (*types.Cluster, error) {
@@ -262,6 +263,45 @@ func (c *Client) CleanClusterUserPermissions(ctx context.Context, clusterId stri
 	}
 	_err = tea.Convert(_body, &_result)
 	return _err
+}
+
+type UserClusterActivityState struct {
+	Active       bool   `json:"active,omitempty"`
+	LastActivity string `json:"last_activity,omitempty"`
+	LastAuditId  string `json:"last_audit_id,omitempty"`
+}
+
+type describeUserClusterActivityState struct {
+	Headers    map[string]*string `json:"headers,omitempty" xml:"headers,omitempty" require:"true"`
+	StatusCode *int32             `json:"statusCode,omitempty" xml:"statusCode,omitempty" require:"true"`
+	UserClusterActivityState
+}
+
+func (c *Client) DescribeUserClusterActivityState(ctx context.Context, clusterId string, uid int64) (*UserClusterActivityState, error) {
+	client := c.csClient
+
+	req := &openapi.OpenApiRequest{
+		Headers: make(map[string]*string),
+	}
+	params := &openapi.Params{
+		Action:      tea.String("DescribeUserClusterActivityState"),
+		Version:     tea.String("2015-12-15"),
+		Protocol:    tea.String("HTTPS"),
+		Pathname:    tea.String(fmt.Sprintf("/clusters/%s/users/%d/activity-state", clusterId, uid)),
+		Method:      tea.String("GET"),
+		AuthType:    tea.String("AK"),
+		Style:       tea.String("ROA"),
+		ReqBodyType: tea.String("json"),
+		BodyType:    tea.String("json"),
+	}
+
+	_result := &describeUserClusterActivityState{}
+	_body, _err := client.CallApi(params, req, &util.RuntimeOptions{})
+	if _err != nil {
+		return nil, _err
+	}
+	_err = tea.Convert(_body, &_result)
+	return &_result.UserClusterActivityState, _err
 }
 
 func convertDescribeClusterAddonsVersionResponse(resp *cs.DescribeClusterAddonsVersionResponse) []types.ClusterAddon {

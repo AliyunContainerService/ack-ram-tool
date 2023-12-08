@@ -148,6 +148,15 @@ func cleanupOneCluster(ctx context.Context, bindings []binding.Binding,
 	for _, uid := range toCleanupUids {
 		fmt.Printf("UID: %d\n", uid)
 	}
+	for _, uid := range toCleanupUids {
+		logger.Infof("start to check cluster audit log for user %d", uid)
+		resp, err := openAPIClient.DescribeUserClusterActivityState(ctx, clusterId, uid)
+		if err != nil {
+			logger.Errorf("check cluster audit log failed: %s", err)
+		} else if resp.Active {
+			logger.Warnf("this user is in active and last activity time is: %s", resp.LastActivity)
+		}
+	}
 
 	ctlcommon.YesOrExit("Are you sure you want to cleanup these bindings and permissions?")
 
