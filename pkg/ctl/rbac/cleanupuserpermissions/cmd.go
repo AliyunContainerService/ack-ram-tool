@@ -47,9 +47,6 @@ Examples:
 
   # cleanup RBAC permissions for all cluster and one user
   ack-ram-tool rbac cleanup-user-permissions -c all -u <uid>
-
-  # cleanup RBAC permissions for all cluster and all deleted users
-  ack-ram-tool rbac cleanup-user-permissions -c all --all-deleted-users
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		if !opts.allDeletedUsers && opts.userId == 0 {
@@ -241,6 +238,6 @@ func SetupCmd(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(cmd)
 	cmd.Flags().Uint64VarP(&opts.userId, "user-id", "u", 0, "limit user id")
 	cmd.Flags().StringVarP(&opts.clusterId, "cluster-id", "c", "", "cluster id")
-	cmd.Flags().BoolVar(&opts.allDeletedUsers, "all-deleted-users", false, "cleanup all deleted users")
+	//cmd.Flags().BoolVar(&opts.allDeletedUsers, "all-deleted-users", false, "cleanup all deleted users")
 	ctlcommon.ExitIfError(cmd.MarkFlagRequired("cluster-id"))
 }
