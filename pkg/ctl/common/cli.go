@@ -36,10 +36,7 @@ func Yes(msg string) bool {
 		Message: msg,
 	}
 	_ = survey.AskOne(prompt, &promptRet)
-	if !promptRet {
-		return false
-	}
-	return true
+	return promptRet
 }
 
 func SetupClusterIdFlag(cmd *cobra.Command) {

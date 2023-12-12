@@ -229,7 +229,7 @@ func SaveBindingToFile(ctx context.Context, dir string, b Binding, client kubern
 	}
 
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		if err := os.MkdirAll(dir, 0755); err != nil {
+		if err := os.MkdirAll(dir, 0750); err != nil {
 			return "", fmt.Errorf("mkdir %s: %w", dir, err)
 		}
 	}
@@ -238,7 +238,7 @@ func SaveBindingToFile(ctx context.Context, dir string, b Binding, client kubern
 	if err != nil {
 		return "", err
 	}
-	if err := os.WriteFile(filePath, data, 0644); err != nil {
+	if err := os.WriteFile(filePath, data, 0600); err != nil {
 		return "", err
 	}
 	return filePath, nil
