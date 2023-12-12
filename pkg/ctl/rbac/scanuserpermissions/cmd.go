@@ -71,7 +71,7 @@ func run(ctx context.Context) {
 
 func scanOneCluster(ctx context.Context, openAPIClient openapi.ClientInterface, clusterId string) error {
 	logger := log.FromContext(ctx)
-	logger.Infof("Start to scan users and bindings for cluster %s", clusterId)
+	logger.Infof("start to scan users and bindings for cluster %s", clusterId)
 	spin := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
 	spin.Start()
 
@@ -100,7 +100,7 @@ func scanOneCluster(ctx context.Context, openAPIClient openapi.ClientInterface, 
 	}
 
 	if opts.userId == 0 && !opts.allUsers {
-		logger.Warn("only include deleted users, you can use --all-users to include all users")
+		logger.Warn("by default, only deleted users are included. Use the --all-users flag to include all users")
 	}
 
 	outputTable(bindings, accounts)

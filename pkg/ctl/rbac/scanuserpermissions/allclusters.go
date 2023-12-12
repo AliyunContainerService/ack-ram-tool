@@ -13,7 +13,7 @@ import (
 )
 
 func scanAllClusters(ctx context.Context, openAPIClient openapi.ClientInterface) error {
-	log.Logger.Info("Start to scan users and bindings for all clusters")
+	log.Logger.Info("start to scan users and bindings for all clusters")
 	clusters, accounts, err := GetAllClustersAndAccountsWithSpin(ctx, openAPIClient)
 	if err != nil {
 		return err
@@ -38,7 +38,7 @@ func scanAllClusters(ctx context.Context, openAPIClient openapi.ClientInterface)
 func scanOneClusterWithAccounts(ctx context.Context, openAPIClient openapi.ClientInterface,
 	clusterId string, accounts map[int64]types.Account) error {
 	logger := log.FromContext(ctx)
-	logger.Infof("Start to scan bindings for cluster %s", clusterId)
+	logger.Infof("start to scan bindings for cluster %s", clusterId)
 	spin := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
 	spin.Start()
 
@@ -62,7 +62,7 @@ func scanOneClusterWithAccounts(ctx context.Context, openAPIClient openapi.Clien
 	}
 
 	if opts.userId == 0 && !opts.allUsers {
-		logger.Warn("only include deleted users, you can use --all-users to include all users")
+		logger.Warn("by default, only deleted users are included. Use the --all-users flag to include all users")
 	}
 	fmt.Printf("ClusterId: %s\n", clusterId)
 	outputTable(bindings, accounts)
@@ -71,7 +71,7 @@ func scanOneClusterWithAccounts(ctx context.Context, openAPIClient openapi.Clien
 
 func GetAllClustersAndAccountsWithSpin(ctx context.Context,
 	openAPIClient openapi.ClientInterface) ([]types.Cluster, map[int64]types.Account, error) {
-	log.Logger.Info("Start to get all clusters, users and roles")
+	log.Logger.Info("start to get all clusters, users and roles")
 	spin := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
 	spin.Start()
 	defer spin.Stop()

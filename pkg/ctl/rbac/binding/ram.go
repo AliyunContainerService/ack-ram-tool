@@ -2,6 +2,7 @@ package binding
 
 import (
 	"context"
+	"errors"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/openapi"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/types"
@@ -23,11 +24,19 @@ func ListAccounts(ctx context.Context, client openapi.ClientInterface) (map[int6
 		log.Logger.Errorf("list users failed: %s", err)
 		return nil, err
 	}
+	if len(users) == 0 {
+		return nil, errors.New("list users failed: No users found")
+	}
+
 	roles, err := client.ListRoles(ctx)
 	if err != nil {
 		log.Logger.Errorf("list roles failed: %s", err)
 		return nil, err
 	}
+	if len(roles) == 0 {
+		return nil, errors.New("list roles failed: No roles found")
+	}
+
 	for _, u := range users {
 		id, _ := strconv.ParseInt(u.Id, 10, 64)
 		accounts[id] = types.Account{

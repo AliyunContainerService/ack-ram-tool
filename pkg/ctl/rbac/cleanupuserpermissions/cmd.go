@@ -35,23 +35,20 @@ var opts = Option{
 
 var cmd = &cobra.Command{
 	Use:   "cleanup-user-permissions",
-	Short: "cleanup RBAC permissions for one user or all deleted users",
-	Long: `cleanup RBAC permissions for one user or all deleted users
+	Short: "clean up RBAC permissions for one user or all deleted users",
+	Long: `clean up RBAC permissions for one user or all deleted users
 
 Examples:
-  # cleanup RBAC permissions for one cluster and one user
+  # clean up RBAC permissions for one cluster and one user
   ack-ram-tool rbac cleanup-user-permissions -c <clusterId> -u <uid>
 
-  # cleanup RBAC permissions for one cluster and all deleted users
-  ack-ram-tool rbac cleanup-user-permissions -c <clusterId> --all-deleted-users
-
-  # cleanup RBAC permissions for all cluster and one user
+  # clean up RBAC permissions for all cluster and one user
   ack-ram-tool rbac cleanup-user-permissions -c all -u <uid>
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		if !opts.allDeletedUsers && opts.userId == 0 {
 			cmd.Help()
-			log.Logger.Error("flag -u/--user-id/--all-deleted-users not set")
+			log.Logger.Error("flag -u/--user-id not set")
 			return
 		}
 
@@ -76,7 +73,7 @@ func run(ctx context.Context) {
 
 func cleanOneCluster(ctx context.Context, openAPIClient openapi.ClientInterface, clusterId string) error {
 	logger := log.FromContext(ctx)
-	logger.Info("Start to scan users and bindings")
+	logger.Info("start to scan users and bindings")
 	spin := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
 	spin.Start()
 
@@ -138,10 +135,10 @@ func cleanupOneCluster(ctx context.Context, bindings []binding.Binding,
 		}
 	}
 
-	logger.Info("will cleanup RBAC bindings as below:")
+	logger.Warn("we will clean up RBAC bindings as follows:")
 	scanuserpermissions.OutputBindingsTable(newBindings, accounts, false)
 
-	logger.Info("will cleanup kubeconfig permissions for users as below:")
+	logger.Warn("we will clean up kubeconfig permissions for users as follows:")
 	for _, uid := range toCleanupUids {
 		fmt.Printf("UID: %d\n", uid)
 	}
@@ -151,11 +148,13 @@ func cleanupOneCluster(ctx context.Context, bindings []binding.Binding,
 		if err != nil {
 			logger.Errorf("check cluster audit log failed: %s", err)
 		} else if resp.Active {
-			logger.Warnf("this user is in active and last activity time is: %s", resp.LastActivity)
+			logger.Warnf("this user is active, and the last activity time was: %s", resp.LastActivity)
+		} else if !resp.Active {
+			logger.Info("no activity has been found in the cluster audit log for this user in the past 7 days")
 		}
 	}
 
-	ctlcommon.YesOrExit("Are you sure you want to cleanup these bindings and permissions?")
+	ctlcommon.YesOrExit("Are you sure you want to clean up these bindings and permissions?")
 
 	for _, b := range newBindings {
 		if err := backupRBACBinding(ctx, b, kube, clusterId); err != nil {
@@ -163,13 +162,13 @@ func cleanupOneCluster(ctx context.Context, bindings []binding.Binding,
 		}
 	}
 
-	//ctlcommon.YesOrExit("Are you sure you want to cleanup these permissions?")
+	//ctlcommon.YesOrExit("Are you sure you want to clean up these permissions?")
 
 	if err := removePermissions(ctx, openAPIClient, clusterId, toCleanupUids); err != nil {
 		return err
 	}
 
-	logger.Info("all bindings and permissions have been cleanup")
+	logger.Info("all bindings and permissions have been cleaned up")
 	return nil
 }
 
@@ -177,11 +176,11 @@ func removePermissions(ctx context.Context, openAPIClient openapi.ClientInterfac
 	clusterId string, uids []int64) error {
 	logger := log.FromContext(ctx)
 	for _, uid := range uids {
-		logger.Infof("start to cleanup kubeconfig permissions for uid %d", uid)
+		logger.Infof("start to clean up kubeconfig permissions for uid %d", uid)
 		if err := openAPIClient.CleanClusterUserPermissions(ctx, clusterId, uid); err != nil {
-			return fmt.Errorf("cleanup kubeconfig permissions for uid %d: %w", uid, err)
+			return fmt.Errorf("clean up kubeconfig permissions for uid %d: %w", uid, err)
 		}
-		logger.Infof("finished cleanup kubeconfig permissions for uid %d", uid)
+		logger.Infof("finished clean up kubeconfig permissions for uid %d", uid)
 	}
 	return nil
 }
@@ -238,6 +237,6 @@ func SetupCmd(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(cmd)
 	cmd.Flags().Uint64VarP(&opts.userId, "user-id", "u", 0, "limit user id")
 	cmd.Flags().StringVarP(&opts.clusterId, "cluster-id", "c", "", "cluster id")
-	//cmd.Flags().BoolVar(&opts.allDeletedUsers, "all-deleted-users", false, "cleanup all deleted users")
+	//cmd.Flags().BoolVar(&opts.allDeletedUsers, "all-deleted-users", false, "clean up all deleted users")
 	ctlcommon.ExitIfError(cmd.MarkFlagRequired("cluster-id"))
 }

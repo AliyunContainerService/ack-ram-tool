@@ -13,7 +13,7 @@ import (
 )
 
 func cleanAllClusters(ctx context.Context, openAPIClient openapi.ClientInterface) error {
-	log.Logger.Info("Start to scan users and bindings for all clusters")
+	log.Logger.Info("start to scan users and bindings for all clusters")
 	clusters, accounts, err := scanuserpermissions.GetAllClustersAndAccountsWithSpin(ctx, openAPIClient)
 	if err != nil {
 		return err
@@ -28,9 +28,9 @@ func cleanAllClusters(ctx context.Context, openAPIClient openapi.ClientInterface
 		}
 
 		clusterCtx := log.IntoContext(ctx, logger)
-		logger.Infof("start to cleanup bindings and permissions for cluster %s", clusterId)
+		logger.Infof("start to clean up bindings and permissions for cluster %s", clusterId)
 		if err := cleanOneClusterWithAccounts(clusterCtx, openAPIClient, clusterId, accounts); err != nil {
-			logger.Errorf("cleanup bindings and permissions for cluster %s failed: %s", clusterId, err)
+			logger.Errorf("clean up bindings and permissions for cluster %s failed: %s", clusterId, err)
 		}
 	}
 	return nil
@@ -39,7 +39,7 @@ func cleanAllClusters(ctx context.Context, openAPIClient openapi.ClientInterface
 func cleanOneClusterWithAccounts(ctx context.Context, openAPIClient openapi.ClientInterface,
 	clusterId string, accounts map[int64]types.Account) error {
 	logger := log.FromContext(ctx)
-	logger.Info("Start to scan users and bindings")
+	logger.Info("start to scan users and bindings")
 	spin := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
 	spin.Start()
 
