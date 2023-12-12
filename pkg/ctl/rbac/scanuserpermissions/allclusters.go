@@ -12,8 +12,6 @@ import (
 	"time"
 )
 
-var noKubeconfigClusterState = []types.ClusterState{}
-
 func scanAllClusters(ctx context.Context, openAPIClient openapi.ClientInterface) error {
 	log.Logger.Info("Start to scan users and bindings for all clusters")
 	clusters, accounts, err := GetAllClustersAndAccountsWithSpin(ctx, openAPIClient)
@@ -24,6 +22,11 @@ func scanAllClusters(ctx context.Context, openAPIClient openapi.ClientInterface)
 		clusterId := cluster.ClusterId
 		log.Logger.Infof("---- %s (%s) ----", clusterId, cluster.Name)
 		logger := log.Named(clusterId)
+		if cluster.State.NoActiveApiServer() {
+			logger.Errorf("invalid cluster state (%s), skip it", cluster.State)
+			continue
+		}
+
 		clusterCtx := log.IntoContext(ctx, logger)
 		if err := scanOneClusterWithAccounts(clusterCtx, openAPIClient, clusterId, accounts); err != nil {
 			logger.Errorf("scan bindings for cluster %s failed: %s", clusterId, err)

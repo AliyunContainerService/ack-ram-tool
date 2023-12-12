@@ -12,7 +12,31 @@ type ClusterType string
 type ClusterState string
 type ClusterTaskState string
 
-var ClusterStateRunning ClusterState = "running"
+var (
+	ClusterStateRunning       ClusterState = "running"
+	ClusterStateDeleting      ClusterState = "deleting"
+	ClusterStateDeleted       ClusterState = "deleted"
+	ClusterStateDeleteFailed  ClusterState = "delete_failed"
+	ClusterStateFailed        ClusterState = "failed"
+	ClusterStateWaiting       ClusterState = "waiting"
+	ClusterStateDisconnected  ClusterState = "disconnected"
+	ClusterStateInitial       ClusterState = "initial"
+	ClusterStateCreateTimeout ClusterState = "create_timeout"
+	ClusterStateUnavailable   ClusterState = "unavailable"
+)
+
+var noActiveApiserverStates = []ClusterState{
+	ClusterStateDeleting,
+	ClusterStateDeleted,
+	ClusterStateDeleteFailed,
+	ClusterStateFailed,
+	ClusterStateWaiting,
+	ClusterStateDisconnected,
+	ClusterStateInitial,
+	ClusterStateCreateTimeout,
+	ClusterStateUnavailable,
+}
+
 var ClusterTypeManagedKubernetes ClusterType = "ManagedKubernetes"
 var (
 	ClusterTaskStateSuccess  ClusterTaskState = "success"
@@ -69,6 +93,15 @@ func (s ClusterTaskState) IsNotSuccess() bool {
 
 func (s ClusterState) IsRunning() bool {
 	return s == ClusterStateRunning
+}
+
+func (s ClusterState) NoActiveApiServer() bool {
+	for _, item := range noActiveApiserverStates {
+		if s == item {
+			return true
+		}
+	}
+	return false
 }
 
 type ClusterLog struct {
