@@ -62,5 +62,5 @@ func cleanOneClusterWithAccounts(ctx context.Context, openAPIClient openapi.Clie
 		return err
 	}
 
-	return cleanupOneCluster(ctx, bindings, accounts, kubeClient, openAPIClient, clusterId)
+	return cleanupOneCluster(ctx, bindings, accounts, kubeClient, openAPIClient, clusterId, true)
 }

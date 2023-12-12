@@ -32,7 +32,7 @@ type CSClientInterface interface {
 	GetAddonStatus(ctx context.Context, clusterId string, name string) (*types.ClusterAddon, error)
 	InstallAddon(ctx context.Context, clusterId string, addon types.ClusterAddon) error
 	ListAddons(ctx context.Context, clusterId string) ([]types.ClusterAddon, error)
-	CleanClusterUserPermissions(ctx context.Context, clusterId string, uid int64) error
+	CleanClusterUserPermissions(ctx context.Context, clusterId string, uid int64, force bool) error
 	DescribeUserClusterActivityState(ctx context.Context, clusterId string, uid int64) (*UserClusterActivityState, error)
 }
 
@@ -238,11 +238,16 @@ type cleanClusterUserPermissions struct {
 	StatusCode *int32             `json:"statusCode,omitempty" xml:"statusCode,omitempty" require:"true"`
 }
 
-func (c *Client) CleanClusterUserPermissions(ctx context.Context, clusterId string, uid int64) error {
+func (c *Client) CleanClusterUserPermissions(ctx context.Context, clusterId string, uid int64, force bool) error {
 	client := c.csClient
 
 	req := &openapi.OpenApiRequest{
 		Headers: make(map[string]*string),
+	}
+	if force {
+		req.Query = map[string]*string{
+			"Force": tea.String("true"),
+		}
 	}
 	params := &openapi.Params{
 		Action:      tea.String("CleanClusterUserPermissions"),
@@ -272,9 +277,9 @@ type UserClusterActivityState struct {
 }
 
 type describeUserClusterActivityState struct {
-	Headers    map[string]*string `json:"headers,omitempty" xml:"headers,omitempty" require:"true"`
-	StatusCode *int32             `json:"statusCode,omitempty" xml:"statusCode,omitempty" require:"true"`
-	UserClusterActivityState
+	Headers    map[string]*string        `json:"headers,omitempty" xml:"headers,omitempty" require:"true"`
+	StatusCode *int32                    `json:"statusCode,omitempty" xml:"statusCode,omitempty" require:"true"`
+	Body       *UserClusterActivityState `json:"body,omitempty"`
 }
 
 func (c *Client) DescribeUserClusterActivityState(ctx context.Context, clusterId string, uid int64) (*UserClusterActivityState, error) {
@@ -301,7 +306,7 @@ func (c *Client) DescribeUserClusterActivityState(ctx context.Context, clusterId
 		return nil, _err
 	}
 	_err = tea.Convert(_body, &_result)
-	return &_result.UserClusterActivityState, _err
+	return _result.Body, _err
 }
 
 func convertDescribeClusterAddonsVersionResponse(resp *cs.DescribeClusterAddonsVersionResponse) []types.ClusterAddon {

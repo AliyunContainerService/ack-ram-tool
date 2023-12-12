@@ -27,6 +27,21 @@ func YesOrExit(msg string) {
 	}
 }
 
+func Yes(msg string) bool {
+	if ctl.GlobalOption.AssumeYes {
+		return true
+	}
+	var promptRet bool
+	prompt := &survey.Confirm{
+		Message: msg,
+	}
+	_ = survey.AskOne(prompt, &promptRet)
+	if !promptRet {
+		return false
+	}
+	return true
+}
+
 func SetupClusterIdFlag(cmd *cobra.Command) {
 	cmd.Flags().StringVarP(
 		&ctl.GlobalOption.ClusterId, "cluster-id", "c", "", "The cluster id to use")

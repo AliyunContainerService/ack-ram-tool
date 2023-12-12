@@ -46,11 +46,11 @@ Examples:
   ack-ram-tool rbac cleanup-user-permissions -c all -u <uid>
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		if !opts.allDeletedUsers && opts.userId == 0 {
-			cmd.Help()
-			log.Logger.Error("flag -u/--user-id not set")
-			return
-		}
+		//if !opts.allDeletedUsers && opts.userId == 0 {
+		//	cmd.Help()
+		//	log.Logger.Error("flag -u/--user-id not set")
+		//	return
+		//}
 
 		ctx := ctlcommon.SetupSignalHandler(context.Background())
 		run(ctx)
@@ -101,12 +101,13 @@ func cleanOneCluster(ctx context.Context, openAPIClient openapi.ClientInterface,
 		return err
 	}
 
-	return cleanupOneCluster(ctx, bindings, accounts, kubeClient, openAPIClient, clusterId)
+	return cleanupOneCluster(ctx, bindings, accounts, kubeClient, openAPIClient, clusterId, false)
 }
 
 func cleanupOneCluster(ctx context.Context, bindings []binding.Binding,
-	accounts map[int64]types.Account, kube kubernetes.Interface, openAPIClient openapi.ClientInterface,
-	clusterId string) error {
+	accounts map[int64]types.Account, kube kubernetes.Interface,
+	openAPIClient openapi.ClientInterface,
+	clusterId string, allowSkip bool) error {
 	var newBindings []binding.Binding
 	var toCleanupUids []int64
 	logger := log.FromContext(ctx)
@@ -134,6 +135,18 @@ func cleanupOneCluster(ctx context.Context, bindings []binding.Binding,
 			toCleanupUidsDup[b.AliUid] = true
 		}
 	}
+	for id, acc := range accounts {
+		if opts.userId != 0 && id != int64(opts.userId) {
+			continue
+		}
+		if opts.allDeletedUsers && !acc.Deleted() {
+			continue
+		}
+		if _, ok := toCleanupUidsDup[id]; !ok {
+			toCleanupUids = append(toCleanupUids, id)
+			toCleanupUidsDup[id] = true
+		}
+	}
 
 	logger.Warn("we will clean up RBAC bindings as follows:")
 	scanuserpermissions.OutputBindingsTable(newBindings, accounts, false)
@@ -154,7 +167,13 @@ func cleanupOneCluster(ctx context.Context, bindings []binding.Binding,
 		}
 	}
 
-	ctlcommon.YesOrExit("Are you sure you want to clean up these bindings and permissions?")
+	confirm := "Are you sure you want to clean up these bindings and permissions?"
+	if !allowSkip {
+		ctlcommon.YesOrExit(confirm)
+	} else if !ctlcommon.Yes(confirm) {
+		logger.Warn("we will skip this cluster!")
+		return nil
+	}
 
 	for _, b := range newBindings {
 		if err := backupRBACBinding(ctx, b, kube, clusterId); err != nil {
@@ -177,7 +196,7 @@ func removePermissions(ctx context.Context, openAPIClient openapi.ClientInterfac
 	logger := log.FromContext(ctx)
 	for _, uid := range uids {
 		logger.Infof("start to clean up kubeconfig permissions for uid %d", uid)
-		if err := openAPIClient.CleanClusterUserPermissions(ctx, clusterId, uid); err != nil {
+		if err := openAPIClient.CleanClusterUserPermissions(ctx, clusterId, uid, true); err != nil {
 			return fmt.Errorf("clean up kubeconfig permissions for uid %d: %w", uid, err)
 		}
 		logger.Infof("finished clean up kubeconfig permissions for uid %d", uid)
@@ -239,4 +258,5 @@ func SetupCmd(rootCmd *cobra.Command) {
 	cmd.Flags().StringVarP(&opts.clusterId, "cluster-id", "c", "", "cluster id")
 	//cmd.Flags().BoolVar(&opts.allDeletedUsers, "all-deleted-users", false, "clean up all deleted users")
 	ctlcommon.ExitIfError(cmd.MarkFlagRequired("cluster-id"))
+	ctlcommon.ExitIfError(cmd.MarkFlagRequired("user-id"))
 }
