@@ -6,6 +6,7 @@ import (
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/rbac/scanuserpermissions"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
 	"github.com/briandowns/spinner"
+	"github.com/fatih/color"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"time"
 
@@ -161,7 +162,9 @@ func cleanupOneCluster(ctx context.Context, bindings []binding.Binding,
 		if err != nil {
 			logger.Errorf("check cluster audit log failed: %s", err)
 		} else if resp.Active {
-			logger.Warnf("this user is active, and the last activity time was: %s", resp.LastActivity)
+			warn := color.RedString("this user has been active in the past 7 days, and the last activity time was: %s", resp.LastLocalActivity())
+			logger.Warnf("%s. You will find the relevant audit log details below:\nsls project: %s\nsls logstore: %s\nlast activity: %s (auditID: %s)",
+				warn, resp.LogProjectName, resp.LogStoreName, resp.LastLocalActivity(), resp.LastAuditId)
 		} else if !resp.Active {
 			logger.Info("no activity has been found in the cluster audit log for this user in the past 7 days")
 		}

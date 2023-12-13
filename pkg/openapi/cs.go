@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"strings"
 	"time"
 
@@ -271,9 +272,17 @@ func (c *Client) CleanClusterUserPermissions(ctx context.Context, clusterId stri
 }
 
 type UserClusterActivityState struct {
-	Active       bool   `json:"active,omitempty"`
-	LastActivity string `json:"last_activity,omitempty"`
-	LastAuditId  string `json:"last_audit_id,omitempty"`
+	LogProjectName string `json:"log_project_name,omitempty"`
+	LogStoreName   string `json:"log_store_name,omitempty"`
+	LogQueryExp    string `json:"log_query_exp,omitempty"`
+
+	Active       bool         `json:"active"`
+	LastActivity *metav1.Time `json:"last_activity,omitempty"`
+	LastAuditId  string       `json:"last_audit_id,omitempty"`
+}
+
+func (s UserClusterActivityState) LastLocalActivity() string {
+	return s.LastActivity.Local().Format(time.RFC3339)
 }
 
 type describeUserClusterActivityState struct {
