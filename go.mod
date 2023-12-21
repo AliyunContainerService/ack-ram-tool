@@ -11,7 +11,7 @@ require (
 	github.com/alibabacloud-go/ram-20150501 v1.0.2
 	github.com/alibabacloud-go/sts-20150401 v1.1.0
 	github.com/alibabacloud-go/tea v1.2.1
-	github.com/aliyun/alibaba-cloud-sdk-go v1.62.156
+	github.com/aliyun/alibaba-cloud-sdk-go v1.62.642
 	github.com/aliyun/credentials-go v1.3.0
 	github.com/briandowns/spinner v1.23.0
 	github.com/fatih/color v1.16.0
@@ -29,6 +29,7 @@ require (
 require (
 	github.com/alibabacloud-go/openapi-util v0.1.0
 	github.com/alibabacloud-go/tea-utils v1.4.5
+	github.com/alibabacloud-go/tea-utils/v2 v2.0.1
 	github.com/go-logr/zapr v1.2.4
 	github.com/olekukonko/tablewriter v0.0.6-0.20230925090304-df64c4bbad77
 	go.uber.org/zap v1.26.0
@@ -39,7 +40,6 @@ require (
 	github.com/alibabacloud-go/alibabacloud-gateway-spi v0.0.4 // indirect
 	github.com/alibabacloud-go/debug v0.0.0-20190504072949-9472017b5c68 // indirect
 	github.com/alibabacloud-go/endpoint-util v1.1.0 // indirect
-	github.com/alibabacloud-go/tea-utils/v2 v2.0.1 // indirect
 	github.com/alibabacloud-go/tea-xml v1.1.2 // indirect
 	github.com/clbanning/mxj/v2 v2.5.6 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
