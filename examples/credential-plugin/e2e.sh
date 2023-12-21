@@ -17,12 +17,28 @@ function get_kubeconfig() {
   bar_tip "get kubeconfig"
 
   ack-ram-tool credential-plugin get-kubeconfig -m ${MODE} --cluster-id ${CLUSTER_ID} > ${KUBECONFIG_PATH}
+
+  if echo ${MODE} |grep token; then
+    Arn=$(aliyun sts GetCallerIdentity | jq .Arn -r)
+    UserId=$(aliyun sts GetCallerIdentity | jq .UserId -r)
+    ack-ram-tool credential-plugin get-kubeconfig --cluster-id ${CLUSTER_ID} > ${KUBECONFIG_PATH}.crt.yaml
+    cat <<EOF | kubectl --kubeconfig=${KUBECONFIG_PATH}.crt.yaml apply -f -
+apiVersion: ramauthenticator.k8s.alibabacloud/v1alpha1
+kind: RAMIdentityMapping
+metadata:
+  name: "${UserId}"
+spec:
+  arn: ${Arn}
+  username: "${UserId}"
+EOF
+  fi
 }
 
 function exec_auth() {
   bar_tip "exec auth plugin"
 
   kubectl --kubeconfig=${KUBECONFIG_PATH} get ns
+  kubectl --kubeconfig=${KUBECONFIG_PATH} auth whoami
 }
 
 function cleanup() {
@@ -30,6 +46,7 @@ function cleanup() {
   bar_tip "cleanup"
 
   rm ${KUBECONFIG_PATH}
+  rm ${KUBECONFIG_PATH}.crt.yaml
   rm ${CACHE_DIR}/*
   rm -r ${CACHE_DIR}
 
