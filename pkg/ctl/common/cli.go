@@ -1,7 +1,10 @@
 package common
 
 import (
+	"context"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
@@ -24,6 +27,18 @@ func YesOrExit(msg string) {
 	}
 }
 
+func Yes(msg string) bool {
+	if ctl.GlobalOption.AssumeYes {
+		return true
+	}
+	var promptRet bool
+	prompt := &survey.Confirm{
+		Message: msg,
+	}
+	_ = survey.AskOne(prompt, &promptRet)
+	return promptRet
+}
+
 func SetupClusterIdFlag(cmd *cobra.Command) {
 	cmd.Flags().StringVarP(
 		&ctl.GlobalOption.ClusterId, "cluster-id", "c", "", "The cluster id to use")
@@ -32,4 +47,13 @@ func SetupClusterIdFlag(cmd *cobra.Command) {
 	cmd.Flags().StringVar(
 		&ctl.GlobalOption.FinalAssumeRoleAnotherRoleArn, "role-arn", "",
 		"Assume an RAM Role ARN when send request or sign token")
+}
+
+func SetupSignalHandler(parentCtx context.Context) context.Context {
+	ctx, cancel := signal.NotifyContext(parentCtx, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-ctx.Done()
+		cancel()
+	}()
+	return ctx
 }

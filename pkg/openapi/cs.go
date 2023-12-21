@@ -4,11 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"strings"
 	"time"
 
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/types"
 	cs "github.com/alibabacloud-go/cs-20151215/v3/client"
+	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
+	util "github.com/alibabacloud-go/tea-utils/v2/service"
 	"github.com/alibabacloud-go/tea/tea"
 	"gopkg.in/yaml.v3"
 )
@@ -23,11 +26,15 @@ type CSClientInterface interface {
 	UpdateCluster(ctx context.Context, clusterId string, opt UpdateClusterOption) (*types.ClusterTask, error)
 	GetTask(ctx context.Context, taskId string) (*types.ClusterTask, error)
 	GetUserKubeConfig(ctx context.Context, clusterId string, privateIpAddress bool, temporaryDuration time.Duration) (*types.KubeConfig, error)
+	// XXXDeprecated: use ListClustersV1 instead
 	ListClusters(ctx context.Context) ([]types.Cluster, error)
+	ListClustersV1(ctx context.Context) ([]types.Cluster, error)
 	GetAddonMetaData(ctx context.Context, clusterId string, name string) (*types.ClusterAddon, error)
 	GetAddonStatus(ctx context.Context, clusterId string, name string) (*types.ClusterAddon, error)
 	InstallAddon(ctx context.Context, clusterId string, addon types.ClusterAddon) error
 	ListAddons(ctx context.Context, clusterId string) ([]types.ClusterAddon, error)
+	CleanClusterUserPermissions(ctx context.Context, clusterId string, uid int64, force bool) error
+	DescribeUserClusterActivityState(ctx context.Context, clusterId string, uid int64) (*UserClusterActivityState, error)
 }
 
 func (c *Client) GetCluster(ctx context.Context, clusterId string) (*types.Cluster, error) {
@@ -41,6 +48,7 @@ func (c *Client) GetCluster(ctx context.Context, clusterId string) (*types.Clust
 	return cluster, nil
 }
 
+// XXXDeprecated: use ListClustersV1 instead
 func (c *Client) ListClusters(ctx context.Context) ([]types.Cluster, error) {
 	client := c.csClient
 	resp, err := client.DescribeClusters(&cs.DescribeClustersRequest{})
@@ -49,6 +57,41 @@ func (c *Client) ListClusters(ctx context.Context) ([]types.Cluster, error) {
 	}
 
 	return convertDescribeClustersResponse(resp), nil
+}
+
+func (c *Client) ListClustersV1(ctx context.Context) ([]types.Cluster, error) {
+	client := c.csClient
+	var ret []types.Cluster
+	pageNumber := int64(1)
+
+	for {
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		default:
+		}
+
+		resp, err := client.DescribeClustersV1(&cs.DescribeClustersV1Request{
+			ClusterSpec: nil,
+			ClusterType: nil,
+			Name:        nil,
+			PageNumber:  tea.Int64(pageNumber),
+			//PageSize:    tea.Int64(),
+			Profile:  nil,
+			RegionId: nil,
+		})
+		if err != nil {
+			return nil, err
+		}
+		clusters := convertDescribeClustersV1Response(resp)
+		if len(clusters) == 0 {
+			break
+		}
+		ret = append(ret, clusters...)
+		pageNumber++
+	}
+
+	return ret, nil
 }
 
 func (c *Client) UpdateCluster(ctx context.Context, clusterId string, opt UpdateClusterOption) (*types.ClusterTask, error) {
@@ -191,6 +234,90 @@ func (c *Client) ListAddons(ctx context.Context, clusterId string) ([]types.Clus
 	return addons, nil
 }
 
+type cleanClusterUserPermissions struct {
+	Headers    map[string]*string `json:"headers,omitempty" xml:"headers,omitempty" require:"true"`
+	StatusCode *int32             `json:"statusCode,omitempty" xml:"statusCode,omitempty" require:"true"`
+}
+
+func (c *Client) CleanClusterUserPermissions(ctx context.Context, clusterId string, uid int64, force bool) error {
+	client := c.csClient
+
+	req := &openapi.OpenApiRequest{
+		Headers: make(map[string]*string),
+	}
+	if force {
+		req.Query = map[string]*string{
+			"Force": tea.String("true"),
+		}
+	}
+	params := &openapi.Params{
+		Action:      tea.String("CleanClusterUserPermissions"),
+		Version:     tea.String("2015-12-15"),
+		Protocol:    tea.String("HTTPS"),
+		Pathname:    tea.String(fmt.Sprintf("/cluster/%s/user/%d/permissions", clusterId, uid)),
+		Method:      tea.String("DELETE"),
+		AuthType:    tea.String("AK"),
+		Style:       tea.String("ROA"),
+		ReqBodyType: tea.String("json"),
+		BodyType:    tea.String("none"),
+	}
+
+	_result := &cleanClusterUserPermissions{}
+	_body, _err := client.CallApi(params, req, &util.RuntimeOptions{})
+	if _err != nil {
+		return _err
+	}
+	_err = tea.Convert(_body, &_result)
+	return _err
+}
+
+type UserClusterActivityState struct {
+	LogProjectName string `json:"log_project_name,omitempty"`
+	LogStoreName   string `json:"log_store_name,omitempty"`
+	LogQueryExp    string `json:"log_query_exp,omitempty"`
+
+	Active       bool         `json:"active"`
+	LastActivity *metav1.Time `json:"last_activity,omitempty"`
+	LastAuditId  string       `json:"last_audit_id,omitempty"`
+}
+
+func (s UserClusterActivityState) LastLocalActivity() string {
+	return s.LastActivity.Local().Format(time.RFC3339)
+}
+
+type describeUserClusterActivityState struct {
+	Headers    map[string]*string        `json:"headers,omitempty" xml:"headers,omitempty" require:"true"`
+	StatusCode *int32                    `json:"statusCode,omitempty" xml:"statusCode,omitempty" require:"true"`
+	Body       *UserClusterActivityState `json:"body,omitempty"`
+}
+
+func (c *Client) DescribeUserClusterActivityState(ctx context.Context, clusterId string, uid int64) (*UserClusterActivityState, error) {
+	client := c.csClient
+
+	req := &openapi.OpenApiRequest{
+		Headers: make(map[string]*string),
+	}
+	params := &openapi.Params{
+		Action:      tea.String("DescribeUserClusterActivityState"),
+		Version:     tea.String("2015-12-15"),
+		Protocol:    tea.String("HTTPS"),
+		Pathname:    tea.String(fmt.Sprintf("/clusters/%s/users/%d/activity-state", clusterId, uid)),
+		Method:      tea.String("GET"),
+		AuthType:    tea.String("AK"),
+		Style:       tea.String("ROA"),
+		ReqBodyType: tea.String("json"),
+		BodyType:    tea.String("json"),
+	}
+
+	_result := &describeUserClusterActivityState{}
+	_body, _err := client.CallApi(params, req, &util.RuntimeOptions{})
+	if _err != nil {
+		return nil, _err
+	}
+	_err = tea.Convert(_body, &_result)
+	return _result.Body, _err
+}
+
 func convertDescribeClusterAddonsVersionResponse(resp *cs.DescribeClusterAddonsVersionResponse) []types.ClusterAddon {
 	body := resp.Body
 	if body == nil {
@@ -256,6 +383,29 @@ func convertDescribeClustersResponse(resp *cs.DescribeClustersResponse) []types.
 	}
 	var clusters []types.Cluster
 	for _, item := range body {
+		c := types.Cluster{}
+		c.ClusterId = tea.StringValue(item.ClusterId)
+		c.ClusterType = types.ClusterType(tea.StringValue(item.ClusterType))
+		c.Name = tea.StringValue(item.Name)
+		c.RegionId = tea.StringValue(item.RegionId)
+		c.State = types.ClusterState(tea.StringValue(item.State))
+
+		metadata := &types.ClusterMetaData{}
+		_ = json.Unmarshal([]byte(tea.StringValue(item.MetaData)), metadata)
+		c.MetaData = *metadata
+		clusters = append(clusters, c)
+	}
+
+	return clusters
+}
+
+func convertDescribeClustersV1Response(resp *cs.DescribeClustersV1Response) []types.Cluster {
+	body := resp.Body
+	if body == nil {
+		return nil
+	}
+	var clusters []types.Cluster
+	for _, item := range body.Clusters {
 		c := types.Cluster{}
 		c.ClusterId = tea.StringValue(item.ClusterId)
 		c.ClusterType = types.ClusterType(tea.StringValue(item.ClusterType))

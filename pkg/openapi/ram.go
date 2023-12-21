@@ -19,6 +19,8 @@ type RamClientInterface interface {
 	GetPolicy(ctx context.Context, name, policyType string) (*types.RamPolicy, error)
 	CreatePolicy(ctx context.Context, policy types.RamPolicy) (*types.RamPolicy, error)
 	AttachPolicyToRole(ctx context.Context, policyName, policyType, roleName string) error
+	ListUsers(ctx context.Context) ([]types.RamUser, error)
+	ListRoles(ctx context.Context) ([]types.RamRole, error)
 }
 
 func (c *Client) GetRole(ctx context.Context, name string) (*types.RamRole, error) {
@@ -293,9 +295,137 @@ func convertCreateRamPolicyResponse(r *types.RamPolicy, resp *ram.CreatePolicyRe
 	r.Description = tea.StringValue(p.Description)
 }
 
+func (c *Client) ListUsers(ctx context.Context) ([]types.RamUser, error) {
+	var users []types.RamUser
+	var marker string
+	for {
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		default:
+		}
+
+		req := &ram.ListUsersRequest{
+			Marker:   nil,
+			MaxItems: tea.Int32(1000),
+		}
+		if marker != "" {
+			req.Marker = tea.String(marker)
+		}
+		resp, err := c.ramClient.ListUsers(req)
+		if err != nil {
+			return nil, err
+		}
+		items := convertListUsersResponse(resp)
+		users = append(users, items...)
+		if resp.Body != nil {
+			if !tea.BoolValue(resp.Body.IsTruncated) {
+				break
+			}
+			marker = tea.StringValue(resp.Body.Marker)
+		}
+	}
+	return users, nil
+}
+
+func (c *Client) ListRoles(ctx context.Context) ([]types.RamRole, error) {
+	var roles []types.RamRole
+	var marker string
+	for {
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		default:
+		}
+
+		req := &ram.ListRolesRequest{
+			Marker:   nil,
+			MaxItems: tea.Int32(1000),
+		}
+		if marker != "" {
+			req.Marker = tea.String(marker)
+		}
+		resp, err := c.ramClient.ListRoles(req)
+		if err != nil {
+			return nil, err
+		}
+		items := convertListRolesResponse(resp)
+		roles = append(roles, items...)
+		if resp.Body != nil {
+			if !tea.BoolValue(resp.Body.IsTruncated) {
+				break
+			}
+			marker = tea.StringValue(resp.Body.Marker)
+		}
+	}
+	return roles, nil
+}
+
+func convertListUsersResponse(resp *ram.ListUsersResponse) []types.RamUser {
+	body := resp.Body
+	if body == nil {
+		return nil
+	}
+	p := body.Users
+	if p == nil {
+		return nil
+	}
+	us := p.User
+	if us == nil {
+		return nil
+	}
+
+	var ret []types.RamUser
+	for _, u := range us {
+		ret = append(ret, types.RamUser{
+			Id:          tea.StringValue(u.UserId),
+			Name:        tea.StringValue(u.UserName),
+			DisplayName: tea.StringValue(u.DisplayName),
+			Deleted:     false,
+		})
+	}
+
+	return ret
+}
+
+func convertListRolesResponse(resp *ram.ListRolesResponse) []types.RamRole {
+	body := resp.Body
+	if body == nil {
+		return nil
+	}
+	p := body.Roles
+	if p == nil {
+		return nil
+	}
+	us := p.Role
+	if us == nil {
+		return nil
+	}
+
+	var ret []types.RamRole
+	for _, u := range us {
+		ret = append(ret, types.RamRole{
+			RoleId:                   tea.StringValue(u.RoleId),
+			RoleName:                 tea.StringValue(u.RoleName),
+			Arn:                      tea.StringValue(u.Arn),
+			Description:              tea.StringValue(u.Description),
+			AssumeRolePolicyDocument: nil,
+			MaxSessionDuration:       tea.Int64Value(u.MaxSessionDuration),
+			Deleted:                  false,
+		})
+	}
+
+	return ret
+}
+
 func IsRamRoleNotExistErr(err error) bool {
 	return isSdkErrWithCode(err, "EntityNotExist.Role")
 }
+
+func IsRamUserNotExistErr(err error) bool {
+	return isSdkErrWithCode(err, "EntityNotExist.User")
+}
+
 func IsRamPolicyNotExistErr(err error) bool {
 	return isSdkErrWithCode(err, "EntityNotExist.Policy")
 }

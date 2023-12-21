@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/utils"
@@ -20,6 +21,21 @@ var (
 	RamPolicyTypeCustom = "Custom"
 )
 
+type AccountType string
+
+const (
+	AccountTypeRoot AccountType = "Root"
+	AccountTypeUser AccountType = "RamUser"
+	AccountTypeRole AccountType = "RamRole"
+)
+
+type Account struct {
+	Type    AccountType
+	RootUId string
+	User    RamUser
+	Role    RamRole
+}
+
 type RamRole struct {
 	RoleName                 string
 	RoleId                   string
@@ -27,6 +43,14 @@ type RamRole struct {
 	Description              string
 	AssumeRolePolicyDocument *RamPolicyDocument
 	MaxSessionDuration       int64
+	Deleted                  bool
+}
+
+type RamUser struct {
+	Id          string
+	Name        string
+	DisplayName string
+	Deleted     bool
 }
 
 type RamPolicy struct {
@@ -178,4 +202,80 @@ func (s *RamPolicyStatement) Equal(another RamPolicyStatement) bool {
 func (s *RamPolicyStatement) JSON() string {
 	data, _ := json.Marshal(s)
 	return string(data)
+}
+
+func (a Account) Id() string {
+	switch a.Type {
+	case AccountTypeUser:
+		return a.User.Id
+	case AccountTypeRole:
+		return a.Role.RoleId
+	}
+	return ""
+}
+func (a Account) Name() string {
+	switch a.Type {
+	case AccountTypeUser:
+		return a.User.Name
+	case AccountTypeRole:
+		return a.Role.RoleName
+	}
+	return ""
+}
+
+func (a Account) Deleted() bool {
+	switch a.Type {
+	case AccountTypeUser:
+		return a.User.Deleted
+	case AccountTypeRole:
+		return a.Role.Deleted
+	}
+	return false
+}
+
+func NewRootAccount(uid int64) Account {
+	idStr := fmt.Sprintf("%d", uid)
+	return Account{
+		RootUId: idStr,
+		Type:    AccountTypeRoot,
+		User: RamUser{
+			Id: idStr,
+		},
+	}
+}
+
+func NewFakeAccount(uid int64) Account {
+	idStr := fmt.Sprintf("%d", uid)
+	acc := Account{}
+	switch {
+	case strings.HasPrefix(idStr, "1"), strings.HasPrefix(idStr, "5"):
+		acc.Type = AccountTypeRoot
+		acc.User = RamUser{
+			Id: idStr,
+		}
+	case strings.HasPrefix(idStr, "2"):
+		acc.Type = AccountTypeUser
+		acc.User = RamUser{
+			Id: idStr,
+		}
+	case strings.HasPrefix(idStr, "3"):
+		acc.Type = AccountTypeRole
+		acc.Role = RamRole{
+			RoleId: idStr,
+		}
+	}
+	return acc
+}
+
+func (a *Account) MarkDeleted() {
+	switch a.Type {
+	case AccountTypeUser:
+		u := a.User
+		u.Deleted = true
+		a.User = u
+	case AccountTypeRole:
+		r := a.Role
+		r.Deleted = true
+		a.Role = r
+	}
 }

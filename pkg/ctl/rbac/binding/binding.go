@@ -1,8 +1,12 @@
-package scanuserpermissions
+package binding
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
+	"os"
+	"path"
 	"regexp"
 	"sort"
 	"strconv"
@@ -13,11 +17,11 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-type BindingKind string
+type Kind string
 
 var (
-	BindingKindRoleBinding        BindingKind = "RoleBinding"
-	BindingKindClusterRoleBinding BindingKind = "ClusterRoleBinding"
+	KindRoleBinding        Kind = "RoleBinding"
+	KindClusterRoleBinding Kind = "ClusterRoleBinding"
 )
 
 type RawBindings struct {
@@ -26,6 +30,7 @@ type RawBindings struct {
 }
 
 var errInvalidName = errors.New("invalid name")
+var regexAliUserIdentity = regexp.MustCompile(`^(\d+)(-\d+)?$`)
 
 func (bs *RawBindings) AliUserBindings() RawBindings {
 	filtered := RawBindings{}
@@ -43,10 +48,11 @@ func (bs *RawBindings) AliUserBindings() RawBindings {
 }
 
 type Binding struct {
-	Kind        BindingKind
+	Kind        Kind
 	Name        string
+	Namespace   string
 	SubjectName string
-	AliUid      int
+	AliUid      int64
 }
 
 func (bs *RawBindings) SortByUid() []Binding {
@@ -54,8 +60,9 @@ func (bs *RawBindings) SortByUid() []Binding {
 	for _, b := range bs.RoleBindings {
 		for _, sub := range b.Subjects {
 			bindList = append(bindList, Binding{
-				Kind:        BindingKindRoleBinding,
+				Kind:        KindRoleBinding,
 				Name:        b.Name,
+				Namespace:   b.Namespace,
 				SubjectName: sub.Name,
 				AliUid:      0,
 			})
@@ -64,8 +71,9 @@ func (bs *RawBindings) SortByUid() []Binding {
 	for _, b := range bs.ClusterRoleBindings {
 		for _, sub := range b.Subjects {
 			bindList = append(bindList, Binding{
-				Kind:        BindingKindClusterRoleBinding,
+				Kind:        KindClusterRoleBinding,
 				Name:        b.Name,
+				Namespace:   b.Namespace,
 				SubjectName: sub.Name,
 				AliUid:      0,
 			})
@@ -86,18 +94,18 @@ func (bs *RawBindings) SortByUid() []Binding {
 	return bindList
 }
 
-func listBindings(ctx context.Context, kube kubernetes.Interface) (*RawBindings, error) {
-	rolebindings, err := listRoleBindings(ctx, kube)
+func ListBindings(ctx context.Context, kube kubernetes.Interface) (*RawBindings, error) {
+	roleBindings, err := listRoleBindings(ctx, kube)
 	if err != nil {
 		return nil, err
 	}
-	clusterroleBindings, err := listClusterRoleBindings(ctx, kube)
+	clusterRoleBindings, err := listClusterRoleBindings(ctx, kube)
 	if err != nil {
 		return nil, err
 	}
 	return &RawBindings{
-		RoleBindings:        rolebindings.Items,
-		ClusterRoleBindings: clusterroleBindings.Items,
+		RoleBindings:        roleBindings.Items,
+		ClusterRoleBindings: clusterRoleBindings.Items,
 	}, nil
 }
 
@@ -119,7 +127,7 @@ func isAliUserClusterRoleBinding(binding rbacv1.ClusterRoleBinding) bool {
 	return false
 }
 
-func getAliUidFromSubjectName(name string) (int, error) {
+func getAliUidFromSubjectName(name string) (int64, error) {
 	matches := regexAliUserIdentity.FindAllStringSubmatch(name, -1)
 	if len(matches) < 1 {
 		return 0, errInvalidName
@@ -132,10 +140,8 @@ func getAliUidFromSubjectName(name string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	return uid, nil
+	return int64(uid), nil
 }
-
-var regexAliUserIdentity = regexp.MustCompile(`^(\d+)(-\d+)?$`)
 
 func isAliUserSubject(subject rbacv1.Subject) bool {
 	if subject.Kind != rbacv1.UserKind {
@@ -204,4 +210,86 @@ func listClusterRoleBindings(ctx context.Context, kube kubernetes.Interface) (*r
 	}
 
 	return allList, nil
+}
+
+func SaveBindingToFile(ctx context.Context, dir string, b Binding, client kubernetes.Interface) (string, error) {
+	var r interface{}
+	var err error
+	switch b.Kind {
+	case KindRoleBinding:
+		r, err = getRoleBinding(ctx, b, client)
+		if err != nil {
+			return "", err
+		}
+	case KindClusterRoleBinding:
+		r, err = getClusterRoleBinding(ctx, b, client)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		if err := os.MkdirAll(dir, 0750); err != nil {
+			return "", fmt.Errorf("mkdir %s: %w", dir, err)
+		}
+	}
+	filePath := path.Join(dir, fmt.Sprintf("%s-%s-%s.json", b.Kind, b.Namespace, b.Name))
+	data, err := json.Marshal(r)
+	if err != nil {
+		return "", err
+	}
+	if err := os.WriteFile(filePath, data, 0600); err != nil {
+		return "", err
+	}
+	return filePath, nil
+}
+
+func RemoveBinding(ctx context.Context, b Binding, client kubernetes.Interface) error {
+	switch b.Kind {
+	case KindRoleBinding:
+		return removeRoleBinding(ctx, b, client)
+	case KindClusterRoleBinding:
+		return removeClusterRoleBinding(ctx, b, client)
+	}
+	return nil
+}
+
+func getClusterRoleBinding(ctx context.Context, b Binding, client kubernetes.Interface) (*rbacv1.ClusterRoleBinding, error) {
+	obj, err := client.RbacV1().ClusterRoleBindings().Get(ctx, b.Name, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+	obj.APIVersion = "rbac.authorization.k8s.io/v1"
+	obj.Kind = "ClusterRoleBinding"
+	return obj, err
+}
+
+func getRoleBinding(ctx context.Context, b Binding, client kubernetes.Interface) (*rbacv1.RoleBinding, error) {
+	obj, err := client.RbacV1().RoleBindings(b.Namespace).Get(ctx, b.Name, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+	obj.APIVersion = "rbac.authorization.k8s.io/v1"
+	obj.Kind = "RoleBinding"
+	return obj, err
+}
+
+func removeClusterRoleBinding(ctx context.Context, b Binding, client kubernetes.Interface) error {
+	err := client.RbacV1().ClusterRoleBindings().Delete(ctx, b.Name, metav1.DeleteOptions{})
+	return err
+}
+
+func removeRoleBinding(ctx context.Context, b Binding, client kubernetes.Interface) error {
+	err := client.RbacV1().RoleBindings(b.Namespace).Delete(ctx, b.Name, metav1.DeleteOptions{})
+	return err
+}
+
+func (b Binding) String() string {
+	switch b.Kind {
+	case KindRoleBinding:
+		return fmt.Sprintf("%s/%s/%s", b.Kind, b.Namespace, b.Name)
+	case KindClusterRoleBinding:
+		return fmt.Sprintf("%s/-/%s", b.Kind, b.Name)
+	}
+	return fmt.Sprintf("%#v", b)
 }

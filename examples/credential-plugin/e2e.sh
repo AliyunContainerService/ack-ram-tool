@@ -5,6 +5,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
 CLUSTER_ID="$1"
 KUBECONFIG_PATH="${SCRIPT_DIR}/kubeconfig"
 CACHE_DIR="${HOME}/.kube/cache/ack-ram-tool/credential-plugin"
+MODE="$2"
 
 trap cleanup EXIT
 
@@ -15,7 +16,7 @@ function bar_tip() {
 function get_kubeconfig() {
   bar_tip "get kubeconfig"
 
-  ack-ram-tool credential-plugin get-kubeconfig --cluster-id ${CLUSTER_ID} > ${KUBECONFIG_PATH}
+  ack-ram-tool credential-plugin get-kubeconfig -m ${MODE} --cluster-id ${CLUSTER_ID} > ${KUBECONFIG_PATH}
 }
 
 function exec_auth() {

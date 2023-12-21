@@ -1,4 +1,4 @@
-package scanuserpermissions
+package binding
 
 import (
 	"testing"
@@ -11,7 +11,7 @@ func Test_getAliUidFromSubjectName(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    int
+		want    int64
 		wantErr bool
 	}{
 		{
