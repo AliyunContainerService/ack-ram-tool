@@ -156,7 +156,7 @@ func generatePreSignedReq(request *openapi.OpenApiRequest, params *openapi.Param
 				return nil, _err
 			}
 			if !tea.BoolValue(util.Empty(securityToken)) {
-				newReq.Headers["x-acs-accesskey-id"] = accessKeyId
+				//newReq.Headers["x-acs-accesskey-id"] = accessKeyId
 				newReq.Headers["x-acs-security-token"] = securityToken
 			}
 
