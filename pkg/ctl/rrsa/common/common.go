@@ -20,9 +20,9 @@ func AllowRRSAFeatureOrDie(ctx context.Context, clusterId string, client *openap
 	if c.State != types.ClusterStateRunning {
 		common.ExitByError(fmt.Sprintf("cluster state is not running: %s", c.State))
 	}
-	if c.ClusterType != types.ClusterTypeManagedKubernetes {
-		common.ExitByError("only support managed cluster")
-	}
+	//if c.ClusterType != types.ClusterTypeManagedKubernetes {
+	//	common.ExitByError("only support managed cluster")
+	//}
 	return c
 }
 
