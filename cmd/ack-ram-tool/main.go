@@ -12,6 +12,7 @@ import (
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/rrsa"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/version"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
+	vs "github.com/AliyunContainerService/ack-ram-tool/pkg/version"
 	"github.com/spf13/cobra"
 )
 
@@ -29,6 +30,8 @@ More info: https://github.com/AliyunContainerService/ack-ram-tool`,
 				golog.Println(err)
 				os.Exit(1)
 			}
+			log.Logger.Debugf("Version: %s GitCommit: %s", vs.Version, vs.GitCommit)
+			log.Logger.Debugf("argv: %v", os.Args)
 		},
 	}
 )
