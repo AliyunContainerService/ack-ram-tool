@@ -29,7 +29,7 @@ require (
 require (
 	github.com/alibabacloud-go/openapi-util v0.1.0
 	github.com/alibabacloud-go/tea-utils v1.4.5
-	github.com/alibabacloud-go/tea-utils/v2 v2.0.1
+	github.com/alibabacloud-go/tea-utils/v2 v2.0.4
 	github.com/go-logr/zapr v1.3.0
 	github.com/olekukonko/tablewriter v0.0.6-0.20230925090304-df64c4bbad77
 	go.uber.org/zap v1.26.0
