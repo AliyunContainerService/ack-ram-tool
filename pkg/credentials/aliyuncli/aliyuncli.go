@@ -233,7 +233,7 @@ func (p *ProfileWrapper) GetCredentialsByExternal() (provider.CredentialsProvide
 	return newP.GetProvider()
 }
 
-var regexpCredJSON = regexp.MustCompile(`{\s*"mode": [^}]+}`)
+var regexpCredJSON = regexp.MustCompile(`{[^}]+"mode":[^}]+}`)
 
 func tryToParseProfileFromOutput(output string) *Profile {
 	ret := regexpCredJSON.FindAllString(output, 1)
@@ -242,7 +242,7 @@ func tryToParseProfileFromOutput(output string) *Profile {
 	}
 	credJSON := ret[0]
 	var p Profile
-	if err := json.Unmarshal([]byte(credJSON), &p); err == nil {
+	if err := json.Unmarshal([]byte(credJSON), &p); err == nil && p.Mode != "" {
 		return &p
 	}
 	return nil
