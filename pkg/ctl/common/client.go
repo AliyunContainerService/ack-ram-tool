@@ -124,7 +124,7 @@ func getCredential(opt getCredentialOption) (provider.CredentialsProvider, error
 
 		acli, err := aliyuncli.NewCredentialHelper(aliyuncliConfigFilePath, aliyuncliProfileName, opt.stsEndpoint)
 		if err == nil && acli != nil {
-			log.Logger.Debugf("get credentials from aliyun cli (%s) with profile name %s",
+			log.Logger.Debugf("try to get credentials from aliyun cli (%s) with profile name %s",
 				utils.ShortHomePath(aliyuncliConfigFilePath), acli.ProfileName())
 			return acli.GetCredentials()
 		}

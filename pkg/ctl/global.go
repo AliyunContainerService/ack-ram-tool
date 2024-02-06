@@ -16,6 +16,7 @@ const (
 	EnvIgnoreAliyunCliCredentials = "ACK_RAM_TOOL_IGNORE_ALIYUN_CLI_CREDENTIALS" // #nosec G101
 	EnvLogLevel                   = "ACK_RAM_TOOL_LOG_LEVEL"
 	EnvRegionId                   = "ACK_RAM_TOOL_REGION_ID"
+	EnvVerbose                    = "ACK_RAM_TOOL_VERBOSE"
 
 	DefaultRegion   = ""
 	DefaultLogLevel = "info"
@@ -62,6 +63,9 @@ func (g *globalOption) UpdateValues() {
 	}
 	if v, err := strconv.ParseBool(os.Getenv(EnvIgnoreAliyunCliCredentials)); err == nil && v {
 		g.IgnoreAliyuncliConfig = true
+	}
+	if v, err := strconv.ParseBool(os.Getenv(EnvVerbose)); err == nil && v {
+		g.Verbose = true
 	}
 	if g.LogLevel == "" {
 		g.LogLevel = os.Getenv(EnvLogLevel)
