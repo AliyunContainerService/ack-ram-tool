@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkwebsite=self.webpackChunkwebsite||[]).push([[1568],{3718:e=>{e.exports=JSON.parse('{"title":"rrsa","slug":"/category/rrsa","permalink":"/ack-ram-tool/category/rrsa","navigation":{"previous":{"title":"\u65b0\u624b\u6307\u5357","permalink":"/ack-ram-tool/zh-CN/getting-started"},"next":{"title":"enable","permalink":"/ack-ram-tool/rrsa/enable"}}}')}}]);
