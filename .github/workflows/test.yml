@@ -15,9 +15,9 @@ jobs:
       with:
         go-version: 1.21
     - name: golangci-lint
-      uses: golangci/golangci-lint-action@v3
+      uses: golangci/golangci-lint-action@v4
       with:
-        version: v1.51.2
+        version: v1.56.2
         args: --timeout=10m -v
   Gosec:
     name: Run Gosec Security Scanner
