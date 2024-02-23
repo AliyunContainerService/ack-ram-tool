@@ -3,7 +3,6 @@ package oidctoken
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -128,7 +127,7 @@ func (p *RoleProvider) setCred(cred *Credential) {
 }
 
 func (p *RoleProvider) retrieve(ctx context.Context) (*Credential, error) {
-	token, err := ioutil.ReadFile(p.tokenFile)
+	token, err := os.ReadFile(p.tokenFile)
 	if err != nil {
 		return nil, err
 	}
