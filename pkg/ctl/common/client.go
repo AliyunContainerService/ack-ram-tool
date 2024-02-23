@@ -7,6 +7,7 @@ import (
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudgo"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudgo/env"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/aliyuncli"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/credentialsgov13"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
@@ -54,7 +55,7 @@ func NewClient(config ClientConfig) (*openapi.Client, error) {
 			Logger:      &log.ProviderLogWrapper{ZP: log.Logger},
 		})
 	}
-	cred := provider.NewCredentialForV2SDK(p, provider.CredentialForV2SDKOptions{
+	cred := credentialsgov13.NewCredentialsWrapper(p, provider.CredentialForV2SDKOptions{
 		Logger: &log.ProviderLogWrapper{ZP: log.Logger},
 	})
 	regionId := config.regionId
