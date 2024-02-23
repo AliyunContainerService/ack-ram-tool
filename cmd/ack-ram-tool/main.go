@@ -5,6 +5,7 @@ import (
 	golog "log"
 	"os"
 
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/credentialplugin"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/exportcredentials"
@@ -32,6 +33,7 @@ More info: https://github.com/AliyunContainerService/ack-ram-tool`,
 			}
 			log.Logger.Debugf("Version: %s GitCommit: %s", vs.Version, vs.GitCommit)
 			log.Logger.Debugf("argv: %v", os.Args)
+			provider.UserAgent = vs.UserAgent()
 		},
 	}
 )
