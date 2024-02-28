@@ -3,7 +3,8 @@
 Using [aliyun-oss-go-sdk](https://github.com/aliyun/aliyun-oss-go-sdk) with RRSA Auth.
 
 ```
-go get github.com/aliyun/credentials-go@v1.2.7
+# >=v1.2.7
+go get github.com/aliyun/credentials-go
 ```
 
 https://github.com/aliyun/credentials-go

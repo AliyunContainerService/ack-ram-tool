@@ -59,6 +59,8 @@ func newOidcCredential() (credentials.Credential, error) {
 		SetOIDCProviderArn(os.Getenv(EnvOidcProviderArn)).
 		SetOIDCTokenFilePath(os.Getenv(EnvOidcTokenFile)).
 		SetRoleSessionName("test-rrsa-oidc-token")
+	// https://next.api.aliyun.com/product/Sts
+	// config.SetSTSEndpoint("sts-vpc.cn-hangzhou.aliyuncs.com")
 
 	oidcCredential, err := credentials.NewCredential(config)
 	return oidcCredential, err
@@ -86,7 +88,7 @@ func (c *Credentials) GetSecurityToken() string {
 	return c.SecurityToken
 }
 
-func (p CredentialsProvider) GetCredentials() oss.Credentials {
+func (p *CredentialsProvider) GetCredentials() oss.Credentials {
 	id, err := p.cred.GetAccessKeyId()
 	if err != nil {
 		log.Printf("get access key id failed: %+v", err)

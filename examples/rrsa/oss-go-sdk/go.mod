@@ -5,7 +5,7 @@ go 1.16
 require (
 	github.com/alibabacloud-go/tea v1.1.20
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.6+incompatible
-	github.com/aliyun/credentials-go v1.2.6
+	github.com/aliyun/credentials-go v1.2.7
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	golang.org/x/net v0.17.0 // indirect
