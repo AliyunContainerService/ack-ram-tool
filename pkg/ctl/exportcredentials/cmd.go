@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/netip"
 	"strings"
 
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
@@ -55,6 +56,13 @@ var cmd = &cobra.Command{
 			return
 		}
 
+		addr, err := netip.ParseAddrPort(opt.serve)
+		if err != nil {
+			ctlcommon.ExitByError(fmt.Sprintf("parse the --serve flag failed: %s", err))
+		}
+		if !addr.Addr().IsLoopback() {
+			ctlcommon.ExitByError("the --serve flag only support loopback address")
+		}
 		log.Logger.Warnf("Serving HTTP on %s", opt.serve)
 		if err := startCredServer(client); err != http.ErrServerClosed {
 			ctlcommon.ExitIfError(err)
@@ -69,7 +77,7 @@ func SetupCmd(rootCmd *cobra.Command) {
 		fmt.Sprintf("The output format to display credentials (%s)",
 			strings.Join(formats, ", ")))
 	cmd.Flags().StringVarP(&opt.serve, "serve", "s", "",
-		"start a server to export credentials (e.g. 127.0.0.1:6666")
+		"start a server to export credentials (e.g. 127.0.0.1:6666), the host part only support 127.0.0.1")
 
 	cmd.Flags().StringVar(
 		&ctl.GlobalOption.FinalAssumeRoleAnotherRoleArn, "role-arn", "",
