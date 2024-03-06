@@ -79,6 +79,8 @@ public class Demo {
         credConf.oidcProviderArn = System.getenv("ALIBABA_CLOUD_OIDC_PROVIDER_ARN");
         credConf.oidcTokenFilePath = System.getenv("ALIBABA_CLOUD_OIDC_TOKEN_FILE");
         credConf.roleSessionName = "test-rrsa-oidc-token";
+        // https://next.api.aliyun.com/product/Sts
+        // credConf.setSTSEndpoint("sts-vpc.cn-hangzhou.aliyuncs.com")
         return new com.aliyun.credentials.Client(credConf);
     }
 }
