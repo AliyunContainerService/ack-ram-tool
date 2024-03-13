@@ -1,6 +1,6 @@
-# python3-sdk
+# oss-python3-sdk
 
-Using [Alibaba Could Python 3 SDK](https://github.com/aliyun/alibabacloud-python-sdk) with RRSA Auth.
+Using [OSS Python 3 SDK](https://github.com/aliyun/aliyun-oss-python-sdk) with RRSA Auth.
 
 ```
 pip install 'alibabacloud_credentials>=0.3.1'
@@ -27,14 +27,13 @@ ack-ram-tool rrsa install-helper-addon --cluster-id "${CLUSTER_ID}"
 3. Create an RAM Policy:
 
 ```
-aliyun ram CreatePolicy --PolicyName cs-describe-clusters --PolicyDocument '{
+aliyun ram CreatePolicy --PolicyName oss-list-buckets --PolicyDocument '{
   "Version": "1",
   "Statement": [
     {
       "Effect": "Allow",
       "Action": [
-        "cs:DescribeClusters",
-        "cs:GetClusters"
+        "oss:ListBuckets"
       ],
       "Resource": [
         "*"
@@ -49,11 +48,11 @@ aliyun ram CreatePolicy --PolicyName cs-describe-clusters --PolicyDocument '{
 
 ```
 ack-ram-tool rrsa associate-role --cluster-id "${CLUSTER_ID}" \
-    --namespace rrsa-demo-python3-sdk \
+    --namespace rrsa-demo-oss-python3-sdk \
     --service-account demo-sa \
     --role-name test-rrsa-demo \
     --create-role-if-not-exist \
-    --attach-custom-policy cs-describe-clusters
+    --attach-custom-policy oss-list-buckets
 ```
 
 5. Deploy demo job:
@@ -66,17 +65,16 @@ kubectl --kubeconfig ./kubeconfig apply -f deploy.yaml
 6. Get logs:
 
 ```
-kubectl --kubeconfig ./kubeconfig -n rrsa-demo-python3-sdk wait --for=condition=complete job/demo --timeout=240s
-kubectl --kubeconfig ./kubeconfig -n rrsa-demo-python3-sdk logs job/demo
+kubectl --kubeconfig ./kubeconfig -n rrsa-demo-oss-python3-sdk wait --for=condition=complete job/demo --timeout=240s
+kubectl --kubeconfig ./kubeconfig -n rrsa-demo-oss-python3-sdk logs job/demo
 ```
 
 Outputs:
 
 ```
-test open api sdk use rrsa oidc token
-call cs.describe_clusters via oidc token success:
-
-cluster id: c4db8***, cluster name: foo***
-cluster id: cc20c***, cluster name: bar***
+2023/05/19 10:58:55 test oss sdk using rrsa oidc token
+call oss.listBuckets via oidc token success:
+- test-***
+- cri-***
 
 ```
