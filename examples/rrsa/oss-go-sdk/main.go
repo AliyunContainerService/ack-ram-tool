@@ -25,6 +25,9 @@ func testOSSSDK() {
 	if err != nil {
 		panic(err)
 	}
+	if _, err := cred.GetAccessKeyId(); err != nil {
+		log.Fatalf("get credentails failed: %+v", err)
+	}
 
 	provider := &CredentialsProvider{
 		cred: cred,

@@ -26,6 +26,9 @@ func testOpenAPISDK() {
 	if err != nil {
 		panic(err)
 	}
+	if _, err := cred.GetAccessKeyId(); err != nil {
+		log.Fatalf("get access key failed: %+v", err)
+	}
 
 	config := &openapi.Config{
 		Credential: cred,

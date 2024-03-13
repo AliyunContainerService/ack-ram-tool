@@ -46,6 +46,9 @@ func testLogSDK() {
 	p := &CredentialsProvider{
 		p: prov,
 	}
+	if _, err := p.Credentials(context.TODO()); err != nil {
+		log.Fatalf("get credentails failed: %+v", err)
+	}
 
 	endpoint := "cn-hangzhou.log.aliyuncs.com"
 	client, err := NewSLSClient(p, endpoint)
