@@ -5,7 +5,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
 CLUSTER_ID="$1"
 KUBECONFIG_PATH="${SCRIPT_DIR}/kubeconfig"
 NAMESPACE="rrsa-demo-oss-python3-sdk"
-ROLE_NAME="oss-list-buckets"
+ROLE_NAME="test-rrsa-demo"
 POLICY_NAME="test-cs-describe-clusters"
 
 trap cleanup EXIT
