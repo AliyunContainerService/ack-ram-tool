@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -14,14 +15,17 @@ type TLogger struct {
 }
 
 func (d TLogger) Info(msg string) {
+	defer catchPanic()
 	d.t.Logf(fmt.Sprintf("%s, %s", time.Now().Format(time.RFC3339), msg))
 }
 
 func (d TLogger) Debug(msg string) {
+	defer catchPanic()
 	d.t.Logf(fmt.Sprintf("%s, %s", time.Now().Format(time.RFC3339), msg))
 }
 
 func (d TLogger) Error(err error, msg string) {
+	defer catchPanic()
 	d.t.Logf(fmt.Sprintf("%s, %s", time.Now().Format(time.RFC3339), msg))
 }
 
@@ -235,4 +239,10 @@ func TestUpdater_stop_no_start(t *testing.T) {
 	u.Stop(context.TODO())
 	u.Stop(context.TODO())
 	u.Stop(context.TODO())
+}
+
+func catchPanic() {
+	if err := recover(); err != nil {
+		log.Printf("catch panic:\n%+v", err)
+	}
 }
