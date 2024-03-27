@@ -131,7 +131,7 @@ func outputTable(bindings []binding.Binding, accounts map[int64]types.Account) {
 			acc.MarkDeleted()
 			accounts[b.AliUid] = acc
 		}
-		if !acc.Deleted() && !opts.allUsers {
+		if !acc.Deleted() && !opts.allUsers && opts.userId == 0 {
 			continue
 		}
 		newBindings = append(newBindings, b)
