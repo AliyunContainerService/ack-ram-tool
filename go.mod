@@ -32,7 +32,7 @@ require (
 	github.com/alibabacloud-go/tea-utils/v2 v2.0.1
 	github.com/go-logr/zapr v1.3.0
 	github.com/olekukonko/tablewriter v0.0.6-0.20230925090304-df64c4bbad77
-	go.uber.org/zap v1.26.0
+	go.uber.org/zap v1.27.0
 	k8s.io/klog/v2 v2.110.1
 )
 
