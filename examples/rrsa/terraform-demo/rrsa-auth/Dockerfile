@@ -15,4 +15,4 @@ COPY run.sh run.sh
 
 RUN terraform init
 
-COMMAND ["/bin/sh", "/app/run.sh"]
+CMD ["/bin/sh", "/app/run.sh"]
