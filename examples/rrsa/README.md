@@ -17,6 +17,7 @@ Examples for RRSA Usage.
 | aliyuncli-demo             | Using [aliyun-cli](https://github.com/aliyun/aliyun-cli) with RRSA Auth                                                   |
 | aliyunlogcli-demo          | Using [aliyun-log-cli](https://github.com/aliyun/aliyun-log-cli) with RRSA Auth                                           |
 | terraform-demo/rrsa-config | RRSA Configuration Via Terraform                                                                                          |
+| terraform-demo/rrsa-auth   | Run Terraform with RRSA Auth                                                                                              |
 
 [//]: # (| ossutil-demo      | Using [ossutil]&#40;https://github.com/aliyun/ossutil&#41; with RRSA Auth  |)
 
