@@ -2,17 +2,21 @@ package service
 
 import (
 	"bytes"
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"reflect"
 	"runtime"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/alibabacloud-go/tea/tea"
@@ -20,25 +24,56 @@ import (
 
 var defaultUserAgent = fmt.Sprintf("AlibabaCloud (%s; %s) Golang/%s Core/%s TeaDSL/1", runtime.GOOS, runtime.GOARCH, strings.Trim(runtime.Version(), "go"), "0.01")
 
+type ExtendsParameters struct {
+	Headers map[string]*string `json:"headers,omitempty" xml:"headers,omitempty"`
+}
+
+func (s ExtendsParameters) String() string {
+	return tea.Prettify(s)
+}
+
+func (s ExtendsParameters) GoString() string {
+	return s.String()
+}
+
+func (s *ExtendsParameters) SetHeaders(v map[string]*string) *ExtendsParameters {
+	s.Headers = v
+	return s
+}
+
 type RuntimeOptions struct {
-	Autoretry      *bool   `json:"autoretry" xml:"autoretry"`
-	IgnoreSSL      *bool   `json:"ignoreSSL" xml:"ignoreSSL"`
-	Key            *string `json:"key,omitempty" xml:"key,omitempty"`
-	Cert           *string `json:"cert,omitempty" xml:"cert,omitempty"`
-	Ca             *string `json:"ca,omitempty" xml:"ca,omitempty"`
-	MaxAttempts    *int    `json:"maxAttempts" xml:"maxAttempts"`
-	BackoffPolicy  *string `json:"backoffPolicy" xml:"backoffPolicy"`
-	BackoffPeriod  *int    `json:"backoffPeriod" xml:"backoffPeriod"`
-	ReadTimeout    *int    `json:"readTimeout" xml:"readTimeout"`
-	ConnectTimeout *int    `json:"connectTimeout" xml:"connectTimeout"`
-	LocalAddr      *string `json:"localAddr" xml:"localAddr"`
-	HttpProxy      *string `json:"httpProxy" xml:"httpProxy"`
-	HttpsProxy     *string `json:"httpsProxy" xml:"httpsProxy"`
-	NoProxy        *string `json:"noProxy" xml:"noProxy"`
-	MaxIdleConns   *int    `json:"maxIdleConns" xml:"maxIdleConns"`
-	Socks5Proxy    *string `json:"socks5Proxy" xml:"socks5Proxy"`
-	Socks5NetWork  *string `json:"socks5NetWork" xml:"socks5NetWork"`
-	KeepAlive      *bool   `json:"keepAlive" xml:"keepAlive"`
+	Autoretry         *bool              `json:"autoretry" xml:"autoretry"`
+	IgnoreSSL         *bool              `json:"ignoreSSL" xml:"ignoreSSL"`
+	Key               *string            `json:"key,omitempty" xml:"key,omitempty"`
+	Cert              *string            `json:"cert,omitempty" xml:"cert,omitempty"`
+	Ca                *string            `json:"ca,omitempty" xml:"ca,omitempty"`
+	MaxAttempts       *int               `json:"maxAttempts" xml:"maxAttempts"`
+	BackoffPolicy     *string            `json:"backoffPolicy" xml:"backoffPolicy"`
+	BackoffPeriod     *int               `json:"backoffPeriod" xml:"backoffPeriod"`
+	ReadTimeout       *int               `json:"readTimeout" xml:"readTimeout"`
+	ConnectTimeout    *int               `json:"connectTimeout" xml:"connectTimeout"`
+	LocalAddr         *string            `json:"localAddr" xml:"localAddr"`
+	HttpProxy         *string            `json:"httpProxy" xml:"httpProxy"`
+	HttpsProxy        *string            `json:"httpsProxy" xml:"httpsProxy"`
+	NoProxy           *string            `json:"noProxy" xml:"noProxy"`
+	MaxIdleConns      *int               `json:"maxIdleConns" xml:"maxIdleConns"`
+	Socks5Proxy       *string            `json:"socks5Proxy" xml:"socks5Proxy"`
+	Socks5NetWork     *string            `json:"socks5NetWork" xml:"socks5NetWork"`
+	KeepAlive         *bool              `json:"keepAlive" xml:"keepAlive"`
+	ExtendsParameters *ExtendsParameters `json:"extendsParameters,omitempty" xml:"extendsParameters,omitempty"`
+}
+
+var processStartTime int64 = time.Now().UnixNano() / 1e6
+var seqId int64 = 0
+
+func getGID() uint64 {
+	// https://blog.sgmansfield.com/2015/12/goroutine-ids/
+	b := make([]byte, 64)
+	b = b[:runtime.Stack(b, false)]
+	b = bytes.TrimPrefix(b, []byte("goroutine "))
+	b = b[:bytes.IndexByte(b, ' ')]
+	n, _ := strconv.ParseUint(string(b), 10, 64)
+	return n
 }
 
 func (s RuntimeOptions) String() string {
@@ -139,6 +174,11 @@ func (s *RuntimeOptions) SetKeepAlive(v bool) *RuntimeOptions {
 	return s
 }
 
+func (s *RuntimeOptions) SetExtendsParameters(v *ExtendsParameters) *RuntimeOptions {
+	s.ExtendsParameters = v
+	return s
+}
+
 func ReadAsString(body io.Reader) (*string, error) {
 	byt, err := ioutil.ReadAll(body)
 	if err != nil {
@@ -155,13 +195,7 @@ func StringifyMapValue(a map[string]interface{}) map[string]*string {
 	res := make(map[string]*string)
 	for key, value := range a {
 		if value != nil {
-			switch value.(type) {
-			case string:
-				res[key] = tea.String(value.(string))
-			default:
-				byt, _ := json.Marshal(value)
-				res[key] = tea.String(string(byt))
-			}
+			res[key] = ToJSONString(value)
 		}
 	}
 	return res
@@ -209,11 +243,13 @@ func ToJSONString(a interface{}) *string {
 		}
 		return tea.String(string(byt))
 	}
-	byt, err := json.Marshal(a)
-	if err != nil {
+	byt := bytes.NewBuffer([]byte{})
+	jsonEncoder := json.NewEncoder(byt)
+	jsonEncoder.SetEscapeHTML(false)
+	if err := jsonEncoder.Encode(a); err != nil {
 		return nil
 	}
-	return tea.String(string(byt))
+	return tea.String(string(bytes.TrimSpace(byt.Bytes())))
 }
 
 func DefaultNumber(reaNum, defaultNum *int) *int {
@@ -242,7 +278,15 @@ func ReadAsJSON(body io.Reader) (result interface{}, err error) {
 }
 
 func GetNonce() *string {
-	return tea.String(getUUID())
+	routineId := getGID()
+	currentTime := time.Now().UnixNano() / 1e6
+	seq := atomic.AddInt64(&seqId, 1)
+	randNum := rand.Int63()
+	msg := fmt.Sprintf("%d-%d-%d-%d-%d", processStartTime, routineId, currentTime, seq, randNum)
+	h := md5.New()
+	h.Write([]byte(msg))
+	ret := hex.EncodeToString(h.Sum(nil))
+	return &ret
 }
 
 func Empty(val *string) *bool {
@@ -310,6 +354,26 @@ func AssertAsNumber(a interface{}) (_result *int, _err error) {
 		res = tea.IntValue(tmp)
 	default:
 		return nil, errors.New(fmt.Sprintf("%v is not a int", a))
+	}
+
+	return tea.Int(res), nil
+}
+
+/**
+ * Assert a value, if it is a integer, return it, otherwise throws
+ * @return the integer value
+ */
+func AssertAsInteger(value interface{}) (_result *int, _err error) {
+	res := 0
+	switch value.(type) {
+	case int:
+		tmp := value.(int)
+		res = tmp
+	case *int:
+		tmp := value.(*int)
+		res = tea.IntValue(tmp)
+	default:
+		return nil, errors.New(fmt.Sprintf("%v is not a int", value))
 	}
 
 	return tea.Int(res), nil
