@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider v0.0.0
-	github.com/alibabacloud-go/cs-20151215/v3 v3.0.35
+	github.com/alibabacloud-go/cs-20151215/v3 v3.0.42
 	github.com/alibabacloud-go/darabonba-openapi v0.2.1
 	github.com/alibabacloud-go/darabonba-openapi/v2 v2.0.6
 	github.com/alibabacloud-go/ram-20150501 v1.0.2
