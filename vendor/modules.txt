@@ -18,8 +18,8 @@ github.com/alibabacloud-go/darabonba-openapi/client
 # github.com/alibabacloud-go/darabonba-openapi/v2 v2.0.6
 ## explicit; go 1.14
 github.com/alibabacloud-go/darabonba-openapi/v2/client
-# github.com/alibabacloud-go/debug v0.0.0-20190504072949-9472017b5c68
-## explicit
+# github.com/alibabacloud-go/debug v1.0.0
+## explicit; go 1.18
 github.com/alibabacloud-go/debug/debug
 # github.com/alibabacloud-go/endpoint-util v1.1.0
 ## explicit
@@ -33,7 +33,7 @@ github.com/alibabacloud-go/ram-20150501/client
 # github.com/alibabacloud-go/sts-20150401 v1.1.0
 ## explicit; go 1.15
 github.com/alibabacloud-go/sts-20150401/client
-# github.com/alibabacloud-go/tea v1.2.1
+# github.com/alibabacloud-go/tea v1.2.2
 ## explicit; go 1.14
 github.com/alibabacloud-go/tea/tea
 github.com/alibabacloud-go/tea/utils
@@ -204,7 +204,7 @@ go.uber.org/zap/internal/exit
 go.uber.org/zap/internal/pool
 go.uber.org/zap/internal/stacktrace
 go.uber.org/zap/zapcore
-# golang.org/x/net v0.19.0
+# golang.org/x/net v0.20.0
 ## explicit; go 1.18
 golang.org/x/net/context
 golang.org/x/net/http/httpguts
@@ -217,12 +217,12 @@ golang.org/x/net/proxy
 ## explicit; go 1.17
 golang.org/x/oauth2
 golang.org/x/oauth2/internal
-# golang.org/x/sys v0.15.0
+# golang.org/x/sys v0.16.0
 ## explicit; go 1.18
 golang.org/x/sys/plan9
 golang.org/x/sys/unix
 golang.org/x/sys/windows
-# golang.org/x/term v0.15.0
+# golang.org/x/term v0.16.0
 ## explicit; go 1.18
 golang.org/x/term
 # golang.org/x/text v0.14.0
