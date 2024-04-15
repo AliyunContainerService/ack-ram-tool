@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	tokenPrefixV1 = "k8s-ack-v2." // #nosec G101
+	tokenPrefixV2 = "k8s-ack-v2." // #nosec G101
 )
 
 var tokenExpiration = time.Minute * 15 // #nosec G101
@@ -35,8 +35,8 @@ var signParamsWhitelist = map[string]bool{
 type Token struct {
 	ClusterId string `json:"clusterId"`
 
-	Method  string            `json:"method"`
-	Path    string            `json:"path"`
+	Method  string            `json:"method"` // for audit
+	Path    string            `json:"path"`   // for audit
 	Query   map[string]string `json:"query"`
 	Headers map[string]string `json:"headers"`
 
@@ -94,7 +94,7 @@ func GenerateToken(clusterId string, cred credentials.Credential) (*Token, error
 
 func (t *Token) String() string {
 	req, _ := json.Marshal(t)
-	return tokenPrefixV1 + base64.StdEncoding.EncodeToString(req)
+	return tokenPrefixV2 + base64.StdEncoding.EncodeToString(req)
 }
 
 func generatePreSignedReq(request *openapi.OpenApiRequest, params *openapi.Params, cred credentials.Credential) (*tea.Request, error) {
