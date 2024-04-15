@@ -69,8 +69,10 @@ func GenerateToken(clusterId string, cred credentials.Credential) (*Token, error
 		ClusterId: clusterId,
 		Method:    tea.StringValue(params.Method),
 		Path:      tea.StringValue(req.Pathname),
-		Headers:   map[string]string{},
-		Query:     map[string]string{},
+		Headers: map[string]string{
+			"user-agent": version.UserAgent(),
+		},
+		Query: map[string]string{},
 	}
 	for k, v := range req.Headers {
 		if !signParamsWhitelist[strings.ToLower(k)] {

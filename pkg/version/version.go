@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"runtime"
 )
 
 var (
@@ -27,8 +28,12 @@ func BinName() string {
 }
 
 func UserAgent() string {
+	ua := fmt.Sprintf("%s ack-ram-tool/%s", binName, Version)
 	if binName == "" || binName == defaultProgramName {
-		return fmt.Sprintf("ack-ram-tool/%s", Version)
+		ua = fmt.Sprintf("ack-ram-tool/%s", Version)
 	}
-	return fmt.Sprintf("%s ack-ram-tool/%s", binName, Version)
+
+	goInfo := fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH)
+	ua = fmt.Sprintf("%s (%s)", ua, goInfo)
+	return ua
 }
