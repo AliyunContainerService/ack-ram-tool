@@ -106,3 +106,6 @@ RAM Roles for Service Accounts (RRSA)
 
 更多信息详见 `文档 <https://aliyuncontainerservice.github.io/ack-ram-tool/>`__
 
+安全
+--------
+对于发现的安全漏洞，请邮件发送至kubernetes-security@service.aliyun.com，您可在`SECURITY.md <./SECURITY.md>`__文件中找到更多信息。

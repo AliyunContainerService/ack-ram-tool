@@ -111,3 +111,7 @@ Documentation
 ---------------
 
 For more information, refer to the `document <https://aliyuncontainerservice.github.io/ack-ram-tool/>`__.
+
+Security
+-------------
+Please report vulnerabilities by email to kubernetes-security@service.aliyun.com. Also see our `SECURITY.md <./SECURITY.md>`__ file for details.
