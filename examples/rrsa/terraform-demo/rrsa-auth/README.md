@@ -1,7 +1,7 @@
 # Run Terraform with RRSA Auth
 
 ```
-aliyun/terraform-provider-alicloud >= v1.220.0
+aliyun/terraform-provider-alicloud >= v1.222.0
 ```
 
 https://registry.terraform.io/providers/aliyun/alicloud/latest
@@ -33,6 +33,8 @@ aliyun ram CreatePolicy --PolicyName create-delete-vpc --PolicyDocument '{
       "Effect": "Allow",
       "Action": [
         "vpc:DescribeVpcAttribute",
+        "vpc:CreateVpc",
+        "vpc:DescribeRouteTableList",
         "vpc:DeleteVpc"
       ],
       "Resource": [
