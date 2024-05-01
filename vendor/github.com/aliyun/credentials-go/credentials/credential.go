@@ -25,8 +25,11 @@ var hookParse = func(err error) error {
 
 // Credential is an interface for getting actual credential
 type Credential interface {
+	// Deprecated: GetAccessKeyId is deprecated, use GetCredential instead of.
 	GetAccessKeyId() (*string, error)
+	// Deprecated: GetAccessKeySecret is deprecated, use GetCredential instead of.
 	GetAccessKeySecret() (*string, error)
+	// Deprecated: GetSecurityToken is deprecated, use GetCredential instead of.
 	GetSecurityToken() (*string, error)
 	GetBearerToken() *string
 	GetType() *string
@@ -310,22 +313,26 @@ func checkoutAssumeRamoidc(config *Config) (err error) {
 }
 
 func checkRAMRoleArn(config *Config) (err error) {
-	if tea.StringValue(config.AccessKeySecret) == "" {
-		err = errors.New("AccessKeySecret cannot be empty")
-		return
-	}
-	if tea.StringValue(config.RoleArn) == "" {
-		err = errors.New("RoleArn cannot be empty")
-		return
-	}
-	if tea.StringValue(config.RoleSessionName) == "" {
-		err = errors.New("RoleSessionName cannot be empty")
-		return
-	}
 	if tea.StringValue(config.AccessKeyId) == "" {
 		err = errors.New("AccessKeyId cannot be empty")
 		return
 	}
+
+	if tea.StringValue(config.AccessKeySecret) == "" {
+		err = errors.New("AccessKeySecret cannot be empty")
+		return
+	}
+
+	if tea.StringValue(config.RoleArn) == "" {
+		err = errors.New("RoleArn cannot be empty")
+		return
+	}
+
+	if tea.StringValue(config.RoleSessionName) == "" {
+		err = errors.New("RoleSessionName cannot be empty")
+		return
+	}
+
 	return
 }
 
