@@ -15,11 +15,11 @@ updates:
     open-pull-requests-limit: 5
     schedule:
       interval: monthly
-  - package-ecosystem: npm
-    directory: website
-    open-pull-requests-limit: 5
-    schedule:
-      interval: monthly
+#  - package-ecosystem: npm
+#    directory: website
+#    open-pull-requests-limit: 5
+#    schedule:
+#      interval: monthly
 
 #  - package-ecosystem: gomod
 #    directory: pkg/credentials/alibabacloudgo/helper
