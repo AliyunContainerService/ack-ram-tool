@@ -15,7 +15,7 @@ github.com/alibabacloud-go/cs-20151215/v3/client
 # github.com/alibabacloud-go/darabonba-openapi v0.2.1
 ## explicit; go 1.14
 github.com/alibabacloud-go/darabonba-openapi/client
-# github.com/alibabacloud-go/darabonba-openapi/v2 v2.0.6
+# github.com/alibabacloud-go/darabonba-openapi/v2 v2.0.7
 ## explicit; go 1.14
 github.com/alibabacloud-go/darabonba-openapi/v2/client
 # github.com/alibabacloud-go/debug v1.0.0
