@@ -474,6 +474,8 @@ func (s *ClusterScanner) prepareTerway(ctx context.Context, addon Addon, wl *Wor
 }
 
 func (s *ClusterScanner) listAddons(ctx context.Context) (map[string]InstalledAddon, error) {
+	defer newSpinner()()
+
 	addons, err := s.openAPIClient.ListAddons(ctx, s.clusterId)
 	if err != nil {
 		return nil, err
@@ -496,6 +498,8 @@ func (s *ClusterScanner) listAddons(ctx context.Context) (map[string]InstalledAd
 
 func (s *ClusterScanner) listWorkloads(ctx context.Context,
 	secrets map[string]corev1.Secret) ([]Workload, error) {
+	defer newSpinner()()
+
 	var workloads []Workload
 	for _, ns := range scanNamespaces {
 		log.Logger.Debugf("start to list workloads in namespace %s", ns)

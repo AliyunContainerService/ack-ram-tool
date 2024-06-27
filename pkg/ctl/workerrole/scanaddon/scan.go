@@ -2,7 +2,11 @@ package scanaddon
 
 import (
 	"context"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/openapi"
+	"github.com/briandowns/spinner"
+	"go.uber.org/zap/zapcore"
+	"time"
 )
 
 var scanNamespaces = []string{
@@ -30,4 +34,13 @@ func scan(ctx context.Context,
 
 	scanner := NewClusterScanner(openapiClient, kube, opts.clusterId)
 	return scanner.Scan(ctx)
+}
+
+func newSpinner() func() {
+	if log.Logger.Level() > zapcore.DebugLevel {
+		spin := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
+		spin.Start()
+		return spin.Stop
+	}
+	return func() {}
 }

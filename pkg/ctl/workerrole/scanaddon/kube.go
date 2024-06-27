@@ -53,6 +53,8 @@ func listPods(ctx context.Context, client kubernetes.Interface, namespace string
 }
 
 func listSecret(ctx context.Context, client kubernetes.Interface, namespace string) (*corev1.SecretList, error) {
+	defer newSpinner()()
+
 	continueMark := ""
 	allList := &corev1.SecretList{Items: []corev1.Secret{}}
 	limit := int64(200)
