@@ -12,6 +12,7 @@ import (
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/rbac"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/rrsa"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/version"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/workerrole"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
 	vs "github.com/AliyunContainerService/ack-ram-tool/pkg/version"
 	"github.com/spf13/cobra"
@@ -43,6 +44,7 @@ func init() {
 	credentialplugin.SetupCredentialPluginCmd(rootCmd)
 	version.SetupVersionCmd(rootCmd)
 	rbac.SetupCmd(rootCmd)
+	workerrole.SetupCmd(rootCmd)
 	exportcredentials.SetupCmd(rootCmd)
 
 	rootCmd.PersistentFlags().StringVar(&ctl.GlobalOption.Region, "region-id",

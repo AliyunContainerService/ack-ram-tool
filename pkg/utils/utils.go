@@ -3,6 +3,7 @@ package utils
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -19,6 +20,22 @@ func JSONEqual(a interface{}, b interface{}) bool {
 		return false
 	}
 	return bytes.Equal(av, bv)
+}
+
+func PrintlnToStdErr(format string, args ...string) {
+	if !strings.HasSuffix(format, "\n") {
+		format += "\n"
+	}
+	fmt.Fprint(os.Stderr, format)
+}
+
+func StringSliceInclude(items []string, check string) bool {
+	for _, item := range items {
+		if check == item {
+			return true
+		}
+	}
+	return false
 }
 
 func StringInterfaceMapEqual(a map[string]interface{}, b map[string]interface{}) bool {
