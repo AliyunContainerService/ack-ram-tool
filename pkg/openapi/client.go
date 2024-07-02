@@ -11,7 +11,6 @@ import (
 	"github.com/aliyun/credentials-go/credentials"
 	"os"
 	"strings"
-	// "github.com/aliyun/credentials-go/credentials"
 )
 
 var (
