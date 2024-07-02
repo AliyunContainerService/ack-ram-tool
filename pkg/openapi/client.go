@@ -7,7 +7,6 @@ import (
 	sts "github.com/alibabacloud-go/sts-20150401/client"
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/credentials-go/credentials"
-	// "github.com/aliyun/credentials-go/credentials"
 )
 
 var (
