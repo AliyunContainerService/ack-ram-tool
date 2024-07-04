@@ -33,7 +33,7 @@ func (k *Kritis) RamPolicy() types.RamPolicy {
 	return types.RamPolicy{
 		Description:    fmt.Sprintf("policy for ack cluster addon %s", k.AddonName()),
 		PolicyDocument: &policy,
-		PolicyName:     fmt.Sprintf("ack-%s", k.AddonName()),
+		PolicyName:     fmt.Sprintf("ack-addon-policy-%s", k.AddonName()),
 		PolicyType:     types.RamPolicyTypeCustom,
 	}
 }
