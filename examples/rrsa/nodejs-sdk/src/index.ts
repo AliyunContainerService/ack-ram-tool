@@ -7,7 +7,7 @@ import Credential, {Config} from '@alicloud/credentials';
 
 export default class Demo {
 
-  static newCredWithCred(): Credential {
+  static newOidcCredential(): Credential {
     // https://www.alibabacloud.com/help/doc-detail/378664.html
     return new Credential(new Config({
       type: 'oidc_role_arn',
@@ -18,16 +18,16 @@ export default class Demo {
     }))
   }
 
-  static newCred(): Credential {
+  static newCredential(): Credential {
     // https://www.alibabacloud.com/help/doc-detail/378664.html
     return new Credential();
   }
 
   static async main(args: string[]): Promise<void> {
     // 两种方法都可以
-    const cred = Demo.newCred();
+    const cred = Demo.newCredential();
     // or
-    // const cred = Demo.newC();
+    // const cred = Demo.newOidcCredential();
 
     const config =  new $OpenApi.Config({credential: cred})
     config.endpoint = 'cs.cn-hangzhou.aliyuncs.com';
