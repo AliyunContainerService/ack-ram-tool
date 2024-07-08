@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "demo": "node src/index.js"
+  },
+  "dependencies": {
+    "@alicloud/credentials": "^2.3.1",
+    "ali-oss": "^6.20.0"
+  }
+}
