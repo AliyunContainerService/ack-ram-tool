@@ -48,18 +48,14 @@ async function main() {
       },
     });
 
-    for (let i = 0; i < 100; i++) {
-        console.info(`${i}`)
-        await client.listBuckets().then(body => {
-            console.log(body.res.status)
-            console.log(body.res.headers['x-oss-request-id'])
-            console.log("call oss.listBuckets via oidc token success:");
-            body.buckets.forEach(item => {
-                // console.info(`- ${item.name}`);
-            });
+    await client.listBuckets().then(body => {
+        console.log(body.res.status)
+        console.log(body.res.headers['x-oss-request-id'])
+        console.log("call oss.listBuckets via oidc token success:");
+        body.buckets.forEach(item => {
+            console.info(`- ${item.name}`);
         });
-        await sleep(1000*durationSeconds)
-    }
+    });
 }
 
 main().catch(console.error);
