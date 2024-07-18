@@ -1,6 +1,7 @@
 package ctl
 
 import (
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/openapi"
 	"os"
 	"strconv"
 	"strings"
@@ -136,6 +137,13 @@ func (g *globalOption) GetLogLevel() string {
 
 func (g *globalOption) GetRoleArn() string {
 	return g.FinalAssumeRoleAnotherRoleArn
+}
+
+func (g *globalOption) GetEndpoints() openapi.Endpoints {
+	region := g.GetRegion()
+	endpoints := openapi.NewEndpoints(region, g.UseVPCEndpoint)
+	endpoints.STS = g.GetSTSEndpoint()
+	return endpoints
 }
 
 func (g *globalOption) GetSTSEndpoint() string {
