@@ -35,6 +35,9 @@ type OIDCProvider struct {
 	stsScheme   string
 	sessionName string
 
+	policy          string
+	durationSeconds string
+
 	roleArn         string
 	oidcProviderArn string
 	oidcTokenFile   string
@@ -46,6 +49,9 @@ type OIDCProviderOptions struct {
 	STSEndpoint string
 	stsScheme   string
 	SessionName string
+
+	TokenDuration time.Duration
+	Policy        string
 
 	RoleArn            string
 	EnvRoleArn         string
@@ -87,11 +93,17 @@ func NewOIDCProvider(opts OIDCProviderOptions) *OIDCProvider {
 		stsEndpoint:     opts.STSEndpoint,
 		stsScheme:       opts.stsScheme,
 		sessionName:     opts.SessionName,
+		policy:          opts.Policy,
 		roleArn:         opts.getRoleArn(),
 		oidcProviderArn: opts.getOIDCProviderArn(),
 		oidcTokenFile:   opts.getOIDCTokenFile(),
 		Logger:          opts.Logger,
 	}
+	if opts.TokenDuration >= time.Second*900 {
+		ds := int64(opts.TokenDuration.Seconds())
+		e.durationSeconds = fmt.Sprintf("%d", ds)
+	}
+
 	e.u = NewUpdater(e.getCredentials, UpdaterOptions{
 		ExpiryWindow:  opts.ExpiryWindow,
 		RefreshPeriod: opts.RefreshPeriod,
@@ -149,7 +161,12 @@ func (o *OIDCProvider) assumeRoleWithOIDC(ctx context.Context, roleArn, oidcProv
 	reqOpts.QueryParams["RoleArn"] = roleArn
 	reqOpts.QueryParams["OIDCProviderArn"] = oidcProviderArn
 	reqOpts.BodyParams["OIDCToken"] = token
-	//reqOpts.QueryParams["Policy"] = policy
+	if o.durationSeconds != "" {
+		reqOpts.QueryParams["DurationSeconds"] = o.durationSeconds
+	}
+	if o.policy != "" {
+		reqOpts.BodyParams["Policy"] = o.policy
+	}
 	reqOpts.QueryParams["RoleSessionName"] = o.sessionName
 	reqOpts.QueryParams["Version"] = "2015-04-01"
 	reqOpts.QueryParams["SignatureNonce"] = getUUID()
