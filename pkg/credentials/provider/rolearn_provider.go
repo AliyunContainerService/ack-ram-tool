@@ -19,6 +19,10 @@ type RoleArnProvider struct {
 	stsScheme   string
 	sessionName string
 
+	policy          string
+	externalId      string
+	durationSeconds string
+
 	roleArn string
 	cp      CredentialsProvider
 
@@ -29,6 +33,10 @@ type RoleArnProviderOptions struct {
 	STSEndpoint string
 	stsScheme   string
 	SessionName string
+
+	TokenDuration time.Duration
+	Policy        string
+	ExternalId    string
 
 	Timeout   time.Duration
 	Transport http.RoundTripper
@@ -50,10 +58,17 @@ func NewRoleArnProvider(cp CredentialsProvider, roleArn string, opts RoleArnProv
 		stsEndpoint: opts.STSEndpoint,
 		stsScheme:   opts.stsScheme,
 		sessionName: opts.SessionName,
+		policy:      opts.Policy,
+		externalId:  opts.ExternalId,
 		roleArn:     roleArn,
 		cp:          cp,
 		Logger:      opts.Logger,
 	}
+	if opts.TokenDuration >= time.Second*900 {
+		ds := int64(opts.TokenDuration.Seconds())
+		e.durationSeconds = fmt.Sprintf("%d", ds)
+	}
+
 	e.u = NewUpdater(e.getCredentials, UpdaterOptions{
 		ExpiryWindow:  opts.ExpiryWindow,
 		RefreshPeriod: opts.RefreshPeriod,
@@ -93,14 +108,21 @@ func (r *RoleArnProvider) assumeRole(ctx context.Context, roleArn string) (*Cred
 	reqOpts := newCommonRequest()
 	reqOpts.Domain = r.stsEndpoint
 	reqOpts.Scheme = r.stsScheme
-	reqOpts.Method = "GET"
+	reqOpts.Method = "POST"
 	reqOpts.QueryParams["Timestamp"] = getTimeInFormatISO8601()
 	reqOpts.QueryParams["AccessKeyId"] = cred.AccessKeyId
 	reqOpts.QueryParams["Action"] = "AssumeRole"
 	reqOpts.QueryParams["Format"] = "JSON"
 	reqOpts.QueryParams["RoleArn"] = roleArn
-	//reqOpts.QueryParams["Policy"] = policy
-	//reqOpts.QueryParams["ExternalId"] = externalId
+	if r.durationSeconds != "" {
+		reqOpts.QueryParams["DurationSeconds"] = r.durationSeconds
+	}
+	if r.policy != "" {
+		reqOpts.BodyParams["Policy"] = r.policy
+	}
+	if r.externalId != "" {
+		reqOpts.QueryParams["ExternalId"] = r.externalId
+	}
 	reqOpts.QueryParams["RoleSessionName"] = r.sessionName
 	reqOpts.QueryParams["SignatureMethod"] = "HMAC-SHA1"
 	reqOpts.QueryParams["SignatureVersion"] = "1.0"
