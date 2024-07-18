@@ -13,9 +13,6 @@ import (
 )
 
 const (
-	defaultSTSEndpoint = "sts.aliyuncs.com"
-	defaultSTSScheme   = "HTTPS"
-
 	defaultEnvRoleArn         = "ALIBABA_CLOUD_ROLE_ARN"
 	defaultEnvOIDCProviderArn = "ALIBABA_CLOUD_OIDC_PROVIDER_ARN"
 	defaultEnvOIDCTokenFile   = "ALIBABA_CLOUD_OIDC_TOKEN_FILE"
@@ -23,7 +20,11 @@ const (
 	defaultExpiryWindowForAssumeRole = time.Minute * 10
 )
 
-var defaultSessionName = "default-session-name"
+var (
+	defaultSessionName = "default-session-name"
+	defaultSTSEndpoint = "sts.aliyuncs.com"
+	defaultSTSScheme   = "HTTPS"
+)
 
 type OIDCProvider struct {
 	u *Updater
@@ -33,6 +34,9 @@ type OIDCProvider struct {
 	stsEndpoint string
 	stsScheme   string
 	sessionName string
+
+	policy          string
+	durationSeconds string
 
 	roleArn         string
 	oidcProviderArn string
@@ -45,6 +49,9 @@ type OIDCProviderOptions struct {
 	STSEndpoint string
 	stsScheme   string
 	SessionName string
+
+	TokenDuration time.Duration
+	Policy        string
 
 	RoleArn            string
 	EnvRoleArn         string
@@ -66,6 +73,12 @@ func init() {
 	if sessionName != "" {
 		defaultSessionName = sessionName
 	}
+	if v := getStsEndpointFromEnv(); v != "" {
+		defaultSTSEndpoint = v
+	}
+	if v := getStsHttpSchemeFromEnv(); v != "" {
+		defaultSTSScheme = strings.ToUpper(v)
+	}
 }
 
 func NewOIDCProvider(opts OIDCProviderOptions) *OIDCProvider {
@@ -80,11 +93,17 @@ func NewOIDCProvider(opts OIDCProviderOptions) *OIDCProvider {
 		stsEndpoint:     opts.STSEndpoint,
 		stsScheme:       opts.stsScheme,
 		sessionName:     opts.SessionName,
+		policy:          opts.Policy,
 		roleArn:         opts.getRoleArn(),
 		oidcProviderArn: opts.getOIDCProviderArn(),
 		oidcTokenFile:   opts.getOIDCTokenFile(),
 		Logger:          opts.Logger,
 	}
+	if opts.TokenDuration >= time.Second*900 {
+		ds := int64(opts.TokenDuration.Seconds())
+		e.durationSeconds = fmt.Sprintf("%d", ds)
+	}
+
 	e.u = NewUpdater(e.getCredentials, UpdaterOptions{
 		ExpiryWindow:  opts.ExpiryWindow,
 		RefreshPeriod: opts.RefreshPeriod,
@@ -142,7 +161,12 @@ func (o *OIDCProvider) assumeRoleWithOIDC(ctx context.Context, roleArn, oidcProv
 	reqOpts.QueryParams["RoleArn"] = roleArn
 	reqOpts.QueryParams["OIDCProviderArn"] = oidcProviderArn
 	reqOpts.BodyParams["OIDCToken"] = token
-	//reqOpts.QueryParams["Policy"] = policy
+	if o.durationSeconds != "" {
+		reqOpts.QueryParams["DurationSeconds"] = o.durationSeconds
+	}
+	if o.policy != "" {
+		reqOpts.BodyParams["Policy"] = o.policy
+	}
 	reqOpts.QueryParams["RoleSessionName"] = o.sessionName
 	reqOpts.QueryParams["Version"] = "2015-04-01"
 	reqOpts.QueryParams["SignatureNonce"] = getUUID()
