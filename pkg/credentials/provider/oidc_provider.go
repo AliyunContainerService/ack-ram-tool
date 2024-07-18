@@ -13,9 +13,6 @@ import (
 )
 
 const (
-	defaultSTSEndpoint = "sts.aliyuncs.com"
-	defaultSTSScheme   = "HTTPS"
-
 	defaultEnvRoleArn         = "ALIBABA_CLOUD_ROLE_ARN"
 	defaultEnvOIDCProviderArn = "ALIBABA_CLOUD_OIDC_PROVIDER_ARN"
 	defaultEnvOIDCTokenFile   = "ALIBABA_CLOUD_OIDC_TOKEN_FILE"
@@ -23,7 +20,11 @@ const (
 	defaultExpiryWindowForAssumeRole = time.Minute * 10
 )
 
-var defaultSessionName = "default-session-name"
+var (
+	defaultSessionName = "default-session-name"
+	defaultSTSEndpoint = "sts.aliyuncs.com"
+	defaultSTSScheme   = "HTTPS"
+)
 
 type OIDCProvider struct {
 	u *Updater
@@ -65,6 +66,12 @@ func init() {
 	sessionName := getRoleSessionNameFromEnv()
 	if sessionName != "" {
 		defaultSessionName = sessionName
+	}
+	if v := getStsEndpointFromEnv(); v != "" {
+		defaultSTSEndpoint = v
+	}
+	if v := getStsHttpSchemeFromEnv(); v != "" {
+		defaultSTSScheme = strings.ToUpper(v)
 	}
 }
 
