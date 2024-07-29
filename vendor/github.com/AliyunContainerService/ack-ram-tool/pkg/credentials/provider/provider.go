@@ -20,5 +20,5 @@ type Stopper interface {
 
 func init() {
 	name := path.Base(os.Args[0])
-	UserAgent = fmt.Sprintf("%s %s/%s ack-ram-tool/%s", name, runtime.GOOS, runtime.GOARCH, runtime.Version())
+	UserAgent = fmt.Sprintf("%s %s/%s ack-ram-tool/provider/%s", name, runtime.GOOS, runtime.GOARCH, runtime.Version())
 }

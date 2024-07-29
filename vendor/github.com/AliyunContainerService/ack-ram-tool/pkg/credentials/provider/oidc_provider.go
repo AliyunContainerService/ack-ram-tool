@@ -266,6 +266,9 @@ func (o *OIDCProviderOptions) applyDefaults() {
 	}
 	if o.ExpiryWindow == 0 {
 		o.ExpiryWindow = defaultExpiryWindowForAssumeRole
+		if o.TokenDuration > 0 && o.TokenDuration <= o.ExpiryWindow {
+			o.ExpiryWindow = o.TokenDuration / 2
+		}
 	}
 	if o.EnvRoleArn == "" {
 		o.EnvRoleArn = defaultEnvRoleArn
