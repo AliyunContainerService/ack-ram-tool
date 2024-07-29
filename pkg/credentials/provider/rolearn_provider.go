@@ -230,6 +230,9 @@ func (o *RoleArnProviderOptions) applyDefaults() {
 	}
 	if o.ExpiryWindow == 0 {
 		o.ExpiryWindow = defaultExpiryWindowForAssumeRole
+		if o.TokenDuration > 0 && o.TokenDuration <= o.ExpiryWindow {
+			o.ExpiryWindow = o.TokenDuration / 2
+		}
 	}
 	if o.Logger == nil {
 		o.Logger = defaultLog
