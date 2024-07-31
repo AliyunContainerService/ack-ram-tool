@@ -26,3 +26,4 @@ kubeconfig
 .terraform/
 .terraform.*
 terraform.tfstate*
+.idea
