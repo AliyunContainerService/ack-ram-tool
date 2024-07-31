@@ -3,6 +3,7 @@ package com.alibabacloud;
 // com.aliyun:credentials-java >= 0.2.10
 import com.aliyun.credentials.Client;
 
+import com.aliyun.credentials.models.CredentialModel;
 import com.aliyun.oss.ClientBuilderConfiguration;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.common.auth.*;
@@ -24,9 +25,10 @@ class OSSCredentialProvider implements CredentialsProvider {
 
     @Override
     public Credentials getCredentials() {
-        String ak = cred.getAccessKeyId();
-        String sk = cred.getAccessKeySecret();
-        String token = cred.getSecurityToken();
+        CredentialModel cm = cred.getCredential();
+        String ak = cm.getAccessKeyId();
+        String sk = cm.getAccessKeySecret();
+        String token = cm.getSecurityToken();
         return new DefaultCredentials(ak, sk, token);
     }
 }
