@@ -40,3 +40,9 @@ func (o *SemaphoreProviderOptions) applyDefaults() {
 		o.MaxWeight = 1
 	}
 }
+
+func (p *SemaphoreProvider) Stop(ctx context.Context) {
+	if s, ok := p.cp.(Stopper); ok {
+		s.Stop(ctx)
+	}
+}
