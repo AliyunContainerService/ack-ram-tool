@@ -60,7 +60,7 @@ github.com/aliyun/credentials-go/credentials
 github.com/aliyun/credentials-go/credentials/request
 github.com/aliyun/credentials-go/credentials/response
 github.com/aliyun/credentials-go/credentials/utils
-# github.com/briandowns/spinner v1.23.0
+# github.com/briandowns/spinner v1.23.1
 ## explicit; go 1.17
 github.com/briandowns/spinner
 # github.com/clbanning/mxj/v2 v2.5.6
