@@ -62,10 +62,12 @@ class TestMQ4XSDK {
     public void ProducerExample(com.aliyun.credentials.Client cred) throws Exception {
         DefaultMQProducer producer = new DefaultMQProducer(getAclRPCHook(cred));
 
+        producer.setProducerGroup("yourProducerGroup");
         // producer.setAccessChannel(AccessChannel.CLOUD);
         // MQ_INST_XX.XX.mq.aliyuncs.com:80
         producer.setNamesrvAddr(System.getenv("MQ_ENDPOINT"));
         producer.start();
+        System.out.println("Producer Started.");
 
         try {
             Message msg = new Message("yourNormalTopic",
@@ -99,7 +101,7 @@ class TestMQ4XSDK {
             }
         });
         consumer.start();
-        System.out.printf("Consumer Started.%n");
+        System.out.println("Consumer Started.");
     }
 
     private static String msgIds(List<MessageExt> msg) {
@@ -127,7 +129,7 @@ public class Demo {
         // or
         // com.aliyun.credentials.Client cred = newOidcCred();
 
-        // test RocketMQ 4.x sdk (https://github.com/apache/rocketmq/tree/rocketmq-all-4.9.8) use rrsa oidc token
+        // test RocketMQ 4.x sdk (https://www.alibabacloud.com/help/doc-detail/445534.html) use rrsa oidc token
         System.out.println("test RocketMQ 4.x sdk use rrsa oidc token");
         TestMQ4XSDK example = new TestMQ4XSDK();
 
@@ -135,7 +137,17 @@ public class Demo {
         example.ProducerExample(cred);
 
         System.out.println("====== Consumer =======");
-        example.ConsumerExample(cred);
+        Runnable runnable = () -> {
+            try {
+                example.ConsumerExample(cred);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        };
+        (new Thread(runnable)).start();
+
+        Thread.sleep(30*1000);
+        System.exit(0);
     }
 
     static com.aliyun.credentials.Client newOidcCred() throws Exception {
