@@ -27,7 +27,7 @@ var scanNamespaces = []string{
 
 func scan(ctx context.Context,
 	openapiClient openapi.ClientInterface, opts Option) error {
-	kube, err := getKubeClient(ctx, openapiClient, opts.clusterId)
+	kube, err := getKubeClient(ctx, openapiClient, opts.clusterId, opts.kubeconfigPath)
 	if err != nil {
 		return err
 	}

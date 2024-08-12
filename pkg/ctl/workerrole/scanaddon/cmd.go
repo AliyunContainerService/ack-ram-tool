@@ -12,6 +12,7 @@ type Option struct {
 	clusterId         string
 	privateIpAddress  bool
 	temporaryDuration time.Duration
+	kubeconfigPath    string
 }
 
 var opts = Option{
@@ -38,6 +39,8 @@ func run(ctx context.Context) {
 func SetupCmd(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(cmd)
 	cmd.Flags().StringVarP(&opts.clusterId, "cluster-id", "c", "", "cluster id")
+	cmd.Flags().StringVar(&opts.kubeconfigPath, "kubeconfig", "", "path to kubeconfig")
+	cmd.Flags().BoolVar(&opts.privateIpAddress, "use-private-ip", false, "using private ip to connect apiserver")
 	err := cmd.MarkFlagRequired("cluster-id")
 	ctlcommon.ExitIfError(err)
 }

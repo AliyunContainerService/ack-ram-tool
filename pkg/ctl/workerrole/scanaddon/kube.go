@@ -2,6 +2,9 @@ package scanaddon
 
 import (
 	"context"
+	"fmt"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
+	"os"
 	"strings"
 
 	ctlcommon "github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/common"
@@ -14,7 +17,13 @@ import (
 )
 
 func getKubeClient(ctx context.Context, openAPIClient openapi.ClientInterface,
-	clusterId string) (kubernetes.Interface, error) {
+	clusterId string, kubeconfigPath string) (kubernetes.Interface, error) {
+	if kubeconfigPath != "" {
+		log.Logger.Debugf("use kubeconfig from %s", kubeconfigPath)
+		return getKubeClientFromFile(kubeconfigPath)
+	}
+
+	log.Logger.Debug("get kubeconfig via open api")
 	kubeconfig, err := openAPIClient.GetUserKubeConfig(ctx, clusterId,
 		opts.privateIpAddress, opts.temporaryDuration)
 	if err != nil {
@@ -22,6 +31,15 @@ func getKubeClient(ctx context.Context, openAPIClient openapi.ClientInterface,
 	}
 
 	client, err := ctlcommon.NewKubeClient(kubeconfig.RawData)
+	return client, err
+}
+
+func getKubeClientFromFile(path string) (kubernetes.Interface, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("read file %s: %w", path, err)
+	}
+	client, err := ctlcommon.NewKubeClient(string(data))
 	return client, err
 }
 
