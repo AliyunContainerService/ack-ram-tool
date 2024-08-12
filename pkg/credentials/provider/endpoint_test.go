@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"os"
 	"testing"
 )
 
@@ -101,5 +102,15 @@ func TestGetSTSEndpoint(t *testing.T) {
 				t.Errorf("GetSTSEndpoint() = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestGetSTSEndpointFromEnv(t *testing.T) {
+	os.Setenv("ALIBABA_CLOUD_STS_ENDPOINT", "sts.cn-hangzhou.aliyuncs.com")
+	defer os.Unsetenv("ALIBABA_CLOUD_STS_ENDPOINT")
+
+	want := "sts.cn-hangzhou.aliyuncs.com"
+	if got := GetSTSEndpoint("foo", true); got != want {
+		t.Errorf("GetSTSEndpoint() = %v, want %v", got, want)
 	}
 }

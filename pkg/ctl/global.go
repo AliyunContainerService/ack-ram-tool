@@ -1,6 +1,7 @@
 package ctl
 
 import (
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/openapi"
 	"os"
 	"strconv"
 	"strings"
@@ -11,7 +12,8 @@ import (
 const (
 	EnvAssumeYes                  = "ACK_RAM_TOOL_ASSUME_YES"
 	EnvProfileFile                = "ACK_RAM_TOOL_PROFILE_FILE"
-	EnvProfileName                = "ACK_RAM_TOOL_PROFIL_ENAME"
+	EnvProfileNameOld             = "ACK_RAM_TOOL_PROFIL_ENAME"
+	EnvProfileName                = "ACK_RAM_TOOL_PROFILE_NAME"
 	EnvIgnoreEnvCredentials       = "ACK_RAM_TOOL_IGNORE_ENV_CREDENTIALS"        // #nosec G101
 	EnvIgnoreAliyunCliCredentials = "ACK_RAM_TOOL_IGNORE_ALIYUN_CLI_CREDENTIALS" // #nosec G101
 	EnvLogLevel                   = "ACK_RAM_TOOL_LOG_LEVEL"
@@ -57,6 +59,9 @@ func (g *globalOption) UpdateValues() {
 	}
 	if g.ProfileName == "" {
 		g.ProfileName = os.Getenv(EnvProfileName)
+		if g.ProfileName == "" {
+			g.ProfileName = os.Getenv(EnvProfileNameOld)
+		}
 	}
 	if v, err := strconv.ParseBool(os.Getenv(EnvIgnoreEnvCredentials)); err == nil && v {
 		g.IgnoreEnv = true
@@ -136,6 +141,13 @@ func (g *globalOption) GetLogLevel() string {
 
 func (g *globalOption) GetRoleArn() string {
 	return g.FinalAssumeRoleAnotherRoleArn
+}
+
+func (g *globalOption) GetEndpoints() openapi.Endpoints {
+	region := g.GetRegion()
+	endpoints := openapi.NewEndpoints(region, g.UseVPCEndpoint)
+	endpoints.STS = g.GetSTSEndpoint()
+	return endpoints
 }
 
 func (g *globalOption) GetSTSEndpoint() string {

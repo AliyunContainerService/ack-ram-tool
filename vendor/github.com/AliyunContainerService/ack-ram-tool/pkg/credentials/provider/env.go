@@ -6,6 +6,9 @@ const (
 	envRoleArn         = "ALIBABA_CLOUD_ROLE_ARN"
 	envOidcProviderArn = "ALIBABA_CLOUD_OIDC_PROVIDER_ARN"
 	envOidcTokenFile   = "ALIBABA_CLOUD_OIDC_TOKEN_FILE"
+
+	envStsEndpoint   = "ALIBABA_CLOUD_STS_ENDPOINT"
+	envStsHttpScheme = "ALIBABA_CLOUD_STS_HTTP_SCHEME"
 )
 
 // https://github.com/aliyun/credentials-go
@@ -141,4 +144,12 @@ func getEnvsValue(keys []string) string {
 
 func getRoleSessionNameFromEnv() string {
 	return getEnvsValue(roleSessionNameEnvs)
+}
+
+func getStsEndpointFromEnv() string {
+	return getEnvsValue([]string{envStsEndpoint})
+}
+
+func getStsHttpSchemeFromEnv() string {
+	return getEnvsValue([]string{envStsHttpScheme})
 }

@@ -1,6 +1,9 @@
 package provider
 
-import "strings"
+import (
+	"os"
+	"strings"
+)
 
 const (
 	regionPlaceholder        = "{region}"
@@ -25,6 +28,9 @@ var stsEndpointsByRegion = map[string][2]string{
 }
 
 func GetSTSEndpoint(region string, vpcNetwork bool) string {
+	if v := os.Getenv(envStsEndpoint); v != "" {
+		return v
+	}
 	endpoints, exist := stsEndpointsByRegion[region]
 	if !exist {
 		endpoints = stsEndpointsByRegion["__default__"]

@@ -29,6 +29,8 @@ type ClientConfig struct {
 	roleArn                 string
 	stsEndpoint             string
 	sessionName             string
+
+	endpoints openapi.Endpoints
 }
 
 func NewClient(config ClientConfig) (*openapi.Client, error) {
@@ -63,11 +65,11 @@ func NewClient(config ClientConfig) (*openapi.Client, error) {
 		regionId = "cn-hangzhou"
 	}
 
-	return openapi.NewClient(&client.Config{
+	return openapi.NewClientWithEndpoints(&client.Config{
 		RegionId:   tea.String(regionId),
 		Credential: cred,
 		UserAgent:  tea.String(version.UserAgent()),
-	})
+	}, config.endpoints)
 }
 
 type getCredentialOption struct {
@@ -170,6 +172,7 @@ func GetClientOrDie() *openapi.Client {
 			ignoreAliyuncli:         ctl.GlobalOption.GetIgnoreAliyuncliConfig(),
 			roleArn:                 ctl.GlobalOption.GetRoleArn(),
 			stsEndpoint:             ctl.GlobalOption.GetSTSEndpoint(),
+			endpoints:               ctl.GlobalOption.GetEndpoints(),
 		},
 	)
 	if err != nil {
