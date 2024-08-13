@@ -235,7 +235,7 @@ var CheckAddons = []Addon{
 		},
 		DefaultRoleNames: []string{
 			"AliyunCSManagedArmsRole",
-			"AliyunCSManagedMseRole",
+			//"AliyunCSManagedMseRole",
 		},
 	},
 	{
@@ -270,10 +270,15 @@ var CheckAddons = []Addon{
 		},
 	},
 	{
-		Name:             "migrate-controller",
-		MinVersion:       "v1.7.7-1dfe3ba-aliyun",
-		ImageNames:       []string{},
-		DefaultRoleNames: []string{},
+		Name:       "migrate-controller",
+		MinVersion: "v1.8.1-187f707-aliyun",
+		ImageNames: []string{
+			"velero-installer",
+			"velero-plugin-alibabacloud",
+		},
+		DefaultRoleNames: []string{
+			"AliyunCSManagedBackupRestoreRole",
+		},
 	},
 	{
 		Name:       "ack-alibaba-cloud-metrics-adapter",

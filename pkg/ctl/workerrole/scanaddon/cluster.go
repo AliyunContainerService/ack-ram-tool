@@ -203,6 +203,9 @@ func (s *ClusterScanner) prepareWorkload(ctx context.Context,
 	if err := s.prepareKubeAi(ctx, addon, wl, secrets, installedAddons); err != nil {
 		return err
 	}
+	if err := s.prepareMigrateController(ctx, addon, wl, secrets, installedAddons); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -303,7 +306,10 @@ func (s *ClusterScanner) prepareArmsCmonitor(ctx context.Context,
 	prefix := "addon."
 	suffix := ".token"
 	allExist := true
-	for _, item := range []string{"arms,ot-collector-cluster-role", "aliyuncsmanagedmserole,ot-collector-cluster-role"} {
+	for _, item := range []string{
+		"arms,ot-collector-cluster-role",
+		//"aliyuncsmanagedmserole,ot-collector-cluster-role",
+	} {
 		parts := strings.Split(item, ",")
 		keyword := parts[0]
 		roleName := parts[1]
@@ -399,6 +405,29 @@ func (s *ClusterScanner) prepareKubeAi(ctx context.Context,
 	suffix := ".token"
 
 	wl.MountedNames = append(wl.MountedNames, prefix+"kubeai"+suffix)
+
+	return nil
+}
+
+func (s *ClusterScanner) prepareMigrateController(ctx context.Context,
+	addon Addon, wl *Workload, secrets map[string]corev1.Secret,
+	installedAddons map[string]InstalledAddon) error {
+	switch addon.Name {
+	case "migrate-controller":
+		break
+	default:
+		return nil
+	}
+	if len(wl.MountedNames) > 0 {
+		return nil
+	}
+
+	prefix := "addon."
+	suffix := ".token"
+
+	wl.MountedNames = append(wl.MountedNames, prefix+"aliyuncsmanagedbackuprestorerole"+suffix)
+
+	wl.Hardened = analyzeMount(ctx, secrets, wl.MountedNames, wl.CreateTime, wl.ReadyTime)
 
 	return nil
 }
