@@ -357,7 +357,10 @@ func (s *ClusterScanner) prepareOnepilot(ctx context.Context,
 	prefix := "addon."
 	suffix := ".token"
 	allExist := true
-	for _, item := range []string{"arms,ack-onepilot-ack-onepilot-role", "aliyuncsmanagedmserole,ack-onepilot-ack-onepilot-role"} {
+	for _, item := range []string{
+		"arms,ack-onepilot-ack-onepilot-role",
+		//"aliyuncsmanagedmserole,ack-onepilot-ack-onepilot-role",
+	} {
 		parts := strings.Split(item, ",")
 		keyword := parts[0]
 		roleName := parts[1]

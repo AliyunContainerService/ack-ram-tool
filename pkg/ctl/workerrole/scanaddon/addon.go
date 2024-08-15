@@ -246,7 +246,7 @@ var CheckAddons = []Addon{
 		},
 		DefaultRoleNames: []string{
 			"AliyunCSManagedArmsRole",
-			"AliyunCSManagedMseRole",
+			//"AliyunCSManagedMseRole",
 		},
 	},
 	{
