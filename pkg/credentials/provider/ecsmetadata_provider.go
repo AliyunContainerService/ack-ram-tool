@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -26,7 +25,7 @@ type ECSMetadataProvider struct {
 	metadataTokenTTLSeconds int
 	metadataTokenExp        time.Time
 
-	client *http.Client
+	client *commonHttpClient
 	Logger Logger
 }
 
@@ -46,10 +45,8 @@ type ECSMetadataProviderOptions struct {
 func NewECSMetadataProvider(opts ECSMetadataProviderOptions) *ECSMetadataProvider {
 	opts.applyDefaults()
 
-	client := &http.Client{
-		Transport: opts.Transport,
-		Timeout:   opts.Timeout,
-	}
+	client := newCommonHttpClient(opts.Transport, opts.Timeout)
+	client.logger = opts.Logger
 	e := &ECSMetadataProvider{
 		endpoint:                opts.Endpoint,
 		roleName:                opts.RoleName,
@@ -85,15 +82,10 @@ type ecsMetadataStsResponse struct {
 	Code            string `json:"Code"`
 }
 
-type metadataError struct {
-	code    int
-	message string
-}
-
 func (e *ECSMetadataProvider) getCredentials(ctx context.Context) (*Credentials, error) {
 	roleName, err := e.getRoleName(ctx)
 	if err != nil {
-		if e, ok := err.(*metadataError); ok && e.code == 404 {
+		if e, ok := err.(*httpError); ok && e.code == 404 {
 			return nil, NewNotEnableError(fmt.Errorf("get role name from ecs metadata failed: %w", err))
 		}
 	}
@@ -107,14 +99,15 @@ func (e *ECSMetadataProvider) getCredentials(ctx context.Context) (*Credentials,
 	if err := json.Unmarshal([]byte(data), &obj); err != nil {
 		return nil, fmt.Errorf("parse credentials failed: %w", err)
 	}
-	if obj.AccessKeySecret == "" {
+	if obj.AccessKeyId == "" || obj.AccessKeySecret == "" ||
+		obj.SecurityToken == "" || obj.Expiration == "" {
 		return nil, fmt.Errorf("parse credentials got unexpected data: %s",
 			strings.ReplaceAll(data, "\n", " "))
 	}
 
 	exp, err := time.Parse("2006-01-02T15:04:05Z", obj.Expiration)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("parse Expiration (%s) failed: %w", obj.Expiration, err)
 	}
 	return &Credentials{
 		AccessKeyId:     obj.AccessKeyId,
@@ -157,7 +150,7 @@ func (e *ECSMetadataProvider) getMedataToken(ctx context.Context) (string, error
 func (e *ECSMetadataProvider) getMedataDataWithToken(ctx context.Context, method, path string) (string, error) {
 	token, err := e.getMedataToken(ctx)
 	if err != nil {
-		if e, ok := err.(*metadataError); !(ok && e.code == 404) {
+		if e, ok := err.(*httpError); !(ok && e.code == 404) {
 			return "", err
 		}
 	}
@@ -170,48 +163,7 @@ func (e *ECSMetadataProvider) getMedataDataWithToken(ctx context.Context, method
 
 func (e *ECSMetadataProvider) getMedataData(ctx context.Context, method, path string, header http.Header) (string, error) {
 	url := fmt.Sprintf("%s%s", e.endpoint, path)
-	req, err := http.NewRequest(method, url, nil)
-	if err != nil {
-		return "", fmt.Errorf("can not init request with url %s: %w", url, err)
-	}
-	req = req.WithContext(ctx)
-	req.Header.Set("User-Agent", UserAgent)
-	for k, items := range header {
-		for _, v := range items {
-			req.Header.Add(k, v)
-		}
-	}
-
-	if debugMode {
-		for _, item := range genDebugReqMessages(req) {
-			e.logger().Debug(item)
-		}
-	}
-
-	resp, err := e.client.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("request %s failed: %w", url, err)
-	}
-	defer resp.Body.Close()
-
-	if debugMode {
-		for _, item := range genDebugRespMessages(resp) {
-			e.logger().Debug(item)
-		}
-	}
-
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", fmt.Errorf("read body failed when request %s: %w", url, err)
-	}
-	if resp.StatusCode != http.StatusOK {
-		return "", &metadataError{
-			code: resp.StatusCode,
-			message: fmt.Sprintf("status code %d is not 200 when request %s: %s",
-				resp.StatusCode, url, strings.ReplaceAll(string(data), "\n", " ")),
-		}
-	}
-	return string(data), nil
+	return e.client.send(ctx, method, url, header, nil)
 }
 
 func (e *ECSMetadataProvider) logger() Logger {
@@ -243,8 +195,4 @@ func (o *ECSMetadataProviderOptions) applyDefaults() {
 	if o.Logger == nil {
 		o.Logger = defaultLog
 	}
-}
-
-func (e metadataError) Error() string {
-	return e.message
 }
