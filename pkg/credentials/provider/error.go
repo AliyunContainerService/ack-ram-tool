@@ -1,5 +1,7 @@
 package provider
 
+import "context"
+
 type NotEnableError struct {
 	err error
 }
@@ -42,4 +44,12 @@ func IsNoAvailableProviderError(err error) bool {
 		return true
 	}
 	return false
+}
+
+type errorProvider struct {
+	err error
+}
+
+func (e errorProvider) Credentials(ctx context.Context) (*Credentials, error) {
+	return nil, e.err
 }
