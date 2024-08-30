@@ -23,7 +23,7 @@ const (
 	envNewSdkCredentialFile = "ALIBABA_CLOUD_CREDENTIALS_FILE" // #nosec G101
 
 	envRoleSessionName = envNewSdkRoleSessionName
-	envCredentialsURI  = envNewSdkCredentialsURI // #nosec G101
+	EnvCredentialsURI  = envNewSdkCredentialsURI // #nosec G101
 )
 
 // https://github.com/aliyun/alibaba-cloud-sdk-go/tree/master/sdk/auth

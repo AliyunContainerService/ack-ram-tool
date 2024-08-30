@@ -123,6 +123,6 @@ func (o *EnvProviderOptions) applyDefaults() {
 	}
 
 	if o.EnvCredentialsURI == "" {
-		o.EnvCredentialsURI = envCredentialsURI
+		o.EnvCredentialsURI = EnvCredentialsURI
 	}
 }
