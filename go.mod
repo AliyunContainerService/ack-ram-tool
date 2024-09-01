@@ -7,7 +7,7 @@ require (
 	github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider v0.0.0
 	github.com/alibabacloud-go/cs-20151215/v3 v3.0.42
 	github.com/alibabacloud-go/darabonba-openapi v0.2.1
-	github.com/alibabacloud-go/darabonba-openapi/v2 v2.0.6
+	github.com/alibabacloud-go/darabonba-openapi/v2 v2.0.9
 	github.com/alibabacloud-go/ram-20150501 v1.0.2
 	github.com/alibabacloud-go/sts-20150401 v1.1.0
 	github.com/alibabacloud-go/tea v1.2.2
@@ -29,7 +29,7 @@ require (
 require (
 	github.com/alibabacloud-go/openapi-util v0.1.0
 	github.com/alibabacloud-go/tea-utils v1.4.5
-	github.com/alibabacloud-go/tea-utils/v2 v2.0.5
+	github.com/alibabacloud-go/tea-utils/v2 v2.0.6
 	github.com/go-logr/zapr v1.3.0
 	github.com/olekukonko/tablewriter v0.0.6-0.20230925090304-df64c4bbad77
 	go.uber.org/zap v1.27.0
