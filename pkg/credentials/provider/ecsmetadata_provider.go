@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -12,6 +14,8 @@ import (
 const (
 	defaultExpiryWindow               = time.Minute * 30
 	defaultECSMetadataServerEndpoint  = "http://100.100.100.200"
+	envECSMetadataServerEndpoint      = "ALIBABA_CLOUD_IMDS_ENDPOINT"
+	envIMDSV2Disabled                 = "ALIBABA_CLOUD_IMDSV2_DISABLED"
 	defaultECSMetadataTokenTTLSeconds = 3600
 	defaultClientTimeout              = time.Second * 30
 )
@@ -21,6 +25,7 @@ type ECSMetadataProvider struct {
 
 	endpoint                string
 	roleName                string
+	disableToken            bool
 	metadataToken           string
 	metadataTokenTTLSeconds int
 	metadataTokenExp        time.Time
@@ -36,6 +41,7 @@ type ECSMetadataProviderOptions struct {
 
 	RoleName                string
 	MetadataTokenTTLSeconds int
+	DisableToken            bool
 
 	ExpiryWindow  time.Duration
 	RefreshPeriod time.Duration
@@ -51,6 +57,7 @@ func NewECSMetadataProvider(opts ECSMetadataProviderOptions) *ECSMetadataProvide
 		endpoint:                opts.Endpoint,
 		roleName:                opts.RoleName,
 		metadataTokenTTLSeconds: opts.MetadataTokenTTLSeconds,
+		disableToken:            opts.DisableToken,
 		client:                  client,
 		Logger:                  opts.Logger,
 	}
@@ -129,6 +136,10 @@ func (e *ECSMetadataProvider) getRoleName(ctx context.Context) (string, error) {
 }
 
 func (e *ECSMetadataProvider) getMedataToken(ctx context.Context) (string, error) {
+	if e.disableToken {
+		return "", nil
+	}
+
 	if !e.metadataTokenExp.Before(time.Now()) {
 		return e.metadataToken, nil
 	}
@@ -182,9 +193,20 @@ func (o *ECSMetadataProviderOptions) applyDefaults() {
 		o.Transport = ts
 	}
 	if o.Endpoint == "" {
-		o.Endpoint = defaultECSMetadataServerEndpoint
+		if v := os.Getenv(envECSMetadataServerEndpoint); v != "" {
+			o.Endpoint = v
+		} else {
+			o.Endpoint = defaultECSMetadataServerEndpoint
+		}
 	} else {
 		o.Endpoint = strings.TrimRight(o.Endpoint, "/")
+	}
+	if !o.DisableToken {
+		if v := os.Getenv(envIMDSV2Disabled); v != "" {
+			if b, err := strconv.ParseBool(v); err == nil && b {
+				o.DisableToken = true
+			}
+		}
 	}
 	if o.MetadataTokenTTLSeconds == 0 {
 		o.MetadataTokenTTLSeconds = defaultECSMetadataTokenTTLSeconds
