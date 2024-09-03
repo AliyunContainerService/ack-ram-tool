@@ -26,7 +26,9 @@ type EnvProviderOptions struct {
 	EnvOIDCProviderArn string
 	EnvOIDCTokenFile   string
 
-	EnvCredentialsURI string
+	EnvCredentialsURI    string
+	EnvConfigFile        string
+	EnvConfigSectionName string
 
 	STSEndpoint string
 	Logger      Logger
@@ -68,6 +70,8 @@ func (e *EnvProvider) getProvider(opts EnvProviderOptions) CredentialsProvider {
 	oidcProviderArn := os.Getenv(opts.EnvOIDCProviderArn)
 	oidcTokenFile := os.Getenv(opts.EnvOIDCTokenFile)
 	credentialsURI := os.Getenv(opts.EnvCredentialsURI)
+	iniConfigPath := os.Getenv(opts.EnvConfigFile)
+	iniConfigSectionName := os.Getenv(opts.EnvConfigSectionName)
 
 	switch {
 	case accessKeyId != "" && accessKeySecret != "" && securityToken != "":
@@ -111,11 +115,23 @@ func (e *EnvProvider) getProvider(opts EnvProviderOptions) CredentialsProvider {
 			Logger: opts.Logger,
 		})
 
-	default:
-		return &errorProvider{
-			err: NewNoAvailableProviderError(
-				errors.New("no validated credentials were found in environment variables")),
+	case iniConfigPath != "":
+		cp, err := NewIniConfigProvider(INIConfigProviderOptions{
+			ConfigPath:  iniConfigPath,
+			SectionName: iniConfigSectionName,
+			STSEndpoint: opts.STSEndpoint,
+			Logger:      opts.Logger,
+		})
+		if err != nil {
+			opts.Logger.Debug(err.Error())
+		} else {
+			return cp
 		}
+	}
+
+	return &errorProvider{
+		err: NewNoAvailableProviderError(
+			errors.New("no validated credentials were found in environment variables")),
 	}
 }
 
@@ -142,5 +158,15 @@ func (o *EnvProviderOptions) applyDefaults() {
 
 	if o.EnvCredentialsURI == "" {
 		o.EnvCredentialsURI = envCredentialsURI
+	}
+	if o.EnvConfigFile == "" {
+		o.EnvConfigFile = envINIConfigFile
+	}
+	if o.EnvConfigSectionName == "" {
+		o.EnvConfigSectionName = envProfileName
+	}
+
+	if o.Logger == nil {
+		o.Logger = DefaultLogger
 	}
 }

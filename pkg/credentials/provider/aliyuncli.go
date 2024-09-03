@@ -37,13 +37,15 @@ type CLIConfigProviderOptions struct {
 	ProfileName string
 	STSEndpoint string
 	Logger      Logger
+
+	conf *Configuration
 }
 
 func NewCLIConfigProvider(opts CLIConfigProviderOptions) (*CLIConfigProvider, error) {
 	opts.applyDefaults()
 	logger := opts.Logger
 
-	conf, profile, err := loadProfile(opts.ConfigPath, opts.ProfileName)
+	conf, profile, err := loadProfile(opts.ConfigPath, opts.ProfileName, opts.conf)
 	if err != nil {
 		return nil, NewNotEnableError(fmt.Errorf("load profile: %w", err))
 	}
@@ -66,11 +68,15 @@ func NewCLIConfigProvider(opts CLIConfigProviderOptions) (*CLIConfigProvider, er
 	return c, nil
 }
 
-func loadProfile(path string, name string) (*Configuration, Profile, error) {
+func loadProfile(path string, name string, conf *Configuration) (*Configuration, Profile, error) {
 	var p Profile
-	conf, err := loadConfiguration(path)
-	if err != nil {
-		return nil, p, fmt.Errorf("init config: %w", err)
+	var err error
+
+	if conf == nil {
+		conf, err = loadConfiguration(path)
+		if err != nil {
+			return nil, p, fmt.Errorf("init config: %w", err)
+		}
 	}
 	if name == "" {
 		name = conf.CurrentProfile

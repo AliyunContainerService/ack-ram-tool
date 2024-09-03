@@ -176,12 +176,20 @@ func NewDefaultChainProvider(opts DefaultChainProviderOptions) *ChainProvider {
 			Logger:        opts.Logger,
 		}),
 	}
+
 	if p, err := NewCLIConfigProvider(CLIConfigProviderOptions{
 		STSEndpoint: opts.STSEndpoint,
 		Logger:      opts.Logger,
 	}); err == nil {
 		providers = append(providers, p)
 	}
+	if p, err := NewIniConfigProvider(INIConfigProviderOptions{
+		STSEndpoint: opts.STSEndpoint,
+		Logger:      opts.Logger,
+	}); err == nil {
+		providers = append(providers, p)
+	}
+
 	providers = append(providers, NewECSMetadataProvider(ECSMetadataProviderOptions{
 		ExpiryWindow:  opts.ExpiryWindow,
 		RefreshPeriod: opts.RefreshPeriod,

@@ -9,6 +9,11 @@ import (
 	"testing"
 )
 
+func init() {
+	os.Setenv(envINIConfigFile, "foo-bar-not-exist")
+	os.Setenv(envProfileName, "foo-bar-test-not-exist")
+}
+
 func TestEnvProvider_Credentials_ak(t *testing.T) {
 	envAk := "TestEnvProvider_Credentials_AK"
 	envSK := "TestEnvProvider_Credentials_SK"
@@ -17,7 +22,6 @@ func TestEnvProvider_Credentials_ak(t *testing.T) {
 	envOidcP := "TestEnvProvider_Credentials_OIDC_Pro"
 	envOidcT := "TestEnvProvider_Credentials_OIDC_Token"
 	envURI := "TestEnvProvider_Credentials_URI"
-	os.Setenv(envProfileName, "foo-bar-test")
 
 	t.Run("no env", func(t *testing.T) {
 		p := NewEnvProvider(EnvProviderOptions{
@@ -327,6 +331,46 @@ func TestEnvProvider_Credentials_oidc(t *testing.T) {
 		if cred.AccessKeyId != "ak_TestEnvProvider_Credentials_oidc" ||
 			cred.AccessKeySecret != "<oidc ak secret>" ||
 			cred.SecurityToken != "<oidc security token>" {
+			t.Errorf("got unexpected cred: %+v", *cred)
+		}
+	})
+}
+
+func TestEnvProvider_Credentials_ini(t *testing.T) {
+	envAk := "TestEnvProvider_Credentials_AK_2"
+	envSK := "TestEnvProvider_Credentials_SK_2"
+	envToken := "TestEnvProvider_Credentials_Token_2"
+	envRoleArn := "TestEnvProvider_Credentials_Role_ARN_2"
+	envOidcP := "TestEnvProvider_Credentials_OIDC_Pro_2"
+	envOidcT := "TestEnvProvider_Credentials_OIDC_Token_2"
+	envURI := "TestEnvProvider_Credentials_URI_2"
+	envConfig := "TestEnvProvider_Credentials_ini_env"
+	envProfile := "TestEnvProvider_Credentials_ini_name"
+	os.Setenv(envProfileName, "foo-bar-test")
+
+	t.Run("sts token env", func(t *testing.T) {
+		os.Setenv(envConfig, "testdata/ak.ini")
+		os.Setenv(envProfile, "default")
+		defer os.Unsetenv(envConfig)
+		defer os.Unsetenv(envProfile)
+		p := NewEnvProvider(EnvProviderOptions{
+			EnvAccessKeyId:       envAk,
+			EnvAccessKeySecret:   envSK,
+			EnvSecurityToken:     envToken,
+			EnvRoleArn:           envRoleArn,
+			EnvOIDCProviderArn:   envOidcP,
+			EnvOIDCTokenFile:     envOidcT,
+			EnvCredentialsURI:    envURI,
+			EnvConfigFile:        envConfig,
+			EnvConfigSectionName: envProfile,
+		})
+		cred, err := p.Credentials(context.TODO())
+		if err != nil {
+			t.Errorf("should no error: %+v", err)
+		}
+		if cred.AccessKeyId != "foo_from_ini" ||
+			cred.AccessKeySecret != "bar_from_ini" ||
+			cred.SecurityToken != "" {
 			t.Errorf("got unexpected cred: %+v", *cred)
 		}
 	})

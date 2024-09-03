@@ -23,9 +23,9 @@ import (
 )
 
 const (
-	defaultConfigDir         = "~/.aliyun"
-	configFile               = "config.json"
-	defaultConfigProfileName = "default"
+	defaultCLIConfigDir         = "~/.aliyun"
+	cliConfigFileName           = "config.json"
+	defaultCLIConfigProfileName = "default"
 )
 
 type Configuration struct {
@@ -37,9 +37,9 @@ type Configuration struct {
 
 func newConfiguration() *Configuration {
 	return &Configuration{
-		CurrentProfile: defaultConfigProfileName,
+		CurrentProfile: defaultCLIConfigProfileName,
 		Profiles: []Profile{
-			newProfile(defaultConfigProfileName),
+			newProfile(defaultCLIConfigProfileName),
 		},
 	}
 }
@@ -54,11 +54,11 @@ func (c *Configuration) getProfile(pn string) (Profile, bool) {
 }
 
 func getDefaultConfigPath() string {
-	dir, err := expandPath(defaultConfigDir)
+	dir, err := expandPath(defaultCLIConfigDir)
 	if err != nil {
-		dir = defaultConfigDir
+		dir = defaultCLIConfigDir
 	}
-	return path.Join(dir, configFile)
+	return path.Join(dir, cliConfigFileName)
 }
 
 func loadConfiguration(inputPath string) (conf *Configuration, err error) {
