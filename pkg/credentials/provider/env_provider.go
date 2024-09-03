@@ -28,7 +28,8 @@ type EnvProviderOptions struct {
 
 	EnvCredentialsURI string
 
-	stsEndpoint string
+	STSEndpoint string
+	Logger      Logger
 }
 
 func NewEnvProvider(opts EnvProviderOptions) *EnvProvider {
@@ -70,28 +71,45 @@ func (e *EnvProvider) getProvider(opts EnvProviderOptions) CredentialsProvider {
 
 	switch {
 	case accessKeyId != "" && accessKeySecret != "" && securityToken != "":
-		return NewSTSTokenProvider(
+		cp := NewSTSTokenProvider(
 			os.Getenv(opts.EnvAccessKeyId),
 			os.Getenv(opts.EnvAccessKeySecret),
 			os.Getenv(opts.EnvSecurityToken),
 		)
-
-	case roleArn != "" && oidcProviderArn != "" && oidcTokenFile != "":
-		return NewOIDCProvider(OIDCProviderOptions{
-			RoleArn:         os.Getenv(opts.EnvRoleArn),
-			OIDCProviderArn: os.Getenv(opts.EnvOIDCProviderArn),
-			OIDCTokenFile:   os.Getenv(opts.EnvOIDCTokenFile),
-			STSEndpoint:     opts.stsEndpoint,
+		if roleArn == "" {
+			return cp
+		}
+		return NewRoleArnProvider(cp, roleArn, RoleArnProviderOptions{
+			STSEndpoint: opts.STSEndpoint,
+			Logger:      opts.Logger,
 		})
 
-	case credentialsURI != "":
-		return NewURIProvider(credentialsURI, URIProviderOptions{})
-
 	case accessKeyId != "" && accessKeySecret != "":
-		return NewAccessKeyProvider(
+		cp := NewAccessKeyProvider(
 			os.Getenv(opts.EnvAccessKeyId),
 			os.Getenv(opts.EnvAccessKeySecret),
 		)
+		if roleArn == "" {
+			return cp
+		}
+		return NewRoleArnProvider(cp, roleArn, RoleArnProviderOptions{
+			STSEndpoint: opts.STSEndpoint,
+			Logger:      opts.Logger,
+		})
+
+	case roleArn != "" && oidcProviderArn != "" && oidcTokenFile != "":
+		return NewOIDCProvider(OIDCProviderOptions{
+			RoleArn:         roleArn,
+			OIDCProviderArn: oidcProviderArn,
+			OIDCTokenFile:   oidcTokenFile,
+			STSEndpoint:     opts.STSEndpoint,
+			Logger:          opts.Logger,
+		})
+
+	case credentialsURI != "":
+		return NewURIProvider(credentialsURI, URIProviderOptions{
+			Logger: opts.Logger,
+		})
 
 	default:
 		return &errorProvider{
@@ -123,6 +141,6 @@ func (o *EnvProviderOptions) applyDefaults() {
 	}
 
 	if o.EnvCredentialsURI == "" {
-		o.EnvCredentialsURI = EnvCredentialsURI
+		o.EnvCredentialsURI = envCredentialsURI
 	}
 }
