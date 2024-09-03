@@ -16,6 +16,7 @@ const (
 	defaultECSMetadataServerEndpoint  = "http://100.100.100.200"
 	envECSMetadataServerEndpoint      = "ALIBABA_CLOUD_IMDS_ENDPOINT"
 	envIMDSV2Disabled                 = "ALIBABA_CLOUD_IMDSV2_DISABLED"
+	envIMDSRoleName                   = "ALIBABA_CLOUD_ECS_METADATA"
 	defaultECSMetadataTokenTTLSeconds = 3600
 	defaultClientTimeout              = time.Second * 30
 )
@@ -210,6 +211,11 @@ func (o *ECSMetadataProviderOptions) applyDefaults() {
 	}
 	if o.MetadataTokenTTLSeconds == 0 {
 		o.MetadataTokenTTLSeconds = defaultECSMetadataTokenTTLSeconds
+	}
+	if o.RoleName == "" {
+		if v := os.Getenv(envIMDSRoleName); v != "" {
+			o.RoleName = v
+		}
 	}
 	if o.ExpiryWindow == 0 {
 		o.ExpiryWindow = defaultExpiryWindow
