@@ -1,4 +1,4 @@
-package aliyuncli
+package provider
 
 import (
 	"bytes"
@@ -12,8 +12,10 @@ import (
 	"regexp"
 	"strings"
 	"time"
+)
 
-	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider"
+const (
+	envProfileName = "ALIBABA_CLOUD_PROFILE"
 )
 
 type profileWrapper struct {
@@ -22,31 +24,38 @@ type profileWrapper struct {
 
 	stsEndpoint string
 	client      *http.Client
-	logger      provider.Logger
+	logger      Logger
 }
 
-type CLIProvider struct {
+type CLIConfigProvider struct {
 	profile *profileWrapper
-	logger  provider.Logger
+	logger  Logger
 }
 
-func NewCLIProvider(configPath, profileName, stsEndpoint string, logger provider.Logger) (*CLIProvider, error) {
-	if configPath == "" {
-		configPath = getDefaultConfigPath()
-	}
-	conf, profile, err := loadProfile(configPath, profileName)
+type CLIConfigProviderOptions struct {
+	ConfigPath  string
+	ProfileName string
+	STSEndpoint string
+	Logger      Logger
+}
+
+func NewCLIConfigProvider(opts CLIConfigProviderOptions) (*CLIConfigProvider, error) {
+	opts.applyDefaults()
+	logger := opts.Logger
+
+	conf, profile, err := loadProfile(opts.ConfigPath, opts.ProfileName)
 	if err != nil {
-		return nil, fmt.Errorf("load profile: %w", err)
+		return nil, NewNotEnableError(fmt.Errorf("load profile: %w", err))
 	}
 	if err := profile.validate(); err != nil {
-		return nil, fmt.Errorf("validate profile: %w", err)
+		return nil, NewNotEnableError(fmt.Errorf("validate profile: %w", err))
 	}
 	logger.Debug(fmt.Sprintf("use profile name: %s", profile.Name))
-	c := &CLIProvider{
+	c := &CLIConfigProvider{
 		profile: &profileWrapper{
 			cp:          profile,
 			conf:        conf,
-			stsEndpoint: stsEndpoint,
+			stsEndpoint: opts.STSEndpoint,
 			client: &http.Client{
 				Timeout: time.Second * 30,
 			},
@@ -73,7 +82,7 @@ func loadProfile(path string, name string) (*Configuration, Profile, error) {
 	return conf, p, nil
 }
 
-func (c *CLIProvider) Credentials(ctx context.Context) (*provider.Credentials, error) {
+func (c *CLIConfigProvider) Credentials(ctx context.Context) (*Credentials, error) {
 	p, err := c.profile.getProvider()
 	if err != nil {
 		return nil, err
@@ -81,7 +90,7 @@ func (c *CLIProvider) Credentials(ctx context.Context) (*provider.Credentials, e
 	return p.Credentials(ctx)
 }
 
-func (p *profileWrapper) getProvider() (provider.CredentialsProvider, error) {
+func (p *profileWrapper) getProvider() (CredentialsProvider, error) {
 	cp := p.cp
 
 	switch cp.Mode {
@@ -112,34 +121,37 @@ func (p *profileWrapper) getProvider() (provider.CredentialsProvider, error) {
 		p.logger.Debug(fmt.Sprintf("using %s mode", cp.Mode))
 		return p.getCredentialsByCredentialsURI()
 	default:
-		return nil, fmt.Errorf("unexcepted certificate mode: %s", cp.Mode)
+		return nil, fmt.Errorf("unexcepted credentials mode: %s", cp.Mode)
 	}
 }
 
-func (p *profileWrapper) getCredentialsByAK() (provider.CredentialsProvider, error) {
+func (p *profileWrapper) getCredentialsByAK() (CredentialsProvider, error) {
 	cp := p.cp
 
-	return provider.NewAccessKeyProvider(cp.AccessKeyId, cp.AccessKeySecret), nil
+	return NewAccessKeyProvider(cp.AccessKeyId, cp.AccessKeySecret), nil
 }
 
-func (p *profileWrapper) getCredentialsBySts() (provider.CredentialsProvider, error) {
+func (p *profileWrapper) getCredentialsBySts() (CredentialsProvider, error) {
 	cp := p.cp
 
-	return provider.NewSTSTokenProvider(cp.AccessKeyId, cp.AccessKeySecret, cp.StsToken), nil
+	return NewSTSTokenProvider(cp.AccessKeyId, cp.AccessKeySecret, cp.StsToken), nil
 }
 
-func (p *profileWrapper) getCredentialsByRoleArn() (provider.CredentialsProvider, error) {
+func (p *profileWrapper) getCredentialsByRoleArn() (CredentialsProvider, error) {
 	cp := p.cp
 
-	preP := provider.NewAccessKeyProvider(cp.AccessKeyId, cp.AccessKeySecret)
+	preP, _ := p.getCredentialsByAK()
+	if cp.StsToken != "" {
+		preP, _ = p.getCredentialsBySts()
+	}
 
 	return p.getCredentialsByRoleArnWithPro(preP)
 }
 
-func (p *profileWrapper) getCredentialsByRoleArnWithPro(preP provider.CredentialsProvider) (provider.CredentialsProvider, error) {
+func (p *profileWrapper) getCredentialsByRoleArnWithPro(preP CredentialsProvider) (CredentialsProvider, error) {
 	cp := p.cp
 
-	credP := provider.NewRoleArnProvider(preP, cp.RamRoleArn, provider.RoleArnProviderOptions{
+	credP := NewRoleArnProvider(preP, cp.RamRoleArn, RoleArnProviderOptions{
 		STSEndpoint: p.stsEndpoint,
 		SessionName: cp.RoleSessionName,
 		Logger:      p.logger,
@@ -147,10 +159,10 @@ func (p *profileWrapper) getCredentialsByRoleArnWithPro(preP provider.Credential
 	return credP, nil
 }
 
-func (p *profileWrapper) getCredentialsByEcsRamRole() (provider.CredentialsProvider, error) {
+func (p *profileWrapper) getCredentialsByEcsRamRole() (CredentialsProvider, error) {
 	cp := p.cp
 
-	credP := provider.NewECSMetadataProvider(provider.ECSMetadataProviderOptions{
+	credP := NewECSMetadataProvider(ECSMetadataProviderOptions{
 		RoleName: cp.RamRoleName,
 		Logger:   p.logger,
 	})
@@ -161,7 +173,7 @@ func (p *profileWrapper) getCredentialsByEcsRamRole() (provider.CredentialsProvi
 //
 //}
 
-func (p *profileWrapper) getCredentialsByRamRoleArnWithEcs() (provider.CredentialsProvider, error) {
+func (p *profileWrapper) getCredentialsByRamRoleArnWithEcs() (CredentialsProvider, error) {
 	preP, err := p.getCredentialsByEcsRamRole()
 	if err != nil {
 		return nil, err
@@ -169,7 +181,7 @@ func (p *profileWrapper) getCredentialsByRamRoleArnWithEcs() (provider.Credentia
 	return p.getCredentialsByRoleArnWithPro(preP)
 }
 
-func (p *profileWrapper) getCredentialsByChainableRamRoleArn() (provider.CredentialsProvider, error) {
+func (p *profileWrapper) getCredentialsByChainableRamRoleArn() (CredentialsProvider, error) {
 	cp := p.cp
 	profileName := cp.SourceProfile
 
@@ -183,6 +195,7 @@ func (p *profileWrapper) getCredentialsByChainableRamRoleArn() (provider.Credent
 		conf:        p.conf,
 		stsEndpoint: p.stsEndpoint,
 		client:      p.client,
+		logger:      p.logger,
 	}
 	preP, err := newP.getProvider()
 	if err != nil {
@@ -193,7 +206,7 @@ func (p *profileWrapper) getCredentialsByChainableRamRoleArn() (provider.Credent
 	return p.getCredentialsByRoleArnWithPro(preP)
 }
 
-func (p *profileWrapper) getCredentialsByExternal() (provider.CredentialsProvider, error) {
+func (p *profileWrapper) getCredentialsByExternal() (CredentialsProvider, error) {
 	cp := p.cp
 	args := strings.Fields(cp.ProcessCommand)
 	cmd := exec.Command(args[0], args[1:]...) // #nosec G204
@@ -233,8 +246,9 @@ func (p *profileWrapper) getCredentialsByExternal() (provider.CredentialsProvide
 
 	p.logger.Debug(fmt.Sprintf("using profile from output of external program"))
 	newP := &profileWrapper{
-		cp:   newCP,
-		conf: p.conf,
+		cp:     newCP,
+		conf:   p.conf,
+		logger: p.logger,
 	}
 	return newP.getProvider()
 }
@@ -254,21 +268,35 @@ func tryToParseProfileFromOutput(output string) *Profile {
 	return nil
 }
 
-func (p *profileWrapper) getCredentialsByCredentialsURI() (provider.CredentialsProvider, error) {
+func (p *profileWrapper) getCredentialsByCredentialsURI() (CredentialsProvider, error) {
 	cp := p.cp
 	uri := cp.CredentialsURI
 	if uri == "" {
-		uri = os.Getenv(provider.EnvCredentialsURI)
+		uri = os.Getenv(envCredentialsURI)
 	}
 	if uri == "" {
 		return nil, fmt.Errorf("invalid credentials uri")
 	}
 	p.logger.Debug(fmt.Sprintf("get credentials from uri %s", uri))
 
-	newPr := provider.NewURIProvider(uri, provider.URIProviderOptions{})
+	newPr := NewURIProvider(uri, URIProviderOptions{})
 	return newPr, nil
 }
 
-func (c *CLIProvider) ProfileName() string {
+func (c *CLIConfigProvider) ProfileName() string {
 	return c.profile.cp.Name
+}
+
+func (o *CLIConfigProviderOptions) applyDefaults() {
+	if o.ConfigPath == "" {
+		o.ConfigPath = getDefaultConfigPath()
+	}
+	if o.ProfileName == "" {
+		if v := os.Getenv(envProfileName); v != "" {
+			o.ProfileName = v
+		}
+	}
+	if o.Logger == nil {
+		o.Logger = DefaultLogger
+	}
 }
