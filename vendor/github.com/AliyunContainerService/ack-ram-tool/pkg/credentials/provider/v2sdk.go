@@ -2,28 +2,40 @@ package provider
 
 import (
 	"context"
+	"time"
 )
 
+var defaultTimeout = time.Minute * 10
+
 type CredentialForV2SDK struct {
-	p      CredentialsProvider
-	Logger Logger
+	p                          CredentialsProvider
+	Logger                     Logger
+	credentialRetrievalTimeout time.Duration
 }
 
 type CredentialForV2SDKOptions struct {
-	Logger Logger
+	Logger                     Logger
+	CredentialRetrievalTimeout time.Duration
 }
 
 func NewCredentialForV2SDK(p CredentialsProvider, opts CredentialForV2SDKOptions) *CredentialForV2SDK {
 	opts.applyDefaults()
 
+	if _, ok := p.(*SemaphoreProvider); !ok {
+		p = NewSemaphoreProvider(p, SemaphoreProviderOptions{MaxWeight: 1})
+	}
+
 	return &CredentialForV2SDK{
-		p:      p,
-		Logger: opts.Logger,
+		p:                          p,
+		Logger:                     opts.Logger,
+		credentialRetrievalTimeout: opts.CredentialRetrievalTimeout,
 	}
 }
 
 func (c *CredentialForV2SDK) GetAccessKeyId() (*string, error) {
-	cred, err := c.p.Credentials(context.TODO())
+	timeoutCtx, cancel := context.WithTimeout(context.Background(), c.credentialRetrievalTimeout)
+	defer cancel()
+	cred, err := c.p.Credentials(timeoutCtx)
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +43,9 @@ func (c *CredentialForV2SDK) GetAccessKeyId() (*string, error) {
 }
 
 func (c *CredentialForV2SDK) GetAccessKeySecret() (*string, error) {
-	cred, err := c.p.Credentials(context.TODO())
+	timeoutCtx, cancel := context.WithTimeout(context.Background(), c.credentialRetrievalTimeout)
+	defer cancel()
+	cred, err := c.p.Credentials(timeoutCtx)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +53,9 @@ func (c *CredentialForV2SDK) GetAccessKeySecret() (*string, error) {
 }
 
 func (c *CredentialForV2SDK) GetSecurityToken() (*string, error) {
-	cred, err := c.p.Credentials(context.TODO())
+	timeoutCtx, cancel := context.WithTimeout(context.Background(), c.credentialRetrievalTimeout)
+	defer cancel()
+	cred, err := c.p.Credentials(timeoutCtx)
 	if err != nil {
 		return nil, err
 	}
@@ -64,6 +80,9 @@ func (c *CredentialForV2SDK) logger() Logger {
 func (o *CredentialForV2SDKOptions) applyDefaults() {
 	if o.Logger == nil {
 		o.Logger = defaultLog
+	}
+	if o.CredentialRetrievalTimeout <= 0 {
+		o.CredentialRetrievalTimeout = defaultTimeout
 	}
 }
 
