@@ -15,7 +15,7 @@ type Logger interface {
 }
 
 var defaultLog Logger = &defaultLogger{}
-var DefaultLogger = defaultLog
+var DefaultLogger = defaultLog.(*defaultLogger)
 
 func init() {
 	debugEnv := strings.Split(strings.ToLower(os.Getenv("DEBUG")), ",")
