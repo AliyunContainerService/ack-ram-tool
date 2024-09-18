@@ -33,10 +33,10 @@ var signParamsWhitelist = map[string]bool{
 }
 
 type Token struct {
-	ClusterId string `json:"clusterId"`
+	ClusterId string `json:"clusterId"` // legacy, for audit
 
-	Method  string            `json:"method"` // for audit
-	Path    string            `json:"path"`   // for audit
+	Method  string            `json:"method"` // legacy, for audit
+	Path    string            `json:"path"`   // legacy, for audit
 	Query   map[string]string `json:"query"`
 	Headers map[string]string `json:"headers"`
 
