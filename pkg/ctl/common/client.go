@@ -18,6 +18,8 @@ import (
 	"github.com/aliyun/credentials-go/credentials"
 )
 
+const defaultConnectTimeoutSeconds = 30
+
 type ClientConfig struct {
 	regionId                string
 	credentialFilePath      string
@@ -65,9 +67,10 @@ func NewClient(config ClientConfig) (*openapi.Client, error) {
 	}
 
 	return openapi.NewClientWithEndpoints(&client.Config{
-		RegionId:   tea.String(regionId),
-		Credential: cred,
-		UserAgent:  tea.String(version.UserAgent()),
+		RegionId:       tea.String(regionId),
+		Credential:     cred,
+		UserAgent:      tea.String(version.UserAgent()),
+		ConnectTimeout: tea.Int(defaultConnectTimeoutSeconds),
 	}, config.endpoints)
 }
 
