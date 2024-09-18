@@ -2,7 +2,7 @@
 
 
 ```
-aliyun/terraform-provider-alicloud > v1.171.0
+aliyun/terraform-provider-alicloud > v1.212.0
 ```
 
 https://registry.terraform.io/providers/aliyun/alicloud/latest
