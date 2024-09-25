@@ -2,6 +2,7 @@ package log
 
 import (
 	"fmt"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider"
 	"os"
 	"strings"
 	"time"
@@ -118,4 +119,8 @@ func setLoggerForProduction(logLevelKey string, encoder zapcore.LevelEncoder) *z
 	klog.SetLogger(newlogger)
 
 	return zlog
+}
+
+func ProviderLogger() provider.Logger {
+	return &ProviderLogWrapper{ZP: Logger}
 }

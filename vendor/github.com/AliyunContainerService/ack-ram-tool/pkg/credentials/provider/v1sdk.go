@@ -3,23 +3,31 @@ package provider
 import (
 	"context"
 	"fmt"
+	"time"
 )
 
 type SignerForV1SDK struct {
-	p      CredentialsProvider
-	Logger Logger
+	p                          CredentialsProvider
+	Logger                     Logger
+	credentialRetrievalTimeout time.Duration
 }
 
 type SignerForV1SDKOptions struct {
-	Logger Logger
+	Logger                     Logger
+	CredentialRetrievalTimeout time.Duration
 }
 
 func NewSignerForV1SDK(p CredentialsProvider, opts SignerForV1SDKOptions) *SignerForV1SDK {
 	opts.applyDefaults()
 
+	if _, ok := p.(*SemaphoreProvider); !ok {
+		p = NewSemaphoreProvider(p, SemaphoreProviderOptions{MaxWeight: 1})
+	}
+
 	return &SignerForV1SDK{
-		p:      p,
-		Logger: opts.Logger,
+		p:                          p,
+		Logger:                     opts.Logger,
+		credentialRetrievalTimeout: opts.CredentialRetrievalTimeout,
 	}
 }
 
@@ -36,7 +44,9 @@ func (s *SignerForV1SDK) GetVersion() string {
 }
 
 func (s *SignerForV1SDK) GetAccessKeyId() (string, error) {
-	cred, err := s.p.Credentials(context.TODO())
+	timeoutCtx, cancel := context.WithTimeout(context.Background(), s.credentialRetrievalTimeout)
+	defer cancel()
+	cred, err := s.p.Credentials(timeoutCtx)
 	if err != nil {
 		return "", err
 	}
@@ -44,7 +54,9 @@ func (s *SignerForV1SDK) GetAccessKeyId() (string, error) {
 }
 
 func (s *SignerForV1SDK) GetExtraParam() map[string]string {
-	cred, err := s.p.Credentials(context.TODO())
+	timeoutCtx, cancel := context.WithTimeout(context.Background(), s.credentialRetrievalTimeout)
+	defer cancel()
+	cred, err := s.p.Credentials(timeoutCtx)
 	if err != nil {
 		s.logger().Error(err, fmt.Sprintf("get credentials failed: %s", err))
 		return nil
@@ -56,7 +68,9 @@ func (s *SignerForV1SDK) GetExtraParam() map[string]string {
 }
 
 func (s *SignerForV1SDK) Sign(stringToSign, secretSuffix string) string {
-	cred, err := s.p.Credentials(context.TODO())
+	timeoutCtx, cancel := context.WithTimeout(context.Background(), s.credentialRetrievalTimeout)
+	defer cancel()
+	cred, err := s.p.Credentials(timeoutCtx)
 	if err != nil {
 		s.logger().Error(err, fmt.Sprintf("get credentials failed: %s", err))
 		return ""
@@ -75,5 +89,8 @@ func (s *SignerForV1SDK) logger() Logger {
 func (o *SignerForV1SDKOptions) applyDefaults() {
 	if o.Logger == nil {
 		o.Logger = defaultLog
+	}
+	if o.CredentialRetrievalTimeout <= 0 {
+		o.CredentialRetrievalTimeout = defaultTimeout
 	}
 }

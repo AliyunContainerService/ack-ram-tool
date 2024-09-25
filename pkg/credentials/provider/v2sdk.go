@@ -21,6 +21,10 @@ type CredentialForV2SDKOptions struct {
 func NewCredentialForV2SDK(p CredentialsProvider, opts CredentialForV2SDKOptions) *CredentialForV2SDK {
 	opts.applyDefaults()
 
+	if _, ok := p.(*SemaphoreProvider); !ok {
+		p = NewSemaphoreProvider(p, SemaphoreProviderOptions{MaxWeight: 1})
+	}
+
 	return &CredentialForV2SDK{
 		p:                          p,
 		Logger:                     opts.Logger,

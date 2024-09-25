@@ -26,7 +26,6 @@ function sleep(ms) {
 
 async function main() {
     console.log("test oss sdk using rrsa oidc token");
-    const durationSeconds = 3600; // 1 hour
     // 两种方法都可以
     const cred = newCredential();
     // or
@@ -37,7 +36,7 @@ async function main() {
       accessKeyId,
       accessKeySecret,
       stsToken: securityToken,
-      refreshSTSTokenInterval: durationSeconds * 0.02 * 1000,
+      refreshSTSTokenInterval: 30 * 1000, // 30 seconds
       refreshSTSToken: async () => {
         const { accessKeyId, accessKeySecret, securityToken } = await cred.getCredential();
         return {

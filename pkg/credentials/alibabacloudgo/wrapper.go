@@ -21,23 +21,15 @@ func NewCredentialsProviderWrapper(cred credentials.Credential) *CredentialsProv
 }
 
 func (c CredentialsProviderWrapper) Credentials(ctx context.Context) (*provider.Credentials, error) {
-	ak, err := c.cred.GetAccessKeyId()
+	cred, err := c.cred.GetCredential()
 	if err != nil {
-		return nil, fmt.Errorf("get access key id failed: %w", err)
-	}
-	sk, err := c.cred.GetAccessKeySecret()
-	if err != nil {
-		return nil, fmt.Errorf("get access key secret failed: %w", err)
-	}
-	token, err := c.cred.GetSecurityToken()
-	if err != nil {
-		return nil, fmt.Errorf("get security token failed: %w", err)
+		return nil, fmt.Errorf("get credentails failed: %w", err)
 	}
 
 	return &provider.Credentials{
-		AccessKeyId:     tea.StringValue(ak),
-		AccessKeySecret: tea.StringValue(sk),
-		SecurityToken:   tea.StringValue(token),
+		AccessKeyId:     tea.StringValue(cred.AccessKeyId),
+		AccessKeySecret: tea.StringValue(cred.AccessKeySecret),
+		SecurityToken:   tea.StringValue(cred.SecurityToken),
 		Expiration:      time.Time{},
 	}, nil
 }

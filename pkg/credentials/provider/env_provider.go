@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 )
@@ -13,7 +14,7 @@ const (
 )
 
 type EnvProvider struct {
-	cp *ChainProvider
+	cp CredentialsProvider
 }
 
 type EnvProviderOptions struct {
@@ -24,6 +25,13 @@ type EnvProviderOptions struct {
 	EnvRoleArn         string
 	EnvOIDCProviderArn string
 	EnvOIDCTokenFile   string
+
+	EnvCredentialsURI    string
+	EnvConfigFile        string
+	EnvConfigSectionName string
+
+	STSEndpoint string
+	Logger      Logger
 }
 
 func NewEnvProvider(opts EnvProviderOptions) *EnvProvider {
@@ -48,23 +56,83 @@ func (e *EnvProvider) Credentials(ctx context.Context) (*Credentials, error) {
 	return cred.DeepCopy(), nil
 }
 
-func (e *EnvProvider) getProvider(opts EnvProviderOptions) *ChainProvider {
-	p1 := NewSTSTokenProvider(
-		os.Getenv(opts.EnvAccessKeyId),
-		os.Getenv(opts.EnvAccessKeySecret),
-		os.Getenv(opts.EnvSecurityToken),
-	)
-	p2 := NewOIDCProvider(OIDCProviderOptions{
-		RoleArn:         os.Getenv(opts.EnvRoleArn),
-		OIDCProviderArn: os.Getenv(opts.EnvOIDCProviderArn),
-		OIDCTokenFile:   os.Getenv(opts.EnvOIDCTokenFile),
-	})
-	p3 := NewAccessKeyProvider(
-		os.Getenv(opts.EnvAccessKeyId),
-		os.Getenv(opts.EnvAccessKeySecret),
-	)
-	cp := NewChainProvider(p1, p2, p3)
-	return cp
+func (e *EnvProvider) Stop(ctx context.Context) {
+	if s, ok := e.cp.(Stopper); ok {
+		s.Stop(ctx)
+	}
+}
+
+func (e *EnvProvider) getProvider(opts EnvProviderOptions) CredentialsProvider {
+	accessKeyId := os.Getenv(opts.EnvAccessKeyId)
+	accessKeySecret := os.Getenv(opts.EnvAccessKeySecret)
+	securityToken := os.Getenv(opts.EnvSecurityToken)
+	roleArn := os.Getenv(opts.EnvRoleArn)
+	oidcProviderArn := os.Getenv(opts.EnvOIDCProviderArn)
+	oidcTokenFile := os.Getenv(opts.EnvOIDCTokenFile)
+	credentialsURI := os.Getenv(opts.EnvCredentialsURI)
+	iniConfigPath := os.Getenv(opts.EnvConfigFile)
+	iniConfigSectionName := os.Getenv(opts.EnvConfigSectionName)
+
+	switch {
+	case accessKeyId != "" && accessKeySecret != "" && securityToken != "":
+		cp := NewSTSTokenProvider(
+			os.Getenv(opts.EnvAccessKeyId),
+			os.Getenv(opts.EnvAccessKeySecret),
+			os.Getenv(opts.EnvSecurityToken),
+		)
+		if roleArn == "" {
+			return cp
+		}
+		return NewRoleArnProvider(cp, roleArn, RoleArnProviderOptions{
+			STSEndpoint: opts.STSEndpoint,
+			Logger:      opts.Logger,
+		})
+
+	case accessKeyId != "" && accessKeySecret != "":
+		cp := NewAccessKeyProvider(
+			os.Getenv(opts.EnvAccessKeyId),
+			os.Getenv(opts.EnvAccessKeySecret),
+		)
+		if roleArn == "" {
+			return cp
+		}
+		return NewRoleArnProvider(cp, roleArn, RoleArnProviderOptions{
+			STSEndpoint: opts.STSEndpoint,
+			Logger:      opts.Logger,
+		})
+
+	case roleArn != "" && oidcProviderArn != "" && oidcTokenFile != "":
+		return NewOIDCProvider(OIDCProviderOptions{
+			RoleArn:         roleArn,
+			OIDCProviderArn: oidcProviderArn,
+			OIDCTokenFile:   oidcTokenFile,
+			STSEndpoint:     opts.STSEndpoint,
+			Logger:          opts.Logger,
+		})
+
+	case credentialsURI != "":
+		return NewURIProvider(credentialsURI, URIProviderOptions{
+			Logger: opts.Logger,
+		})
+
+	case iniConfigPath != "":
+		cp, err := NewIniConfigProvider(INIConfigProviderOptions{
+			ConfigPath:  iniConfigPath,
+			SectionName: iniConfigSectionName,
+			STSEndpoint: opts.STSEndpoint,
+			Logger:      opts.Logger,
+		})
+		if err != nil {
+			opts.Logger.Debug(err.Error())
+		} else {
+			return cp
+		}
+	}
+
+	return &errorProvider{
+		err: NewNoAvailableProviderError(
+			errors.New("no validated credentials were found in environment variables")),
+	}
 }
 
 func (o *EnvProviderOptions) applyDefaults() {
@@ -86,5 +154,19 @@ func (o *EnvProviderOptions) applyDefaults() {
 	}
 	if o.EnvOIDCTokenFile == "" {
 		o.EnvOIDCTokenFile = defaultEnvOIDCTokenFile
+	}
+
+	if o.EnvCredentialsURI == "" {
+		o.EnvCredentialsURI = envCredentialsURI
+	}
+	if o.EnvConfigFile == "" {
+		o.EnvConfigFile = envINIConfigFile
+	}
+	if o.EnvConfigSectionName == "" {
+		o.EnvConfigSectionName = envProfileName
+	}
+
+	if o.Logger == nil {
+		o.Logger = DefaultLogger
 	}
 }

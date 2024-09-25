@@ -1,14 +1,10 @@
 package env
 
 import (
-	"errors"
-	"fmt"
 	"os"
 
-	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudgo"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
-	"github.com/aliyun/credentials-go/credentials"
 )
 
 var (
@@ -89,16 +85,6 @@ func NewCredentialsProvider(opts CredentialsProviderOptions) (provider.Credentia
 	oidcTokenFile := GetOIDCTokenFile()
 	sessionName := GetRoleSessionName()
 
-	config := &credentials.Config{
-		AccessKeyId:       stringPoint(keyId),
-		AccessKeySecret:   stringPoint(keySecret),
-		SecurityToken:     stringPoint(stsToken),
-		Url:               stringPoint(credURI),
-		RoleArn:           stringPoint(roleArn),
-		OIDCProviderArn:   stringPoint(oidcProviderArn),
-		OIDCTokenFilePath: stringPoint(oidcTokenFile),
-		RoleSessionName:   stringPoint(sessionName),
-	}
 	if keyId != "" && keySecret != "" && stsToken != "" {
 		return provider.NewSTSTokenProvider(keyId, keySecret, stsToken), nil
 	}
@@ -113,19 +99,25 @@ func NewCredentialsProvider(opts CredentialsProviderOptions) (provider.Credentia
 		}), nil
 	}
 	if keyId != "" && keySecret != "" {
+		if roleArn != "" {
+			cp := provider.NewAccessKeyProvider(keyId, keySecret)
+			return provider.NewRoleArnProvider(cp, roleArn, provider.RoleArnProviderOptions{
+				SessionName: sessionName,
+				Logger:      &log.ProviderLogWrapper{ZP: log.Logger},
+			}), nil
+		}
 		return provider.NewAccessKeyProvider(keyId, keySecret), nil
 	}
+
 	if credURI != "" {
-		config.Type = stringPoint("credentials_uri")
-	} else {
-		return nil, errors.New("not found credentials related environment variables")
+		return provider.NewURIProvider(credURI, provider.URIProviderOptions{
+			Logger: &log.ProviderLogWrapper{ZP: log.Logger},
+		}), nil
 	}
 
-	cred, err := credentials.NewCredential(config)
-	if err != nil {
-		return nil, fmt.Errorf("init credential failed: %w", err)
-	}
-	return alibabacloudgo.NewCredentialsProviderWrapper(cred), nil
+	return provider.NewEnvProvider(provider.EnvProviderOptions{
+		Logger: &log.ProviderLogWrapper{ZP: log.Logger},
+	}), nil
 }
 
 func GetAccessKeyId() string {

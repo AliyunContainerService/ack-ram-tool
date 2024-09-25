@@ -6,7 +6,6 @@ import (
 
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudgo"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudgo/env"
-	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/aliyuncli"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/credentialsgov13"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
@@ -18,6 +17,8 @@ import (
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/credentials-go/credentials"
 )
+
+const defaultConnectTimeoutSeconds = 30
 
 type ClientConfig struct {
 	regionId                string
@@ -66,9 +67,10 @@ func NewClient(config ClientConfig) (*openapi.Client, error) {
 	}
 
 	return openapi.NewClientWithEndpoints(&client.Config{
-		RegionId:   tea.String(regionId),
-		Credential: cred,
-		UserAgent:  tea.String(version.UserAgent()),
+		RegionId:       tea.String(regionId),
+		Credential:     cred,
+		UserAgent:      tea.String(version.UserAgent()),
+		ConnectTimeout: tea.Int(defaultConnectTimeoutSeconds),
 	}, config.endpoints)
 }
 
@@ -125,11 +127,16 @@ func getCredential(opt getCredentialOption) (provider.CredentialsProvider, error
 		log.Logger.Debugf("try to get credentials from aliyun cli config file: %s",
 			utils.ShortHomePath(aliyuncliConfigFilePath))
 
-		acli, err := aliyuncli.NewCredentialHelper(aliyuncliConfigFilePath, aliyuncliProfileName, opt.stsEndpoint)
+		acli, err := provider.NewCLIConfigProvider(provider.CLIConfigProviderOptions{
+			ConfigPath:  aliyuncliConfigFilePath,
+			ProfileName: aliyuncliProfileName,
+			STSEndpoint: opt.stsEndpoint,
+			Logger:      log.ProviderLogger(),
+		})
 		if err == nil && acli != nil {
 			log.Logger.Debugf("try to get credentials from aliyun cli (%s) with profile name %s",
 				utils.ShortHomePath(aliyuncliConfigFilePath), acli.ProfileName())
-			return acli.GetCredentials()
+			return acli, nil
 		}
 		if err != nil {
 			return nil, fmt.Errorf("get credentials from aliyun cli (%s) failed: %w",

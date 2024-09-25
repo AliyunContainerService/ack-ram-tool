@@ -4,10 +4,19 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 	"sync/atomic"
 	"testing"
 	"time"
 )
+
+func init() {
+	os.Setenv(envProfileName, "foo-bar-test-ut")
+}
+
+func TestChainProvider_select(t *testing.T) {
+
+}
 
 func TestChainProvider_Credentials_success(t *testing.T) {
 	p1 := NewAccessKeyProvider("", "")
