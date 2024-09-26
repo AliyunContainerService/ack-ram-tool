@@ -34,6 +34,9 @@ type Account struct {
 	RootUId string
 	User    RamUser
 	Role    RamRole
+
+	PrincipalId string
+	Arn         string
 }
 
 type RamRole struct {
@@ -265,6 +268,18 @@ func NewFakeAccount(uid int64) Account {
 		}
 	}
 	return acc
+}
+
+func (a *Account) IdentityType() string {
+	switch a.Type {
+	case AccountTypeRoot:
+		return "Account"
+	case AccountTypeUser:
+		return "RAMUser"
+	case AccountTypeRole:
+		return "AssumedRoleUser"
+	}
+	return ""
 }
 
 func (a *Account) MarkDeleted() {

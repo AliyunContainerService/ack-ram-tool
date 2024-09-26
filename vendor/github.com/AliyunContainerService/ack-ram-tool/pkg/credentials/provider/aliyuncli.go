@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -30,6 +31,9 @@ type profileWrapper struct {
 type CLIConfigProvider struct {
 	profile *profileWrapper
 	logger  Logger
+
+	pr   CredentialsProvider
+	lock sync.Mutex
 }
 
 type CLIConfigProviderOptions struct {
@@ -89,11 +93,28 @@ func loadProfile(path string, name string, conf *Configuration) (*Configuration,
 }
 
 func (c *CLIConfigProvider) Credentials(ctx context.Context) (*Credentials, error) {
-	p, err := c.profile.getProvider()
+	p, err := c.getAndUpdateProvider()
 	if err != nil {
 		return nil, err
 	}
 	return p.Credentials(ctx)
+}
+
+func (c *CLIConfigProvider) getAndUpdateProvider() (CredentialsProvider, error) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	if c.pr != nil {
+		return c.pr, nil
+	}
+
+	pr, err := c.profile.getProvider()
+	if err != nil {
+		return nil, err
+	}
+	c.pr = pr
+
+	return pr, nil
 }
 
 func (p *profileWrapper) getProvider() (CredentialsProvider, error) {

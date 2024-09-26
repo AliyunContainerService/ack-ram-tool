@@ -7,6 +7,7 @@ import (
 
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/auth"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/credentialplugin"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/exportcredentials"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/rbac"
@@ -44,6 +45,7 @@ func init() {
 	version.SetupVersionCmd(rootCmd)
 	rbac.SetupCmd(rootCmd)
 	exportcredentials.SetupCmd(rootCmd)
+	auth.SetupCmd(rootCmd)
 
 	rootCmd.PersistentFlags().StringVar(&ctl.GlobalOption.Region, "region-id",
 		"", "The region to use"+
