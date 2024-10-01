@@ -7,12 +7,12 @@ require (
 	github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider v0.0.0
 	github.com/alibabacloud-go/cs-20151215/v3 v3.0.42
 	github.com/alibabacloud-go/darabonba-openapi v0.2.1
-	github.com/alibabacloud-go/darabonba-openapi/v2 v2.0.6
+	github.com/alibabacloud-go/darabonba-openapi/v2 v2.0.10
 	github.com/alibabacloud-go/ram-20150501 v1.0.2
 	github.com/alibabacloud-go/sts-20150401 v1.1.0
 	github.com/alibabacloud-go/tea v1.2.2
 	github.com/aliyun/alibaba-cloud-sdk-go v1.62.708
-	github.com/aliyun/credentials-go v1.3.2
+	github.com/aliyun/credentials-go v1.3.10
 	github.com/briandowns/spinner v1.23.0
 	github.com/fatih/color v1.17.0
 	github.com/json-iterator/go v1.1.12 // indirect
@@ -29,7 +29,7 @@ require (
 require (
 	github.com/alibabacloud-go/openapi-util v0.1.0
 	github.com/alibabacloud-go/tea-utils v1.4.5
-	github.com/alibabacloud-go/tea-utils/v2 v2.0.5
+	github.com/alibabacloud-go/tea-utils/v2 v2.0.6
 	github.com/go-logr/zapr v1.3.0
 	github.com/olekukonko/tablewriter v0.0.6-0.20230925090304-df64c4bbad77
 	go.uber.org/zap v1.27.0
@@ -37,8 +37,8 @@ require (
 )
 
 require (
-	github.com/alibabacloud-go/alibabacloud-gateway-spi v0.0.4 // indirect
-	github.com/alibabacloud-go/debug v1.0.0 // indirect
+	github.com/alibabacloud-go/alibabacloud-gateway-spi v0.0.5 // indirect
+	github.com/alibabacloud-go/debug v1.0.1 // indirect
 	github.com/alibabacloud-go/endpoint-util v1.1.0 // indirect
 	github.com/alibabacloud-go/tea-xml v1.1.3 // indirect
 	github.com/clbanning/mxj/v2 v2.5.6 // indirect
@@ -69,7 +69,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rivo/uniseg v0.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/tjfoc/gmsm v1.3.2 // indirect
+	github.com/tjfoc/gmsm v1.4.1 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/oauth2 v0.10.0 // indirect

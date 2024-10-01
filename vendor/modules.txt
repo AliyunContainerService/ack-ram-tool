@@ -6,7 +6,7 @@ github.com/AlecAivazis/survey/v2/terminal
 # github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider v0.0.0 => ./pkg/credentials/provider
 ## explicit; go 1.16
 github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider
-# github.com/alibabacloud-go/alibabacloud-gateway-spi v0.0.4
+# github.com/alibabacloud-go/alibabacloud-gateway-spi v0.0.5
 ## explicit; go 1.14
 github.com/alibabacloud-go/alibabacloud-gateway-spi/client
 # github.com/alibabacloud-go/cs-20151215/v3 v3.0.42
@@ -15,10 +15,10 @@ github.com/alibabacloud-go/cs-20151215/v3/client
 # github.com/alibabacloud-go/darabonba-openapi v0.2.1
 ## explicit; go 1.14
 github.com/alibabacloud-go/darabonba-openapi/client
-# github.com/alibabacloud-go/darabonba-openapi/v2 v2.0.6
+# github.com/alibabacloud-go/darabonba-openapi/v2 v2.0.10
 ## explicit; go 1.14
 github.com/alibabacloud-go/darabonba-openapi/v2/client
-# github.com/alibabacloud-go/debug v1.0.0
+# github.com/alibabacloud-go/debug v1.0.1
 ## explicit; go 1.18
 github.com/alibabacloud-go/debug/debug
 # github.com/alibabacloud-go/endpoint-util v1.1.0
@@ -40,7 +40,7 @@ github.com/alibabacloud-go/tea/utils
 # github.com/alibabacloud-go/tea-utils v1.4.5
 ## explicit; go 1.14
 github.com/alibabacloud-go/tea-utils/service
-# github.com/alibabacloud-go/tea-utils/v2 v2.0.5
+# github.com/alibabacloud-go/tea-utils/v2 v2.0.6
 ## explicit; go 1.14
 github.com/alibabacloud-go/tea-utils/v2/service
 # github.com/alibabacloud-go/tea-xml v1.1.3
@@ -54,9 +54,12 @@ github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors
 github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests
 github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses
 github.com/aliyun/alibaba-cloud-sdk-go/sdk/utils
-# github.com/aliyun/credentials-go v1.3.2
+# github.com/aliyun/credentials-go v1.3.10
 ## explicit; go 1.14
 github.com/aliyun/credentials-go/credentials
+github.com/aliyun/credentials-go/credentials/internal/http
+github.com/aliyun/credentials-go/credentials/internal/providers
+github.com/aliyun/credentials-go/credentials/internal/utils
 github.com/aliyun/credentials-go/credentials/request
 github.com/aliyun/credentials-go/credentials/response
 github.com/aliyun/credentials-go/credentials/utils
@@ -187,8 +190,8 @@ github.com/spf13/pflag
 # github.com/stretchr/testify v1.9.0
 ## explicit; go 1.17
 github.com/stretchr/testify/assert
-# github.com/tjfoc/gmsm v1.3.2
-## explicit; go 1.12
+# github.com/tjfoc/gmsm v1.4.1
+## explicit; go 1.14
 github.com/tjfoc/gmsm/sm3
 # go.uber.org/multierr v1.10.0
 ## explicit; go 1.19
