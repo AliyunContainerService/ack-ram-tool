@@ -87,7 +87,12 @@ func (c *Client) ListClustersV1(ctx context.Context) ([]types.Cluster, error) {
 		if len(clusters) == 0 {
 			break
 		}
-		ret = append(ret, clusters...)
+		for _, c := range clusters {
+			if c.ClusterType == "aliyun" {
+				continue
+			}
+			ret = append(ret, c)
+		}
 		pageNumber++
 	}
 
