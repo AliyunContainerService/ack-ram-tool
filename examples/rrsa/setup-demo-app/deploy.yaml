@@ -1,0 +1,33 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rrsa-demo
+  labels:
+    pod-identity.alibabacloud.com/injection: 'on'
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: demo-sa
+  namespace: rrsa-demo
+  annotations:
+    pod-identity.alibabacloud.com/role-name: demo-role-for-rrsa
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: demo
+  namespace: rrsa-demo
+spec:
+  serviceAccountName: demo-sa
+  containers:
+    - image: registry.cn-hangzhou.aliyuncs.com/acs/ack-ram-tool:1.0.0
+      imagePullPolicy: "Always"
+      args:
+        - rrsa
+        - demo
+      name: demo
+  restartPolicy: OnFailure

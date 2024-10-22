@@ -1,12 +1,11 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"os"
 
-	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudgo"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudgo/env"
-	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/aliyuncli"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/credentialsgov13"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
@@ -18,6 +17,8 @@ import (
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/credentials-go/credentials"
 )
+
+const defaultConnectTimeoutSeconds = 30
 
 type ClientConfig struct {
 	regionId                string
@@ -66,9 +67,10 @@ func NewClient(config ClientConfig) (*openapi.Client, error) {
 	}
 
 	return openapi.NewClientWithEndpoints(&client.Config{
-		RegionId:   tea.String(regionId),
-		Credential: cred,
-		UserAgent:  tea.String(version.UserAgent()),
+		RegionId:       tea.String(regionId),
+		Credential:     cred,
+		UserAgent:      tea.String(version.UserAgent()),
+		ConnectTimeout: tea.Int(defaultConnectTimeoutSeconds),
 	}, config.endpoints)
 }
 
@@ -90,6 +92,7 @@ func getCredential(opt getCredentialOption) (provider.CredentialsProvider, error
 	ignoreAliyuncli := opt.ignoreAliyuncli
 	aliyuncliProfileName := opt.aliyuncliProfileName
 
+	// env
 	if credentialFilePath == "" && aliyuncliConfigFilePath == "" {
 		if sessionName != "" {
 			_ = os.Setenv(env.EnvRoleSessionName, sessionName)
@@ -97,15 +100,24 @@ func getCredential(opt getCredentialOption) (provider.CredentialsProvider, error
 		if !ignoreEnv {
 			log.Logger.Debug("try to get credentials from environment variables")
 			// TODO: support ecs ALIBABA_CLOUD_ECS_METADATA
-			if cred, err := env.NewCredentialsProvider(env.CredentialsProviderOptions{
+			cred, _ := env.NewCredentialsProvider(env.CredentialsProviderOptions{
 				STSEndpoint: opt.stsEndpoint,
-			}); err == nil && cred != nil {
-				log.Logger.Debugf("use credentials from environment variables")
-				return cred, err
+			})
+			if cred != nil {
+				_, err := cred.Credentials(context.TODO())
+				if err == nil || !provider.IsNotEnableError(err) {
+					log.Logger.Debugf("use credentials from environment variables")
+					return cred, nil
+				} else {
+					log.Logger.Debugf("get credentials from environment variables failed: %+v, try another method",
+						err)
+				}
 			}
 			log.Logger.Debug("not found credentials from environment variables")
 		}
 	}
+
+	// aliyun cli config
 	if aliyuncliConfigFilePath == "" {
 		aliyuncliConfigFilePath, _ = utils.ExpandPath("~/.aliyun/config.json")
 		if path, err := checkFileExist(aliyuncliConfigFilePath); err != nil && os.IsNotExist(err) {
@@ -115,7 +127,6 @@ func getCredential(opt getCredentialOption) (provider.CredentialsProvider, error
 			aliyuncliConfigFilePath = path
 		}
 	}
-
 	if !ignoreAliyuncli {
 		if path, err := checkFileExist(aliyuncliConfigFilePath); err != nil {
 			return nil, fmt.Errorf("read file %s: %w", aliyuncliConfigFilePath, err)
@@ -125,11 +136,16 @@ func getCredential(opt getCredentialOption) (provider.CredentialsProvider, error
 		log.Logger.Debugf("try to get credentials from aliyun cli config file: %s",
 			utils.ShortHomePath(aliyuncliConfigFilePath))
 
-		acli, err := aliyuncli.NewCredentialHelper(aliyuncliConfigFilePath, aliyuncliProfileName, opt.stsEndpoint)
+		acli, err := provider.NewCLIConfigProvider(provider.CLIConfigProviderOptions{
+			ConfigPath:  aliyuncliConfigFilePath,
+			ProfileName: aliyuncliProfileName,
+			STSEndpoint: opt.stsEndpoint,
+			Logger:      log.ProviderLogger(),
+		})
 		if err == nil && acli != nil {
 			log.Logger.Debugf("try to get credentials from aliyun cli (%s) with profile name %s",
 				utils.ShortHomePath(aliyuncliConfigFilePath), acli.ProfileName())
-			return acli.GetCredentials()
+			return acli, nil
 		}
 		if err != nil {
 			return nil, fmt.Errorf("get credentials from aliyun cli (%s) failed: %w",
@@ -137,6 +153,7 @@ func getCredential(opt getCredentialOption) (provider.CredentialsProvider, error
 		}
 	}
 
+	// ini config
 	if credentialFilePath == "" {
 		path, err := checkFileExist(credentials.PATHCredentialFile)
 		if err != nil && os.IsNotExist(err) {
@@ -146,19 +163,22 @@ func getCredential(opt getCredentialOption) (provider.CredentialsProvider, error
 		credentialFilePath = path
 	}
 
-	log.Logger.Debugf("get default credentials from %s", utils.ShortHomePath(credentialFilePath))
+	log.Logger.Debugf("try to get default credentials from %s", utils.ShortHomePath(credentialFilePath))
 	if path, err := checkFileExist(credentialFilePath); err != nil {
 		return nil, fmt.Errorf("read file %s: %w", credentialFilePath, err)
 	} else {
 		credentialFilePath = path
 	}
 
-	_ = os.Setenv(credentials.ENVCredentialFile, credentialFilePath)
-	cred, err := credentials.NewCredential(nil)
+	cred, err := provider.NewIniConfigProvider(provider.INIConfigProviderOptions{
+		ConfigPath:  credentialFilePath,
+		STSEndpoint: opt.stsEndpoint,
+		Logger:      log.ProviderLogger(),
+	})
 	if err != nil {
 		return nil, err
 	}
-	return alibabacloudgo.NewCredentialsProviderWrapper(cred), nil
+	return cred, nil
 }
 
 func GetClientOrDie() *openapi.Client {

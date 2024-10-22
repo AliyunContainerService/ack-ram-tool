@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/types"
 	"github.com/alibabacloud-go/tea/tea"
+	"strings"
 	"time"
 
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/oidctoken"
@@ -42,33 +43,58 @@ func (c *Client) GetCallerIdentity(ctx context.Context) (*types.Account, error) 
 		return nil, fmt.Errorf("unkown resp: %s", resp.String())
 	}
 	body := resp.Body
+	arn := getRealArn(tea.StringValue(body.Arn))
 	switch tea.StringValue(body.IdentityType) {
 	case "Account":
 		return &types.Account{
-			Type:    types.AccountTypeRoot,
-			RootUId: tea.StringValue(body.AccountId),
+			PrincipalId: tea.StringValue(body.PrincipalId),
+			Arn:         arn,
+			Type:        types.AccountTypeRoot,
+			RootUId:     tea.StringValue(body.AccountId),
 			User: types.RamUser{
 				Id: tea.StringValue(body.UserId),
 			},
 		}, nil
 	case "RAMUser":
+		parts := strings.Split(arn, "/")
+		name := parts[len(parts)-1]
 		return &types.Account{
-			Type:    types.AccountTypeUser,
-			RootUId: tea.StringValue(body.AccountId),
+			PrincipalId: tea.StringValue(body.PrincipalId),
+			Arn:         arn,
+			Type:        types.AccountTypeUser,
+			RootUId:     tea.StringValue(body.AccountId),
 			User: types.RamUser{
-				Id: tea.StringValue(body.UserId),
+				Id:   tea.StringValue(body.UserId),
+				Name: name,
 			},
 		}, nil
 	case "AssumedRoleUser":
+		parts := strings.Split(arn, "/")
+		name := parts[len(parts)-1]
 		return &types.Account{
-			Type:    types.AccountTypeRole,
-			RootUId: tea.StringValue(body.AccountId),
+			PrincipalId: tea.StringValue(body.PrincipalId),
+			Arn:         arn,
+			Type:        types.AccountTypeRole,
+			RootUId:     tea.StringValue(body.AccountId),
 			Role: types.RamRole{
-				RoleId: tea.StringValue(body.RoleId),
-				Arn:    tea.StringValue(body.Arn),
+				RoleId:   tea.StringValue(body.RoleId),
+				Arn:      tea.StringValue(body.Arn),
+				RoleName: name,
 			},
 		}, nil
 	}
 
 	return nil, fmt.Errorf("unkown resp: %s", resp.String())
+}
+
+func getRealArn(raw string) string {
+	roleKey := ":assumed-role/"
+	arn := raw
+	if strings.Contains(raw, roleKey) {
+		arn = strings.Replace(arn, roleKey, ":role/", 1)
+		parts := strings.Split(arn, "/")
+		parts = parts[:len(parts)-1]
+		arn = strings.Join(parts, "/")
+	}
+	return arn
 }
