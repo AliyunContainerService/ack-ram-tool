@@ -20,6 +20,13 @@ import (
 
 const defaultConnectTimeoutSeconds = 30
 
+type credentialType string
+
+const (
+	credentialTypeImds    credentialType = "imds"
+	credentialTypeEcsRole credentialType = "ecs-role"
+)
+
 type ClientConfig struct {
 	regionId                string
 	credentialFilePath      string
@@ -30,6 +37,7 @@ type ClientConfig struct {
 	roleArn                 string
 	stsEndpoint             string
 	sessionName             string
+	credentialType          string
 
 	endpoints openapi.Endpoints
 }
@@ -44,6 +52,7 @@ func NewClient(config ClientConfig) (*openapi.Client, error) {
 		ignoreEnv:               config.ignoreEnv,
 		ignoreAliyuncli:         config.ignoreAliyuncli,
 		stsEndpoint:             config.stsEndpoint,
+		credentialType:          credentialType(config.credentialType),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("get credentials: %w", err)
@@ -82,6 +91,7 @@ type getCredentialOption struct {
 	ignoreEnv               bool
 	ignoreAliyuncli         bool
 	stsEndpoint             string
+	credentialType          credentialType
 }
 
 func getCredential(opt getCredentialOption) (provider.CredentialsProvider, error) {
@@ -92,6 +102,13 @@ func getCredential(opt getCredentialOption) (provider.CredentialsProvider, error
 	ignoreAliyuncli := opt.ignoreAliyuncli
 	aliyuncliProfileName := opt.aliyuncliProfileName
 
+	switch opt.credentialType {
+	case credentialTypeImds, credentialTypeEcsRole:
+		return provider.NewECSMetadataProvider(provider.ECSMetadataProviderOptions{
+			Logger: log.ProviderLogger(),
+		}), nil
+	}
+
 	// env
 	if credentialFilePath == "" && aliyuncliConfigFilePath == "" {
 		if sessionName != "" {
@@ -99,7 +116,6 @@ func getCredential(opt getCredentialOption) (provider.CredentialsProvider, error
 		}
 		if !ignoreEnv {
 			log.Logger.Debug("try to get credentials from environment variables")
-			// TODO: support ecs ALIBABA_CLOUD_ECS_METADATA
 			cred, _ := env.NewCredentialsProvider(env.CredentialsProviderOptions{
 				STSEndpoint: opt.stsEndpoint,
 			})
@@ -193,6 +209,7 @@ func GetClientOrDie() *openapi.Client {
 			roleArn:                 ctl.GlobalOption.GetRoleArn(),
 			stsEndpoint:             ctl.GlobalOption.GetSTSEndpoint(),
 			endpoints:               ctl.GlobalOption.GetEndpoints(),
+			credentialType:          ctl.GlobalOption.GetCredentialType(),
 		},
 	)
 	if err != nil {
