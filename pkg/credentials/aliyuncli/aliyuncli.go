@@ -170,7 +170,7 @@ func (p *ProfileWrapper) GetCredentialsByChainableRamRoleArn() (provider.Credent
 	log.Logger.Debugf("get credentials from source profile %s", profileName)
 	source, loaded := p.conf.GetProfile(profileName)
 	if !loaded {
-		return nil, fmt.Errorf("can not load the source profile: " + profileName)
+		return nil, fmt.Errorf("can not load the source profile: %s", profileName)
 	}
 	newP := &ProfileWrapper{
 		cp:          source,
