@@ -19,6 +19,7 @@ const (
 	EnvLogLevel                   = "ACK_RAM_TOOL_LOG_LEVEL"
 	EnvRegionId                   = "ACK_RAM_TOOL_REGION_ID"
 	EnvVerbose                    = "ACK_RAM_TOOL_VERBOSE"
+	EnvCredentialType             = "ACK_RAM_TOOL_CREDENTIAL_TYPE" // #nosec G101
 
 	DefaultRegion   = ""
 	DefaultLogLevel = "info"
@@ -148,6 +149,10 @@ func (g *globalOption) GetEndpoints() openapi.Endpoints {
 	endpoints := openapi.NewEndpoints(region, g.UseVPCEndpoint)
 	endpoints.STS = g.GetSTSEndpoint()
 	return endpoints
+}
+
+func (g *globalOption) GetCredentialType() string {
+	return os.Getenv(EnvCredentialType)
 }
 
 func (g *globalOption) GetSTSEndpoint() string {

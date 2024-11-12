@@ -30,6 +30,8 @@ type EnvProviderOptions struct {
 	EnvConfigFile        string
 	EnvConfigSectionName string
 
+	EnvIMDSRoleName string
+
 	STSEndpoint string
 	Logger      Logger
 }
@@ -72,6 +74,7 @@ func (e *EnvProvider) getProvider(opts EnvProviderOptions) CredentialsProvider {
 	credentialsURI := os.Getenv(opts.EnvCredentialsURI)
 	iniConfigPath := os.Getenv(opts.EnvConfigFile)
 	iniConfigSectionName := os.Getenv(opts.EnvConfigSectionName)
+	imdsRoleName := os.Getenv(opts.EnvIMDSRoleName)
 
 	switch {
 	case accessKeyId != "" && accessKeySecret != "" && securityToken != "":
@@ -113,6 +116,12 @@ func (e *EnvProvider) getProvider(opts EnvProviderOptions) CredentialsProvider {
 	case credentialsURI != "":
 		return NewURIProvider(credentialsURI, URIProviderOptions{
 			Logger: opts.Logger,
+		})
+
+	case imdsRoleName != "":
+		return NewECSMetadataProvider(ECSMetadataProviderOptions{
+			RoleName: imdsRoleName,
+			Logger:   opts.Logger,
 		})
 
 	case iniConfigPath != "":
@@ -164,6 +173,10 @@ func (o *EnvProviderOptions) applyDefaults() {
 	}
 	if o.EnvConfigSectionName == "" {
 		o.EnvConfigSectionName = envProfileName
+	}
+
+	if o.EnvIMDSRoleName == "" {
+		o.EnvIMDSRoleName = envIMDSRoleName
 	}
 
 	if o.Logger == nil {
