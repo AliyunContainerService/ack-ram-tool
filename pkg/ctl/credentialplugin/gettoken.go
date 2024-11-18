@@ -8,7 +8,11 @@ import (
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ramauthenticator"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/types"
 	"github.com/spf13/cobra"
+	"os"
+	"strings"
 )
+
+const envTokenExtraQueryKeyPrefix = "ACK_RAM_TOOL_TOKEN_EXTRA_KEY_PREFIX"
 
 type GetTokenOpts struct {
 	//clusterId        string
@@ -30,7 +34,9 @@ var getTokenCmd = &cobra.Command{
 		clusterId := ctl.GlobalOption.ClusterId
 		getCredentialOpts.clusterId = clusterId
 
-		token, err := ramauthenticator.GenerateToken(clusterId, client.Credential())
+		generator := ramauthenticator.NewTokenGenerator(clusterId, client.Credential())
+		generator.SetExtraQuery(getExtraTokenQuery())
+		token, err := generator.NewToken()
 		common.ExitIfError(err)
 
 		cred, err := newTokenExecCredential(token)
@@ -40,6 +46,29 @@ var getTokenCmd = &cobra.Command{
 		common.ExitIfError(err)
 		fmt.Println(string(d))
 	},
+}
+
+func getExtraTokenQuery() map[string]string {
+	query := make(map[string]string)
+	prefix := os.Getenv(envTokenExtraQueryKeyPrefix)
+	if prefix == "" {
+		return query
+	}
+	for _, item := range os.Environ() {
+		before, after, found := strings.Cut(item, "=")
+		if !found {
+			continue
+		}
+		if after == "" {
+			continue
+		}
+		if !strings.HasPrefix(before, prefix) {
+			continue
+		}
+		k := strings.ToLower(strings.TrimPrefix(before, prefix))
+		query[k] = after
+	}
+	return query
 }
 
 func newTokenExecCredential(token *ramauthenticator.Token) (*types.ExecCredential, error) {

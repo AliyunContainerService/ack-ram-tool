@@ -43,11 +43,45 @@ type Token struct {
 	Expiration time.Time `json:"-"`
 }
 
-func GenerateToken(clusterId string, cred credentials.Credential) (*Token, error) {
+type extendOption func(q *openapi.OpenApiRequest)
+
+type TokenGenerator struct {
+	clusterId  string
+	cred       credentials.Credential
+	extraQuery map[string]string
+}
+
+func NewTokenGenerator(clusterId string, cred credentials.Credential) *TokenGenerator {
+	return &TokenGenerator{
+		clusterId:  clusterId,
+		cred:       cred,
+		extraQuery: make(map[string]string),
+	}
+}
+
+func (g *TokenGenerator) NewToken() (*Token, error) {
+	return GenerateToken(g.clusterId, g.cred, g.extendRequest)
+}
+
+func (g *TokenGenerator) SetExtraQuery(extraQuery map[string]string) {
+	g.extraQuery = extraQuery
+}
+
+func (g *TokenGenerator) extendRequest(req *openapi.OpenApiRequest) {
+	for k, v := range g.extraQuery {
+		k = strings.ToLower(k)
+		req.Query[k] = tea.String(v)
+	}
+}
+
+func GenerateToken(clusterId string, cred credentials.Credential, options ...extendOption) (*Token, error) {
 	q := &openapi.OpenApiRequest{
 		Query: map[string]*string{
 			"ACKClusterId": tea.String(clusterId),
 		},
+	}
+	for _, f := range options {
+		f(q)
 	}
 	params := &openapi.Params{
 		Action:      tea.String("GetCallerIdentity"),
@@ -82,7 +116,9 @@ func GenerateToken(clusterId string, cred credentials.Credential) (*Token, error
 	}
 	for k, v := range req.Query {
 		if !signParamsWhitelist[strings.ToLower(k)] {
-			continue
+			if q.Query[k] == nil {
+				continue
+			}
 		}
 		t.Query[k] = tea.StringValue(v)
 	}
