@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-const envTokenExtraQueryKeyPrefix = "ACK_RAM_TOOL_TOKEN_EXTRA_KEY_PREFIX"
+const envTokenExtraQueryKeyPrefix = "ACK_RAM_TOOL_TOKEN_EXTRA_KEY_PREFIX" // #nosec G101
 
 type GetTokenOpts struct {
 	//clusterId        string
