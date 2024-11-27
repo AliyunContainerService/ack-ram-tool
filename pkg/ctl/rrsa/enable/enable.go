@@ -41,6 +41,7 @@ var cmd = &cobra.Command{
 			spin.Stop()
 			ctlcommon.ExitByError(fmt.Sprintf("Failed to enable RRSA feature for cluster %s: %+v", clusterId, err))
 		}
+		time.Sleep(time.Second * 30)
 		ctx, cancel := context.WithTimeout(ctx, time.Minute*15)
 		defer cancel()
 		if err := common.WaitClusterUpdateFinished(ctx, clusterId, task.TaskId, client); err != nil {
