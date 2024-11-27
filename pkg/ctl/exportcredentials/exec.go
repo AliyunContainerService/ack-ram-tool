@@ -31,8 +31,12 @@ var (
 	}
 )
 
-func runUserCommands(ctx context.Context, cred Credentials, args []string, stdout io.Writer, stderr io.Writer) error {
+func runUserCommands(ctx context.Context, cred Credentials, args []string,
+	stdin io.Reader, stdout io.Writer, stderr io.Writer) error {
 	cmd := exec.CommandContext(ctx, args[0], args[1:]...) // #nosec G204
+	if stdin == nil {
+		stdin = os.Stdin
+	}
 	if stdout == nil {
 		stdout = os.Stdout
 	}
@@ -42,6 +46,7 @@ func runUserCommands(ctx context.Context, cred Credentials, args []string, stdou
 	envs := getCredentialsEnvsWithCurrentEnvs(cred)
 	envs = append(envs, "ALIBABACLOUD_IGNORE_PROFILE=TRUE")
 	cmd.Env = envs
+	cmd.Stdin = stdin
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
 

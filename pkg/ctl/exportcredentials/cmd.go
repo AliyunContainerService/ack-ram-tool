@@ -46,7 +46,7 @@ var cmd = &cobra.Command{
 			ctlcommon.ExitIfError(err)
 
 			if opt.format == formatEnvironmentVariables && len(args) > 0 {
-				err = runUserCommands(context.Background(), *cred, args, nil, nil)
+				err = runUserCommands(context.Background(), *cred, args, nil, nil, nil)
 				ctlcommon.ExitIfError(err)
 				return
 			}
