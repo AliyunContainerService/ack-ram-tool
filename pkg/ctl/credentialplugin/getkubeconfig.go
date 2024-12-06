@@ -27,7 +27,9 @@ type credentialMode string
 
 var (
 	modeRAMAuthenticatorToken credentialMode = "ram-authenticator-token"
+	modeToken                 credentialMode = "token"
 	modeCertificate           credentialMode = "certificate"
+	modeCert                  credentialMode = "cert"
 	selectedMode              string
 )
 
@@ -104,7 +106,7 @@ func fillGlobalFlags(args []string) []string {
 
 func getExecArgs(clusterId string, mode credentialMode, opt GetCredentialOpts) []string {
 	switch mode {
-	case modeRAMAuthenticatorToken:
+	case modeRAMAuthenticatorToken, modeToken:
 		return []string{
 			"credential-plugin",
 			"get-token",
@@ -135,8 +137,8 @@ func setupGetKubeconfigCmd(rootCmd *cobra.Command) {
 
 	getKubeconfigCmd.Flags().DurationVar(&getCredentialOpts.temporaryDuration, "expiration", getCredentialOpts.temporaryDuration, "The certificate expiration")
 	getKubeconfigCmd.Flags().BoolVar(&getCredentialOpts.privateIpAddress, "private-address", getCredentialOpts.privateIpAddress, "Use private ip as api-server address")
-	getKubeconfigCmd.Flags().StringVarP(&selectedMode, "mode", "m", string(modeCertificate),
-		fmt.Sprintf("credential mode: %s", strings.Join([]string{string(modeCertificate), string(modeRAMAuthenticatorToken)}, " or ")))
+	getKubeconfigCmd.Flags().StringVarP(&selectedMode, "mode", "m", string(modeCert),
+		fmt.Sprintf("credential mode: %s", strings.Join([]string{string(modeCert), string(modeToken)}, " or ")))
 	getKubeconfigCmd.Flags().StringVar(&getCredentialOpts.apiVersion, "api-version", "v1beta1", "v1 or v1beta1")
 	getKubeconfigCmd.Flags().StringVar(&getCredentialOpts.cacheDir, "credential-cache-dir", getCredentialOpts.cacheDir, "Directory to cache certificate")
 	//getcredentialCmd.Flags().BoolVar(&getCredentialOpts.disableCache, "disable-credential-cache", false, "disable credential cache")
