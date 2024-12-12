@@ -25,7 +25,7 @@ func testOSSSDK() {
 	if err != nil {
 		panic(err)
 	}
-	if _, err := cred.GetAccessKeyId(); err != nil {
+	if _, err := cred.GetCredential(); err != nil {
 		log.Fatalf("get credentails failed: %+v", err)
 	}
 
@@ -92,26 +92,16 @@ func (c *Credentials) GetSecurityToken() string {
 }
 
 func (p *CredentialsProvider) GetCredentials() oss.Credentials {
-	id, err := p.cred.GetAccessKeyId()
+	cred, err := p.cred.GetCredential()
 	if err != nil {
-		log.Printf("get access key id failed: %+v", err)
-		return &Credentials{}
-	}
-	secret, err := p.cred.GetAccessKeySecret()
-	if err != nil {
-		log.Printf("get access key secret failed: %+v", err)
-		return &Credentials{}
-	}
-	token, err := p.cred.GetSecurityToken()
-	if err != nil {
-		log.Printf("get access security token failed: %+v", err)
+		log.Printf("get credentials failed: %+v", err)
 		return &Credentials{}
 	}
 
 	return &Credentials{
-		AccessKeyId:     tea.StringValue(id),
-		AccessKeySecret: tea.StringValue(secret),
-		SecurityToken:   tea.StringValue(token),
+		AccessKeyId:     tea.StringValue(cred.AccessKeyId),
+		AccessKeySecret: tea.StringValue(cred.AccessKeySecret),
+		SecurityToken:   tea.StringValue(cred.SecurityToken),
 	}
 }
 
