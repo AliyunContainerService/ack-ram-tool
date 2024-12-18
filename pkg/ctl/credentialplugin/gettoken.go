@@ -7,6 +7,7 @@ import (
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/common"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ramauthenticator"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/types"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/version"
 	"github.com/spf13/cobra"
 	"os"
 	"strings"
@@ -46,6 +47,10 @@ var getTokenCmd = &cobra.Command{
 		common.ExitIfError(err)
 		fmt.Println(string(d))
 	},
+}
+
+func init() {
+	ramauthenticator.UserAgent = version.UserAgent()
 }
 
 func getExtraTokenQuery() map[string]string {
