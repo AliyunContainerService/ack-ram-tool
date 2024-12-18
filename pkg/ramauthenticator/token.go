@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"github.com/AliyunContainerService/ack-ram-tool/pkg/version"
 	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
 	openapiutil "github.com/alibabacloud-go/openapi-util/service"
 	util "github.com/alibabacloud-go/tea-utils/service"
@@ -19,6 +18,7 @@ const (
 )
 
 var tokenExpiration = time.Minute * 15 // #nosec G101
+var UserAgent = "ack-ram-tool"
 
 var signParamsWhitelist = map[string]bool{
 	"x-acs-action":          true,
@@ -104,7 +104,7 @@ func GenerateToken(clusterId string, cred credentials.Credential, options ...ext
 		Method:    tea.StringValue(params.Method),
 		Path:      tea.StringValue(req.Pathname),
 		Headers: map[string]string{
-			"user-agent": version.UserAgent(),
+			"user-agent": UserAgent,
 		},
 		Query: map[string]string{},
 	}
@@ -146,7 +146,7 @@ func generatePreSignedReq(request *openapi.OpenApiRequest, params *openapi.Param
 		//"host":                  client.Endpoint,
 		"x-acs-version": params.Version,
 		"x-acs-action":  params.Action,
-		"user-agent":    tea.String(version.UserAgent()),
+		"user-agent":    tea.String(UserAgent),
 		"x-acs-date":    openapiutil.GetTimestamp(),
 		//"x-acs-signature-nonce": util.GetNonce(),
 		"accept": tea.String("application/json"),
