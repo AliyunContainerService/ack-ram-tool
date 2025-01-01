@@ -1,4 +1,4 @@
-FROM golang:1.23.3-bullseye as builder
+FROM golang:1.23.4-bullseye as builder
 # TARGETPLATFORM
 ARG VERSION
 ARG GIT_COMMIT
