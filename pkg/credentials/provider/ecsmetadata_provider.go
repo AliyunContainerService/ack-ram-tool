@@ -91,14 +91,14 @@ type ecsMetadataStsResponse struct {
 }
 
 func (e *ECSMetadataProvider) getCredentials(ctx context.Context) (*Credentials, error) {
-	roleName, err := e.getRoleName(ctx)
+	roleName, err := e.GetRoleName(ctx)
 	if err != nil {
 		if e, ok := err.(*httpError); ok && e.code == 404 {
 			return nil, NewNotEnableError(fmt.Errorf("get role name from ecs metadata failed: %w", err))
 		}
 	}
 	path := fmt.Sprintf("/latest/meta-data/ram/security-credentials/%s", roleName)
-	data, err := e.getMedataDataWithToken(ctx, http.MethodGet, path)
+	data, err := e.GetMedataDataWithToken(ctx, http.MethodGet, path)
 	if err != nil {
 		return nil, err
 	}
@@ -125,11 +125,11 @@ func (e *ECSMetadataProvider) getCredentials(ctx context.Context) (*Credentials,
 	}, nil
 }
 
-func (e *ECSMetadataProvider) getRoleName(ctx context.Context) (string, error) {
+func (e *ECSMetadataProvider) GetRoleName(ctx context.Context) (string, error) {
 	if e.roleName != "" {
 		return e.roleName, nil
 	}
-	name, err := e.getMedataDataWithToken(ctx, http.MethodGet, "/latest/meta-data/ram/security-credentials/")
+	name, err := e.GetMedataDataWithToken(ctx, http.MethodGet, "/latest/meta-data/ram/security-credentials/")
 	if err != nil {
 		return "", err
 	}
@@ -159,12 +159,13 @@ func (e *ECSMetadataProvider) getMedataToken(ctx context.Context) (string, error
 	return body, nil
 }
 
-func (e *ECSMetadataProvider) getMedataDataWithToken(ctx context.Context, method, path string) (string, error) {
+func (e *ECSMetadataProvider) GetMedataDataWithToken(ctx context.Context, method, path string) (string, error) {
 	token, err := e.getMedataToken(ctx)
 	if err != nil {
 		if e, ok := err.(*httpError); !(ok && e.code == 404) {
 			return "", err
 		}
+		e.logger().Error(err, err.Error())
 	}
 	h := http.Header{}
 	if token != "" {
