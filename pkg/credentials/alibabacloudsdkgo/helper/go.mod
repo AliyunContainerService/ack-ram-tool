@@ -1,6 +1,7 @@
 module github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudsdkgo/helper
 
-go 1.17
+go 1.23.0
+
 toolchain go1.24.1
 
 require github.com/aliyun/credentials-go v1.2.3

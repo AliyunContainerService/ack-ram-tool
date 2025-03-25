@@ -1,6 +1,7 @@
 module github.com/AliyunContainerService/ack-ram-tool/pkg/ramauthenticator
 
-go 1.20
+go 1.23.0
+
 toolchain go1.24.1
 
 require (
