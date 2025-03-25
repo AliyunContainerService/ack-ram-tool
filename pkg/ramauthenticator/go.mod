@@ -1,6 +1,7 @@
 module github.com/AliyunContainerService/ack-ram-tool/pkg/ramauthenticator
 
 go 1.20
+toolchain go1.24.1
 
 require (
 	github.com/alibabacloud-go/darabonba-openapi/v2 v2.0.4
@@ -20,6 +21,6 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/tjfoc/gmsm v1.4.1 // indirect
-	golang.org/x/net v0.23.0 // indirect
+	golang.org/x/net v0.36.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
