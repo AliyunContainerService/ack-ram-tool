@@ -1,6 +1,6 @@
 module github.com/AliyunContainerService/ack-ram-tool
 
-go 1.20
+go 1.21
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
@@ -27,9 +27,8 @@ require (
 )
 
 require (
-	github.com/alibabacloud-go/openapi-util v0.1.0
-	github.com/alibabacloud-go/tea-utils v1.4.5
-	github.com/alibabacloud-go/tea-utils/v2 v2.0.5
+	github.com/AliyunContainerService/ack-ram-tool/pkg/ramauthenticator v0.0.0
+	github.com/alibabacloud-go/tea-utils/v2 v2.0.6
 	github.com/go-logr/zapr v1.3.0
 	github.com/olekukonko/tablewriter v0.0.6-0.20230925090304-df64c4bbad77
 	go.uber.org/zap v1.27.0
@@ -38,8 +37,10 @@ require (
 
 require (
 	github.com/alibabacloud-go/alibabacloud-gateway-spi v0.0.4 // indirect
-	github.com/alibabacloud-go/debug v1.0.0 // indirect
+	github.com/alibabacloud-go/debug v1.0.1 // indirect
 	github.com/alibabacloud-go/endpoint-util v1.1.0 // indirect
+	github.com/alibabacloud-go/openapi-util v0.1.1 // indirect
+	github.com/alibabacloud-go/tea-utils v1.4.5 // indirect
 	github.com/alibabacloud-go/tea-xml v1.1.3 // indirect
 	github.com/clbanning/mxj/v2 v2.5.6 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -69,7 +70,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rivo/uniseg v0.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/tjfoc/gmsm v1.3.2 // indirect
+	github.com/tjfoc/gmsm v1.4.1 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/net v0.33.0 // indirect
 	golang.org/x/oauth2 v0.10.0 // indirect
@@ -90,4 +91,7 @@ require (
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
 
-replace github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider => ./pkg/credentials/provider
+replace (
+	github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider => ./pkg/credentials/provider
+	github.com/AliyunContainerService/ack-ram-tool/pkg/ramauthenticator => ./pkg/ramauthenticator
+)

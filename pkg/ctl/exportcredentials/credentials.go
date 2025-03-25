@@ -51,11 +51,12 @@ func getExpirationWithJitter(t time.Time) time.Time {
 func (c *Credentials) Format(format string) string {
 	output := ""
 	switch format {
-	case formatCredentialFileIni:
+	case formatCredentialFileIni, formatCredentialFileIniShort:
 		output = toCredentialFileIni(*c)
-	case formatAliyunCLIURIJSON, formatECSMetadataJSON:
+	case formatAliyunCLIURIJSON, formatAliyunCLIURIJSONShort,
+		formatECSMetadataJSON, formatECSMetadataJSONShort:
 		output = toAliyunCLIURIBody(*c)
-	case formatEnvironmentVariables:
+	case formatEnvironmentVariables, formatEnvironmentVariablesShort:
 		output = toExportEnvironmentVariables(*c)
 	default:
 		output = toAliyunCLIConfigJSON(*c)

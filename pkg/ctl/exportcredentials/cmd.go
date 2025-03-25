@@ -20,18 +20,28 @@ type option struct {
 
 var opt = option{}
 var (
-	formatAliyunCLIConfigJSON  = "aliyun-cli-config-json"
-	formatAliyunCLIURIJSON     = "aliyun-cli-uri-json"
-	formatECSMetadataJSON      = "ecs-metadata-json"
-	formatCredentialFileIni    = "credential-file-ini" // #nosec G101
-	formatEnvironmentVariables = "environment-variables"
+	formatAliyunCLIConfigJSON       = "aliyun-cli-config-json"
+	formatAliyunCLIConfigJSONShort  = "aliyuncli-json"
+	formatAliyunCLIURIJSON          = "aliyun-cli-uri-json"
+	formatAliyunCLIURIJSONShort     = "aliyuncli-uri"
+	formatECSMetadataJSON           = "ecs-metadata-json"
+	formatECSMetadataJSONShort      = "ecs"
+	formatCredentialFileIni         = "credential-file-ini" // #nosec G101
+	formatCredentialFileIniShort    = "ini"                 // #nosec G101
+	formatEnvironmentVariables      = "environment-variables"
+	formatEnvironmentVariablesShort = "env"
 )
 var formats = []string{
 	formatAliyunCLIConfigJSON,
+	formatAliyunCLIConfigJSONShort,
 	formatAliyunCLIURIJSON,
+	formatAliyunCLIURIJSONShort,
 	formatECSMetadataJSON,
+	formatECSMetadataJSONShort,
 	formatCredentialFileIni,
+	formatCredentialFileIniShort,
 	formatEnvironmentVariables,
+	formatEnvironmentVariablesShort,
 }
 
 var cmd = &cobra.Command{
@@ -45,7 +55,9 @@ var cmd = &cobra.Command{
 			cred, err := getCredentials(client)
 			ctlcommon.ExitIfError(err)
 
-			if opt.format == formatEnvironmentVariables && len(args) > 0 {
+			if (opt.format == formatEnvironmentVariables ||
+				opt.format == formatEnvironmentVariablesShort) &&
+				len(args) > 0 {
 				err = runUserCommands(context.Background(), *cred, args, nil, nil, nil)
 				ctlcommon.ExitIfError(err)
 				return
