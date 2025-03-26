@@ -1,6 +1,7 @@
 package exportcredentials
 
 import (
+	"github.com/alibabacloud-go/tea/tea"
 	"math/rand"
 	"time"
 
@@ -17,24 +18,16 @@ type Credentials struct {
 // TODO: add cache
 func getCredentials(client *openapi.Client) (*Credentials, error) {
 	cc := client.Credential()
-	ak, err := cc.GetAccessKeyId()
-	if err != nil {
-		return nil, err
-	}
-	as, err := cc.GetAccessKeySecret()
-	if err != nil {
-		return nil, err
-	}
-	st, err := cc.GetSecurityToken()
+	credV, err := cc.GetCredential()
 	if err != nil {
 		return nil, err
 	}
 	exp := getExpirationWithJitter(time.Now())
 
 	cred := Credentials{
-		AccessKeyId:     *ak,
-		AccessKeySecret: *as,
-		SecurityToken:   *st,
+		AccessKeyId:     tea.StringValue(credV.AccessKeyId),
+		AccessKeySecret: tea.StringValue(credV.AccessKeySecret),
+		SecurityToken:   tea.StringValue(credV.SecurityToken),
 		Expiration:      exp.UTC().Format("2006-01-02T15:04:05Z"),
 	}
 

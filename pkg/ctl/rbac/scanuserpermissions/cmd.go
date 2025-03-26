@@ -122,6 +122,7 @@ func outputTable(bindings []binding.Binding, accounts map[int64]types.Account) {
 		if b.AliUid == 0 {
 			continue
 		}
+		// #nosec G115
 		if opts.userId != 0 && b.AliUid != int64(opts.userId) { // #nosec G115
 			continue
 		}

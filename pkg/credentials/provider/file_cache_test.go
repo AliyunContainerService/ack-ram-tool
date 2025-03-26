@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path"
 	"testing"
 	"time"
 )
@@ -180,7 +181,7 @@ func TestFileCacheProvider_Credentials_error(t *testing.T) {
 }
 
 func ensureTmpDir(t *testing.T) string {
-	dir := os.TempDir() + "foobar"
+	dir := path.Join(os.TempDir(), "foobar")
 	err := os.MkdirAll(dir, 0750)
 	if err != nil {
 		t.Fatal(err)
