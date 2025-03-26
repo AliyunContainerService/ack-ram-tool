@@ -3,6 +3,8 @@ package provider
 import (
 	"context"
 	"time"
+
+	"github.com/aliyun/credentials-go/credentials"
 )
 
 var defaultTimeout = time.Minute * 10
@@ -32,38 +34,49 @@ func NewCredentialForV2SDK(p CredentialsProvider, opts CredentialForV2SDKOptions
 	}
 }
 
-func (c *CredentialForV2SDK) GetAccessKeyId() (*string, error) {
+func (c *CredentialForV2SDK) GetCredential() (*credentials.CredentialModel, error) {
 	timeoutCtx, cancel := context.WithTimeout(context.Background(), c.credentialRetrievalTimeout)
 	defer cancel()
 	cred, err := c.p.Credentials(timeoutCtx)
 	if err != nil {
 		return nil, err
 	}
-	return stringPointer(cred.AccessKeyId), nil
+	return &credentials.CredentialModel{
+		AccessKeyId:     stringPointer(cred.AccessKeyId),
+		AccessKeySecret: stringPointer(cred.AccessKeySecret),
+		SecurityToken:   stringPointer(cred.SecurityToken),
+		BearerToken:     nil,
+		Type:            nil,
+		ProviderName:    nil,
+	}, nil
+}
+
+func (c *CredentialForV2SDK) GetAccessKeyId() (*string, error) {
+	cred, err := c.GetCredential()
+	if err != nil {
+		return nil, err
+	}
+	return cred.AccessKeyId, nil
 }
 
 func (c *CredentialForV2SDK) GetAccessKeySecret() (*string, error) {
-	timeoutCtx, cancel := context.WithTimeout(context.Background(), c.credentialRetrievalTimeout)
-	defer cancel()
-	cred, err := c.p.Credentials(timeoutCtx)
+	cred, err := c.GetCredential()
 	if err != nil {
 		return nil, err
 	}
-	return stringPointer(cred.AccessKeySecret), nil
+	return cred.AccessKeySecret, nil
 }
 
 func (c *CredentialForV2SDK) GetSecurityToken() (*string, error) {
-	timeoutCtx, cancel := context.WithTimeout(context.Background(), c.credentialRetrievalTimeout)
-	defer cancel()
-	cred, err := c.p.Credentials(timeoutCtx)
+	cred, err := c.GetCredential()
 	if err != nil {
 		return nil, err
 	}
-	return stringPointer(cred.SecurityToken), nil
+	return cred.SecurityToken, nil
 }
 
 func (c *CredentialForV2SDK) GetBearerToken() *string {
-	return stringPointer("")
+	return nil
 }
 
 func (c *CredentialForV2SDK) GetType() *string {
@@ -87,5 +100,8 @@ func (o *CredentialForV2SDKOptions) applyDefaults() {
 }
 
 func stringPointer(s string) *string {
+	if s == "" {
+		return nil
+	}
 	return &s
 }
