@@ -122,7 +122,7 @@ func outputTable(bindings []binding.Binding, accounts map[int64]types.Account) {
 		if b.AliUid == 0 {
 			continue
 		}
-		if opts.userId != 0 && b.AliUid != int64(opts.userId) {
+		if opts.userId != 0 && b.AliUid != int64(opts.userId) { // nolint:gosec
 			continue
 		}
 		acc, ok := accounts[b.AliUid]
