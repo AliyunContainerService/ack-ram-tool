@@ -1,6 +1,7 @@
 module github.com/AliyunContainerService/ack-ram-tool/examples/rrsa/log-go-sdk
 
-go 1.16
+go 1.23.0
+
 toolchain go1.24.1
 
 require (
