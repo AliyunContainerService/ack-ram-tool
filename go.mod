@@ -2,6 +2,8 @@ module github.com/AliyunContainerService/ack-ram-tool
 
 go 1.23.0
 
+toolchain go1.24.1
+
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider v0.0.0
@@ -11,7 +13,7 @@ require (
 	github.com/alibabacloud-go/ram-20150501 v1.0.2
 	github.com/alibabacloud-go/sts-20150401 v1.1.0
 	github.com/alibabacloud-go/tea v1.2.2
-	github.com/aliyun/alibaba-cloud-sdk-go v1.62.708
+	github.com/aliyun/alibaba-cloud-sdk-go v1.63.103
 	github.com/aliyun/credentials-go v1.4.5
 	github.com/briandowns/spinner v1.23.0
 	github.com/fatih/color v1.18.0
