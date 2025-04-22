@@ -25,6 +25,8 @@ const (
 	defaultClientTimeout   = time.Second * 30
 )
 
+var DefaultClient, _ = NewClient(ClientOptions{})
+
 type Client struct {
 	httpClient *http.Client
 

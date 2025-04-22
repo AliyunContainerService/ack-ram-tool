@@ -82,6 +82,32 @@ func TestGetToken(t *testing.T) {
 	})
 }
 
+func TestDefaultClient(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.RequestURI == "/latest/api/token" {
+			w.Write([]byte("test-token"))
+			return
+		}
+		if v := r.Header.Get("X-aliyun-ecs-metadata-token"); v != "" && v != "test-token" {
+			http.Error(w, "forbidden", http.StatusForbidden)
+			return
+		}
+		w.Write([]byte("metadata-value"))
+	}))
+	defer server.Close()
+	DefaultClient.endpoint = server.URL
+
+	t.Run("successful request", func(t *testing.T) {
+		data, err := DefaultClient.GetMetaData(context.Background(), http.MethodGet, "/test-path")
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		if string(data) != "metadata-value" {
+			t.Errorf("expected metadata-value, got %s", string(data))
+		}
+	})
+}
+
 func TestGetMetaData(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.RequestURI == "/latest/api/token" {
