@@ -2,13 +2,15 @@ package provider
 
 import (
 	"context"
-	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/ecsmetadata"
 )
 
 const (
@@ -31,7 +33,7 @@ type ECSMetadataProvider struct {
 	metadataTokenTTLSeconds int
 	metadataTokenExp        time.Time
 
-	client *commonHttpClient
+	client *ecsmetadata.Client
 	Logger Logger
 }
 
@@ -51,16 +53,26 @@ type ECSMetadataProviderOptions struct {
 
 func NewECSMetadataProvider(opts ECSMetadataProviderOptions) *ECSMetadataProvider {
 	opts.applyDefaults()
+	cops := opts.toClientOptions()
+	wrapper := func(rt http.RoundTripper) http.RoundTripper {
+		w := &commonHttpClient{
+			delegatedRoundTripper: rt,
+			logger:                opts.Logger,
+		}
+		return w
+	}
+	cops.TransportWrappers = append(cops.TransportWrappers, wrapper)
+	client, err := ecsmetadata.NewClient(cops)
+	if err != nil {
+		client, _ = ecsmetadata.NewClient(ecsmetadata.ClientOptions{
+			TransportWrappers: []ecsmetadata.TransportWrapper{wrapper},
+		})
+	}
 
-	client := newCommonHttpClient(opts.Transport, opts.Timeout)
-	client.logger = opts.Logger
 	e := &ECSMetadataProvider{
-		endpoint:                opts.Endpoint,
-		roleName:                opts.RoleName,
-		metadataTokenTTLSeconds: opts.MetadataTokenTTLSeconds,
-		disableToken:            opts.DisableToken,
-		client:                  client,
-		Logger:                  opts.Logger,
+		roleName: opts.RoleName,
+		client:   client,
+		Logger:   opts.Logger,
 	}
 	e.u = NewUpdater(e.getCredentials, UpdaterOptions{
 		ExpiryWindow:  opts.ExpiryWindow,
@@ -96,32 +108,25 @@ func (e *ECSMetadataProvider) getCredentials(ctx context.Context) (*Credentials,
 		if e, ok := err.(*httpError); ok && e.code == 404 {
 			return nil, NewNotEnableError(fmt.Errorf("get role name from ecs metadata failed: %w", err))
 		}
+		var httperr *ecsmetadata.HTTPError
+		if errors.As(err, &httperr) && httperr.StatusCode == 404 {
+			return nil, NewNotEnableError(fmt.Errorf("get role name from ecs metadata failed: %w", err))
+		}
+		return nil, err
 	}
-	path := fmt.Sprintf("/latest/meta-data/ram/security-credentials/%s", roleName)
-	data, err := e.GetMedataDataWithToken(ctx, http.MethodGet, path)
+	obj, err := e.client.GetRoleCredentials(ctx, roleName)
 	if err != nil {
 		return nil, err
 	}
-
-	var obj ecsMetadataStsResponse
-	if err := json.Unmarshal([]byte(data), &obj); err != nil {
-		return nil, fmt.Errorf("parse credentials failed: %w", err)
-	}
-	if obj.AccessKeyId == "" || obj.AccessKeySecret == "" ||
-		obj.SecurityToken == "" || obj.Expiration == "" {
-		return nil, fmt.Errorf("parse credentials got unexpected data: %s",
-			strings.ReplaceAll(data, "\n", " "))
+	if obj.AccessKeyId == "" || obj.AccessKeySecret == "" {
+		return nil, fmt.Errorf("parse credentials got unexpected data: %+v", *obj)
 	}
 
-	exp, err := time.Parse("2006-01-02T15:04:05Z", obj.Expiration)
-	if err != nil {
-		return nil, fmt.Errorf("parse Expiration (%s) failed: %w", obj.Expiration, err)
-	}
 	return &Credentials{
 		AccessKeyId:     obj.AccessKeyId,
 		AccessKeySecret: obj.AccessKeySecret,
 		SecurityToken:   obj.SecurityToken,
-		Expiration:      exp,
+		Expiration:      obj.Expiration,
 	}, nil
 }
 
@@ -129,54 +134,12 @@ func (e *ECSMetadataProvider) GetRoleName(ctx context.Context) (string, error) {
 	if e.roleName != "" {
 		return e.roleName, nil
 	}
-	name, err := e.GetMedataDataWithToken(ctx, http.MethodGet, "/latest/meta-data/ram/security-credentials/")
-	if err != nil {
-		return "", err
-	}
-	return strings.TrimSpace(name), nil
-}
-
-func (e *ECSMetadataProvider) getMedataToken(ctx context.Context) (string, error) {
-	if e.disableToken {
-		return "", nil
-	}
-
-	if !e.metadataTokenExp.Before(time.Now()) {
-		return e.metadataToken, nil
-	}
-
-	e.logger().Debug("start to get metadata token")
-	h := http.Header{}
-	h.Set("X-aliyun-ecs-metadata-token-ttl-seconds", fmt.Sprintf("%d", e.metadataTokenTTLSeconds))
-	body, err := e.getMedataData(ctx, http.MethodPut, "/latest/api/token", h)
-	if err != nil {
-		return "", fmt.Errorf("get metadata token failed: %w", err)
-	}
-
-	e.metadataToken = strings.TrimSpace(body)
-	e.metadataTokenExp = time.Now().Add(time.Duration(float64(e.metadataTokenTTLSeconds)*0.8) * time.Second)
-
-	return body, nil
+	return e.client.GetRoleName(ctx)
 }
 
 func (e *ECSMetadataProvider) GetMedataDataWithToken(ctx context.Context, method, path string) (string, error) {
-	token, err := e.getMedataToken(ctx)
-	if err != nil {
-		if e, ok := err.(*httpError); !(ok && e.code == 404) {
-			return "", err
-		}
-		e.logger().Error(err, err.Error())
-	}
-	h := http.Header{}
-	if token != "" {
-		h.Set("X-aliyun-ecs-metadata-token", token)
-	}
-	return e.getMedataData(ctx, method, path, h)
-}
-
-func (e *ECSMetadataProvider) getMedataData(ctx context.Context, method, path string, header http.Header) (string, error) {
-	url := fmt.Sprintf("%s%s", e.endpoint, path)
-	return e.client.send(ctx, method, url, header, nil)
+	data, err := e.client.GetMetaData(ctx, method, path)
+	return string(data), err
 }
 
 func (e *ECSMetadataProvider) logger() Logger {
@@ -223,5 +186,19 @@ func (o *ECSMetadataProviderOptions) applyDefaults() {
 	}
 	if o.Logger == nil {
 		o.Logger = defaultLog
+	}
+}
+
+func (o *ECSMetadataProviderOptions) toClientOptions() ecsmetadata.ClientOptions {
+	return ecsmetadata.ClientOptions{
+		Endpoint:          o.Endpoint,
+		RoleName:          o.RoleName,
+		DisableIMDSV2:     o.DisableToken,
+		TokenTTLSeconds:   o.MetadataTokenTTLSeconds,
+		TransportWrappers: nil,
+		Timeout:           o.Timeout,
+		NowFunc:           nil,
+		DisableRetry:      false,
+		RetryOptions:      nil,
 	}
 }
