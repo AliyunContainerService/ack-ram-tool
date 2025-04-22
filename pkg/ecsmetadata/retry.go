@@ -41,7 +41,7 @@ retry:
 		}
 
 		if opts.RetryDelayFunc != nil {
-			delay := opts.RetryDelayFunc(i)
+			delay := opts.RetryDelayFunc(i + 1)
 			if delay > 0 {
 				select {
 				case <-ctx.Done():
