@@ -7,6 +7,8 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -26,6 +28,7 @@ const (
 )
 
 var DefaultClient, _ = NewClient(ClientOptions{})
+var UserAgent = ""
 
 type Client struct {
 	httpClient *http.Client
@@ -42,6 +45,8 @@ type Client struct {
 
 	disableRetry bool
 	retryOptions RetryOptions
+
+	userAgent string
 }
 
 type TransportWrapper func(rt http.RoundTripper) http.RoundTripper
@@ -65,6 +70,13 @@ type ClientOptions struct {
 	DisableRetry bool
 	// default: DefaultRetryOptions()
 	RetryOptions *RetryOptions
+
+	UserAgent string
+}
+
+func init() {
+	name := path.Base(os.Args[0])
+	UserAgent = fmt.Sprintf("%s %s/%s %s", name, runtime.GOOS, runtime.GOARCH, runtime.Version())
 }
 
 func NewClient(opts ClientOptions) (*Client, error) {
@@ -185,6 +197,7 @@ func (c *Client) send(ctx context.Context, method, path string, header http.Head
 	for k, v := range header {
 		req.Header.Set(k, v[0])
 	}
+	req.Header.Set("User-Agent", c.userAgent)
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("do request failed: %w", err)
@@ -261,6 +274,9 @@ func (o *ClientOptions) prepare() error {
 		if o.RetryOptions == nil {
 			o.RetryOptions = DefaultRetryOptions()
 		}
+	}
+	if o.UserAgent == "" {
+		o.UserAgent = UserAgent
 	}
 
 	return nil
