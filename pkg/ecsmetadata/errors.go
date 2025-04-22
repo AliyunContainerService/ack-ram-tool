@@ -55,8 +55,8 @@ func (e noRetryError) Unwrap() error {
 	return e.err
 }
 
-func truncateStr(raw string, maxLen uint32) string {
-	currLen := uint32(len(raw))
+func truncateStr(raw string, maxLen int) string {
+	currLen := len(raw)
 	if currLen <= maxLen {
 		return raw
 	}
