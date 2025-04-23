@@ -96,6 +96,7 @@ func NewClient(opts ClientOptions) (*Client, error) {
 		nowFunc:         opts.NowFunc,
 		retryOptions:    *opts.RetryOptions,
 		disableRetry:    opts.DisableRetry,
+		userAgent:       opts.UserAgent,
 	}, nil
 }
 
@@ -164,6 +165,10 @@ func (c *Client) getRawStringData(ctx context.Context, path string) (string, err
 	return string(data), nil
 }
 
+func (c *Client) getRawData(ctx context.Context, path string) ([]byte, error) {
+	return c.GetMetaData(ctx, http.MethodGet, path)
+}
+
 func (c *Client) sendWithRetry(ctx context.Context, method, path string, header http.Header) ([]byte, error) {
 	if c.disableRetry {
 		return c.send(ctx, method, path, header)
@@ -188,7 +193,7 @@ func (c *Client) sendWithRetry(ctx context.Context, method, path string, header 
 }
 
 func (c *Client) send(ctx context.Context, method, path string, header http.Header) ([]byte, error) {
-	url := fmt.Sprintf("%s%s", c.endpoint, path)
+	url := c.getURL(path)
 	req, err := http.NewRequestWithContext(ctx, method, url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("create request failed: %w", err)
@@ -200,17 +205,19 @@ func (c *Client) send(ctx context.Context, method, path string, header http.Head
 	req.Header.Set("User-Agent", c.userAgent)
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("do request failed: %w", err)
+		err2 := fmt.Errorf("do request failed: %w", err)
+		return nil, newHTTPError(err2, url, resp, nil)
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("read body failed: %w", err)
+		err2 := fmt.Errorf("read body failed: %w", err)
+		return nil, newHTTPError(err2, url, resp, nil)
 	}
 	if resp.StatusCode != http.StatusOK {
-		err := fmt.Errorf("request failed: %s", resp.Status)
-		return nil, newHTTPError(err, url, resp, body)
+		err2 := fmt.Errorf("status code of respose is not 200: %s", resp.Status)
+		return nil, newHTTPError(err2, url, resp, body)
 	}
 	return body, nil
 }
@@ -280,4 +287,13 @@ func (o *ClientOptions) prepare() error {
 	}
 
 	return nil
+}
+
+func (c *Client) SetEndpoint(endpoint string) *Client {
+	c.endpoint = strings.TrimRight(endpoint, "/")
+	return c
+}
+
+func (c *Client) getURL(path string) string {
+	return fmt.Sprintf("%s%s", c.endpoint, path)
 }

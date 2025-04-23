@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 )
@@ -33,9 +34,8 @@ func TestGetRegionId(t *testing.T) {
 		client, err := NewClient(ClientOptions{
 			TransportWrappers: []TransportWrapper{
 				func(rt http.RoundTripper) http.RoundTripper {
-					return &MockTransportWrapper{
-						rt: rt,
-						callback: func(path string) (int, string, error) {
+					return &MockWrapper{
+						Mock: func(path string) (int, string, error) {
 							if path == "/latest/api/token" {
 								return 200, "token", nil
 							}
@@ -64,9 +64,8 @@ func TestGetRegionId(t *testing.T) {
 		client, err := NewClient(ClientOptions{
 			TransportWrappers: []TransportWrapper{
 				func(rt http.RoundTripper) http.RoundTripper {
-					return &MockTransportWrapper{
-						rt: rt,
-						callback: func(path string) (int, string, error) {
+					return &MockWrapper{
+						Mock: func(path string) (int, string, error) {
 							if path == "/latest/api/token" {
 								return 200, "token", nil
 							}
@@ -99,9 +98,8 @@ func TestGetZoneId(t *testing.T) {
 		client, err := NewClient(ClientOptions{
 			TransportWrappers: []TransportWrapper{
 				func(rt http.RoundTripper) http.RoundTripper {
-					return &MockTransportWrapper{
-						rt: rt,
-						callback: func(path string) (int, string, error) {
+					return &MockWrapper{
+						Mock: func(path string) (int, string, error) {
 							if path == "/latest/api/token" {
 								return 200, "token", nil
 							}
@@ -130,9 +128,8 @@ func TestGetZoneId(t *testing.T) {
 		client, err := NewClient(ClientOptions{
 			TransportWrappers: []TransportWrapper{
 				func(rt http.RoundTripper) http.RoundTripper {
-					return &MockTransportWrapper{
-						rt: rt,
-						callback: func(path string) (int, string, error) {
+					return &MockWrapper{
+						Mock: func(path string) (int, string, error) {
 							if path == "/latest/api/token" {
 								return 200, "token", nil
 							}
@@ -162,23 +159,20 @@ func TestGetOwnerAccountId(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("normal case", func(t *testing.T) {
+		s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			path := r.URL.RequestURI()
+			if path == "/latest/api/token" {
+				w.Write([]byte("token"))
+				return
+			}
+			if path != "/latest/meta-data/owner-account-id" {
+				t.Errorf("expected path '/latest/meta-data/owner-account-id', got '%s'", path)
+			}
+			w.Write([]byte("123456789012"))
+		}))
+		defer s.Close()
 		client, err := NewClient(ClientOptions{
-			TransportWrappers: []TransportWrapper{
-				func(rt http.RoundTripper) http.RoundTripper {
-					return &MockTransportWrapper{
-						rt: rt,
-						callback: func(path string) (int, string, error) {
-							if path == "/latest/api/token" {
-								return 200, "token", nil
-							}
-							if path != "/latest/meta-data/owner-account-id" {
-								t.Errorf("expected path '/latest/meta-data/owner-account-id', got '%s'", path)
-							}
-							return 200, "123456789012", nil
-						},
-					}
-				},
-			},
+			Endpoint: s.URL,
 		})
 		if err != nil {
 			t.Errorf("expected no error, got '%v'", err)
@@ -193,23 +187,20 @@ func TestGetOwnerAccountId(t *testing.T) {
 	})
 
 	t.Run("error case", func(t *testing.T) {
+		s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			path := r.URL.RequestURI()
+			if path == "/latest/api/token" {
+				w.Write([]byte("token"))
+				return
+			}
+			if path != "/latest/meta-data/owner-account-id" {
+				t.Errorf("expected path '/latest/meta-data/owner-account-id', got '%s'", path)
+			}
+			w.WriteHeader(400)
+		}))
+		defer s.Close()
 		client, err := NewClient(ClientOptions{
-			TransportWrappers: []TransportWrapper{
-				func(rt http.RoundTripper) http.RoundTripper {
-					return &MockTransportWrapper{
-						rt: rt,
-						callback: func(path string) (int, string, error) {
-							if path == "/latest/api/token" {
-								return 200, "token", nil
-							}
-							if path != "/latest/meta-data/owner-account-id" {
-								t.Errorf("expected path '/latest/meta-data/owner-account-id', got '%s'", path)
-							}
-							return 400, "", errors.New("mock error")
-						},
-					}
-				},
-			},
+			Endpoint: s.URL,
 		})
 		if err != nil {
 			t.Errorf("expected no error, got '%v'", err)

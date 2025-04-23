@@ -21,17 +21,25 @@ type noRetryError struct {
 }
 
 func newHTTPError(err error, url string, resp *http.Response, body []byte) *HTTPError {
-	newBody := strings.ReplaceAll(string(body), "\n", " ")
-	newBody = strings.ReplaceAll(newBody, "\r", " ")
-	newBody = truncateStr(newBody, 80)
-	return &HTTPError{
-		URL:        url,
-		StatusCode: resp.StatusCode,
-		Header:     resp.Header,
-		Body:       newBody,
-		Err:        err,
-		Message:    err.Error(),
+	var newBody string
+	if len(body) > 0 {
+		newBody = strings.ReplaceAll(string(body), "\n", " ")
+		newBody = strings.ReplaceAll(newBody, "\r", " ")
+		newBody = strings.TrimSpace(newBody)
+		newBody = truncateStr(newBody, 80)
 	}
+
+	herr := &HTTPError{
+		URL:     url,
+		Body:    newBody,
+		Err:     err,
+		Message: err.Error(),
+	}
+	if resp != nil {
+		herr.StatusCode = resp.StatusCode
+		herr.Header = resp.Header
+	}
+	return herr
 }
 
 func newNoRetryError(err error) *noRetryError {
@@ -39,7 +47,7 @@ func newNoRetryError(err error) *noRetryError {
 }
 
 func (e HTTPError) Error() string {
-	return fmt.Sprintf("%s. send data to %s failed, status code: %d, body: %s",
+	return fmt.Sprintf("%s. send request to %s failed, status code: %d, body: %s",
 		e.Message, e.URL, e.StatusCode, e.Body)
 }
 

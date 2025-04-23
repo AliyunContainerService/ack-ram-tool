@@ -14,9 +14,8 @@ func TestGetInstanceType(t *testing.T) {
 		client, err := NewClient(ClientOptions{
 			TransportWrappers: []TransportWrapper{
 				func(rt http.RoundTripper) http.RoundTripper {
-					return &MockTransportWrapper{
-						rt: rt,
-						callback: func(path string) (int, string, error) {
+					return &MockWrapper{
+						Mock: func(path string) (int, string, error) {
 							if path == "/latest/api/token" {
 								return 200, "token", nil
 							}
@@ -45,9 +44,8 @@ func TestGetInstanceType(t *testing.T) {
 		client, err := NewClient(ClientOptions{
 			TransportWrappers: []TransportWrapper{
 				func(rt http.RoundTripper) http.RoundTripper {
-					return &MockTransportWrapper{
-						rt: rt,
-						callback: func(path string) (int, string, error) {
+					return &MockWrapper{
+						Mock: func(path string) (int, string, error) {
 							if path == "/latest/api/token" {
 								return 200, "token", nil
 							}
@@ -80,9 +78,8 @@ func TestGetInstanceName(t *testing.T) {
 		client, err := NewClient(ClientOptions{
 			TransportWrappers: []TransportWrapper{
 				func(rt http.RoundTripper) http.RoundTripper {
-					return &MockTransportWrapper{
-						rt: rt,
-						callback: func(path string) (int, string, error) {
+					return &MockWrapper{
+						Mock: func(path string) (int, string, error) {
 							if path == "/latest/api/token" {
 								return 200, "token", nil
 							}
@@ -111,9 +108,8 @@ func TestGetInstanceName(t *testing.T) {
 		client, err := NewClient(ClientOptions{
 			TransportWrappers: []TransportWrapper{
 				func(rt http.RoundTripper) http.RoundTripper {
-					return &MockTransportWrapper{
-						rt: rt,
-						callback: func(path string) (int, string, error) {
+					return &MockWrapper{
+						Mock: func(path string) (int, string, error) {
 							if path == "/latest/api/token" {
 								return 200, "token", nil
 							}
@@ -146,9 +142,8 @@ func TestGetInstanceId(t *testing.T) {
 		client, err := NewClient(ClientOptions{
 			TransportWrappers: []TransportWrapper{
 				func(rt http.RoundTripper) http.RoundTripper {
-					return &MockTransportWrapper{
-						rt: rt,
-						callback: func(path string) (int, string, error) {
+					return &MockWrapper{
+						Mock: func(path string) (int, string, error) {
 							if path == "/latest/api/token" {
 								return 200, "token", nil
 							}
@@ -177,9 +172,8 @@ func TestGetInstanceId(t *testing.T) {
 		client, err := NewClient(ClientOptions{
 			TransportWrappers: []TransportWrapper{
 				func(rt http.RoundTripper) http.RoundTripper {
-					return &MockTransportWrapper{
-						rt: rt,
-						callback: func(path string) (int, string, error) {
+					return &MockWrapper{
+						Mock: func(path string) (int, string, error) {
 							if path == "/latest/api/token" {
 								return 200, "token", nil
 							}
@@ -196,6 +190,134 @@ func TestGetInstanceId(t *testing.T) {
 			t.Errorf("expected no error, got '%v'", err)
 		}
 		result, err := client.GetInstanceId(ctx)
+		if err == nil {
+			t.Errorf("expected error, got nil")
+		}
+		if result != "" {
+			t.Errorf("expected empty result, got '%s'", result)
+		}
+	})
+}
+
+func TestGetImageId(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("normal case", func(t *testing.T) {
+		client, err := NewClient(ClientOptions{
+			TransportWrappers: []TransportWrapper{
+				func(rt http.RoundTripper) http.RoundTripper {
+					return &MockWrapper{
+						Mock: func(path string) (int, string, error) {
+							if path == "/latest/api/token" {
+								return 200, "token", nil
+							}
+							if path != "/latest/meta-data/image-id" {
+								t.Errorf("expected path '/latest/meta-data/image-id', got '%s'", path)
+							}
+							return 200, "ubuntu_20_04_x64_20G_alibase_20230922.vhd", nil
+						},
+					}
+				},
+			},
+		})
+		if err != nil {
+			t.Errorf("expected no error, got '%v'", err)
+		}
+		result, err := client.GetImageId(ctx)
+		if err != nil {
+			t.Errorf("expected no error, got '%v'", err)
+		}
+		if result != "ubuntu_20_04_x64_20G_alibase_20230922.vhd" {
+			t.Errorf("expected result 'ubuntu_20_04_x64_20G_alibase_20230922.vhd', got '%s'", result)
+		}
+	})
+
+	t.Run("error case", func(t *testing.T) {
+		client, err := NewClient(ClientOptions{
+			TransportWrappers: []TransportWrapper{
+				func(rt http.RoundTripper) http.RoundTripper {
+					return &MockWrapper{
+						Mock: func(path string) (int, string, error) {
+							if path == "/latest/api/token" {
+								return 200, "token", nil
+							}
+							if path != "/latest/meta-data/image-id" {
+								t.Errorf("expected path '/latest/meta-data/image-id', got '%s'", path)
+							}
+							return 400, "", errors.New("mock error")
+						},
+					}
+				},
+			},
+		})
+		if err != nil {
+			t.Errorf("expected no error, got '%v'", err)
+		}
+		result, err := client.GetImageId(ctx)
+		if err == nil {
+			t.Errorf("expected error, got nil")
+		}
+		if result != "" {
+			t.Errorf("expected empty result, got '%s'", result)
+		}
+	})
+}
+
+func TestGetSerialNumber(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("normal case", func(t *testing.T) {
+		client, err := NewClient(ClientOptions{
+			TransportWrappers: []TransportWrapper{
+				func(rt http.RoundTripper) http.RoundTripper {
+					return &MockWrapper{
+						Mock: func(path string) (int, string, error) {
+							if path == "/latest/api/token" {
+								return 200, "token", nil
+							}
+							if path != "/latest/meta-data/serial-number" {
+								t.Errorf("expected path '/latest/meta-data/serial-number', got '%s'", path)
+							}
+							return 200, "test-serial-number", nil
+						},
+					}
+				},
+			},
+		})
+		if err != nil {
+			t.Errorf("expected no error, got '%v'", err)
+		}
+		result, err := client.GetSerialNumber(ctx)
+		if err != nil {
+			t.Errorf("expected no error, got '%v'", err)
+		}
+		if result != "test-serial-number" {
+			t.Errorf("expected result 'test-serial-number', got '%s'", result)
+		}
+	})
+
+	t.Run("error case", func(t *testing.T) {
+		client, err := NewClient(ClientOptions{
+			TransportWrappers: []TransportWrapper{
+				func(rt http.RoundTripper) http.RoundTripper {
+					return &MockWrapper{
+						Mock: func(path string) (int, string, error) {
+							if path == "/latest/api/token" {
+								return 200, "token", nil
+							}
+							if path != "/latest/meta-data/serial-number" {
+								t.Errorf("expected path '/latest/meta-data/serial-number', got '%s'", path)
+							}
+							return 400, "", errors.New("mock error")
+						},
+					}
+				},
+			},
+		})
+		if err != nil {
+			t.Errorf("expected no error, got '%v'", err)
+		}
+		result, err := client.GetSerialNumber(ctx)
 		if err == nil {
 			t.Errorf("expected error, got nil")
 		}

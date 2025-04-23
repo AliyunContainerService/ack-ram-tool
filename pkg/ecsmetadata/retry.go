@@ -40,7 +40,7 @@ retry:
 			return nerr.err
 		}
 
-		if opts.RetryDelayFunc != nil {
+		if opts.RetryDelayFunc != nil && i < opts.MaxRetryTimes {
 			delay := opts.RetryDelayFunc(i + 1)
 			if delay > 0 {
 				select {

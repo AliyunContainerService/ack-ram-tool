@@ -36,6 +36,6 @@ func (c *Client) GetNetworkType(ctx context.Context) (string, error) {
 	return c.getTidyStringData(ctx, "/latest/meta-data/network-type")
 }
 
-func (c *Client) GetMAC(ctx context.Context) (string, error) {
+func (c *Client) GetMac(ctx context.Context) (string, error) {
 	return c.getTidyStringData(ctx, "/latest/meta-data/mac")
 }
