@@ -21,7 +21,7 @@ const (
 	EnvEndpoint            = "ALIBABA_CLOUD_IMDS_ENDPOINT"
 	EnvIMDSV2Disabled      = "ALIBABA_CLOUD_IMDSV2_DISABLED"
 	EnvIMDSRoleName        = "ALIBABA_CLOUD_ECS_METADATA"
-	defaultTokenTTLSeconds = 3600
+	defaultTokenTTLSeconds = 18000 // 5hours
 	minTokenTTLSeconds     = 1
 	maxTokenTTLSeconds     = 21600
 	defaultClientTimeout   = time.Second * 30
@@ -57,7 +57,7 @@ type ClientOptions struct {
 	// ram role of ecs instance
 	RoleName      string
 	DisableIMDSV2 bool
-	// default: 3600
+	// default: 18000, 5 hours
 	TokenTTLSeconds int
 
 	TransportWrappers []TransportWrapper
