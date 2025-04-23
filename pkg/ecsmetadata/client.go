@@ -100,6 +100,10 @@ func NewClient(opts ClientOptions) (*Client, error) {
 	}, nil
 }
 
+func (c *Client) GetMetaData(ctx context.Context, method, path string) ([]byte, error) {
+	return c.getMetaDataWithRetry(ctx, method, path)
+}
+
 func (c *Client) getToken(ctx context.Context) (string, error) {
 	if c.disableIMDSV2 {
 		return "", nil
@@ -112,7 +116,7 @@ func (c *Client) getToken(ctx context.Context) (string, error) {
 
 	h := http.Header{}
 	h.Set("X-aliyun-ecs-metadata-token-ttl-seconds", fmt.Sprintf("%d", c.tokenTTLSeconds))
-	body, err := c.sendWithRetry(ctx, http.MethodPut, "/latest/api/token", h)
+	body, err := c.send(ctx, http.MethodPut, "/latest/api/token", h)
 	if err != nil {
 		return "", fmt.Errorf("get token failed: %w", err)
 	}
@@ -125,12 +129,33 @@ func (c *Client) getToken(ctx context.Context) (string, error) {
 	return c.metadataToken, nil
 }
 
-func (c *Client) GetMetaData(ctx context.Context, method, path string) ([]byte, error) {
+func (c *Client) getMetaDataWithRetry(ctx context.Context, method, path string) ([]byte, error) {
+	if c.disableRetry {
+		return c.getMetaData(ctx, method, path)
+	}
+
+	var data []byte
+	var err error
+	lastErr := retryWithOptions(ctx, func(ctx context.Context) error {
+		data, err = c.getMetaData(ctx, method, path)
+		if err != nil {
+			if !isRetryable(err) {
+				return newNoRetryError(err)
+			}
+		}
+		return err
+	}, c.retryOptions)
+
+	return data, lastErr
+}
+
+func (c *Client) getMetaData(ctx context.Context, method, path string) ([]byte, error) {
 	token, err := c.getToken(ctx)
 	if err != nil {
 		var httpErr *HTTPError
-		if errors.As(err, &httpErr) && (httpErr.StatusCode == http.StatusNotFound ||
-			httpErr.StatusCode == http.StatusForbidden) {
+		if errors.As(err, &httpErr) &&
+			(httpErr.StatusCode == http.StatusNotFound ||
+				httpErr.StatusCode == http.StatusForbidden) {
 			// ignore 404 and 403 error
 		} else {
 			return nil, err
@@ -141,12 +166,7 @@ func (c *Client) GetMetaData(ctx context.Context, method, path string) ([]byte, 
 	if token != "" {
 		h.Set("X-aliyun-ecs-metadata-token", token)
 	}
-	return c.sendWithRetry(ctx, method, path, h)
-}
-
-func (c *Client) GetMetaDataWithoutToken(ctx context.Context, method, path string) ([]byte, error) {
-	h := http.Header{}
-	return c.sendWithRetry(ctx, method, path, h)
+	return c.send(ctx, method, path, h)
 }
 
 func (c *Client) getTidyStringData(ctx context.Context, path string) (string, error) {
@@ -167,29 +187,6 @@ func (c *Client) getRawStringData(ctx context.Context, path string) (string, err
 
 func (c *Client) getRawData(ctx context.Context, path string) ([]byte, error) {
 	return c.GetMetaData(ctx, http.MethodGet, path)
-}
-
-func (c *Client) sendWithRetry(ctx context.Context, method, path string, header http.Header) ([]byte, error) {
-	if c.disableRetry {
-		return c.send(ctx, method, path, header)
-	}
-
-	var data []byte
-	var err error
-	lastErr := retryWithOptions(ctx, func(ctx context.Context) error {
-		data, err = c.send(ctx, method, path, header)
-		if err != nil {
-			var httperr *HTTPError
-			if errors.As(err, &httperr) {
-				if httperr.StatusCode == http.StatusNotFound {
-					return newNoRetryError(err)
-				}
-			}
-		}
-		return err
-	}, c.retryOptions)
-
-	return data, lastErr
 }
 
 func (c *Client) send(ctx context.Context, method, path string, header http.Header) ([]byte, error) {

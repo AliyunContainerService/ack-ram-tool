@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"time"
 )
 
@@ -54,4 +55,17 @@ retry:
 	}
 
 	return fmt.Errorf("retry failed after %d attempts: %w", opts.MaxRetryTimes, lastErr)
+}
+
+func isRetryable(err error) bool {
+	var httperr *HTTPError
+	if errors.As(err, &httperr) {
+		if httperr.StatusCode == http.StatusNotFound ||
+			httperr.StatusCode == http.StatusForbidden ||
+			httperr.StatusCode == http.StatusBadRequest {
+			return false
+		}
+	}
+
+	return true
 }

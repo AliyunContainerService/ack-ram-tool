@@ -6,7 +6,41 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 )
+
+func TestRetryWithOptions(t *testing.T) {
+	ctx := context.Background()
+	delayCount := 0
+	opts := RetryOptions{
+		MaxRetryTimes: 3,
+		RetryDelayFunc: func(n int) time.Duration {
+			delayCount++
+			return 0
+		},
+	}
+
+	callCount := 0
+	fn := func(ctx context.Context) error {
+		callCount++
+		return fmt.Errorf("retryable error")
+	}
+
+	err := retryWithOptions(ctx, fn, opts)
+	t.Log(err)
+	t.Log(callCount)
+	t.Log(delayCount)
+
+	if err == nil {
+		t.Fatalf("expected error, got nil")
+	}
+	if callCount != 4 {
+		t.Fatalf("expected function to be called 4 times, got %d calls", callCount)
+	}
+	if delayCount != 3 {
+		t.Fatalf("expected delay to be called 3 times, got %d calls", delayCount)
+	}
+}
 
 func TestRetryWithOptions_SuccessOnFirstAttempt(t *testing.T) {
 	ctx := context.Background()

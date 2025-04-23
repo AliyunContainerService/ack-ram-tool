@@ -161,14 +161,14 @@ func TestGetOwnerAccountId(t *testing.T) {
 	t.Run("normal case", func(t *testing.T) {
 		s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			path := r.URL.RequestURI()
-			if path == "/latest/api/token" {
+			switch path {
+			case "/latest/api/token":
 				w.Write([]byte("token"))
-				return
-			}
-			if path != "/latest/meta-data/owner-account-id" {
+			case "/latest/meta-data/owner-account-id":
+				w.Write([]byte("123456789012"))
+			default:
 				t.Errorf("expected path '/latest/meta-data/owner-account-id', got '%s'", path)
 			}
-			w.Write([]byte("123456789012"))
 		}))
 		defer s.Close()
 		client, err := NewClient(ClientOptions{

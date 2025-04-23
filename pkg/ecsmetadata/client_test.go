@@ -82,6 +82,30 @@ func TestGetToken(t *testing.T) {
 	})
 }
 
+func TestGetTokenWith404Error(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPut && r.URL.Path == "/latest/api/token" {
+			http.Error(w, "not found", http.StatusNotFound)
+			return
+		}
+		w.Write([]byte("data"))
+	}))
+	defer server.Close()
+
+	opts := ClientOptions{Endpoint: server.URL}
+	client, _ := NewClient(opts)
+
+	t.Run("token request returns 404", func(t *testing.T) {
+		token, err := client.getToken(context.Background())
+		if err == nil || !strings.Contains(err.Error(), "not found") {
+			t.Fatalf("expected not found error, got %v", err)
+		}
+		if token != "" {
+			t.Errorf("expected empty token, got %s", token)
+		}
+	})
+}
+
 func TestDefaultClient(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.RequestURI == "/latest/api/token" {
@@ -149,33 +173,121 @@ func TestGetMetaData(t *testing.T) {
 	})
 }
 
-func TestSendWithRetry(t *testing.T) {
+func TestGetMetaDataWithRetry(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.Contains(r.URL.Path, "retry") {
-			http.Error(w, "retryable error", http.StatusInternalServerError)
+		if r.RequestURI == "/latest/api/token" {
+			// Simulate 404 error for token request
+			if strings.Contains(r.URL.Path, "test-token-500-error") {
+				http.Error(w, "internal server", http.StatusInternalServerError)
+				return
+			}
+			w.Write([]byte("test-token"))
 			return
 		}
-		w.Write([]byte("success"))
+		if v := r.Header.Get("X-aliyun-ecs-metadata-token"); v != "" && v != "test-token" {
+			http.Error(w, "forbidden", http.StatusForbidden)
+			return
+		}
+		// Simulate retryable error
+		if strings.Contains(r.URL.Path, "test-retryable-error") {
+			http.Error(w, "internal server error", http.StatusInternalServerError)
+			return
+		}
+		// Simulate non-retryable error
+		if strings.Contains(r.URL.Path, "non-retryable-error") {
+			http.Error(w, "bad request", http.StatusBadRequest)
+			return
+		}
+		w.Write([]byte("metadata-value"))
+	}))
+	defer server.Close()
+
+	opts := ClientOptions{Endpoint: server.URL}
+	client, _ := NewClient(opts)
+	client.metadataToken = "test-token"
+	client.metadataTokenExp = time.Now().Add(time.Hour)
+
+	t.Run("disable retry", func(t *testing.T) {
+		client.disableRetry = true
+		data, err := client.GetMetaData(context.Background(), http.MethodGet, "/test-path/test-retryable-error")
+		if err == nil || !strings.Contains(err.Error(), "internal server error") {
+			t.Fatalf("expected internal server error, got %v", err)
+		}
+		if data != nil {
+			t.Errorf("expected no data, got %s", string(data))
+		}
+	})
+
+	t.Run("retryable error", func(t *testing.T) {
+		client.disableRetry = false
+		client.retryOptions.MaxRetryTimes = 3
+		data, err := client.GetMetaData(context.Background(), http.MethodGet, "/test-path/test-retryable-error")
+		if err == nil || !strings.Contains(err.Error(), "internal server error") {
+			t.Fatalf("expected internal server error after retries, got %v", err)
+		}
+		if data != nil {
+			t.Errorf("expected no data, got %s", string(data))
+		}
+	})
+
+	t.Run("non-retryable error", func(t *testing.T) {
+		client.disableRetry = false
+		data, err := client.GetMetaData(context.Background(), http.MethodGet, "/test-path/non-retryable-error")
+		if err == nil || !strings.Contains(err.Error(), "bad request") {
+			t.Fatalf("expected bad request error without retries, got %v", err)
+		}
+		if data != nil {
+			t.Errorf("expected no data, got %s", string(data))
+		}
+	})
+}
+
+func TestGetMetaDataWithToken404Ignored(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.RequestURI == "/latest/api/token" {
+			// Simulate 404 error for token request
+			http.Error(w, "not found", http.StatusNotFound)
+			return
+		}
+		// Ensure the metadata request is processed without a token
+		w.Write([]byte("metadata-value"))
 	}))
 	defer server.Close()
 
 	opts := ClientOptions{Endpoint: server.URL}
 	client, _ := NewClient(opts)
 
-	t.Run("success without retry", func(t *testing.T) {
-		data, err := client.sendWithRetry(context.Background(), http.MethodGet, "/success", nil)
+	t.Run("ignore 404 error from get token and return metadata", func(t *testing.T) {
+		data, err := client.GetMetaData(context.Background(), http.MethodGet, "/test-path")
 		if err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}
-		if string(data) != "success" {
-			t.Errorf("expected success, got %s", string(data))
+		if string(data) != "metadata-value" {
+			t.Errorf("expected metadata-value, got %s", string(data))
 		}
 	})
+}
 
-	t.Run("retry logic", func(t *testing.T) {
-		_, err := client.sendWithRetry(context.Background(), http.MethodGet, "/retry", nil)
-		if err == nil || !strings.Contains(err.Error(), "retry failed") {
-			t.Fatalf("expected retry error, got %v", err)
+func TestGetMetaDataWithToken500NotIgnored(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.RequestURI == "/latest/api/token" {
+			// Simulate 500 error for token request
+			http.Error(w, "internal server error", http.StatusInternalServerError)
+			return
 		}
-	})
+		// Ensure the metadata request is processed without a token
+		w.Write([]byte("metadata-value"))
+	}))
+	defer server.Close()
+
+	opts := ClientOptions{Endpoint: server.URL}
+	client, _ := NewClient(opts)
+
+	data, err := client.GetMetaData(context.Background(), http.MethodGet, "/test-path")
+	if err == nil || !strings.Contains(err.Error(), "internal server error") {
+		t.Fatalf("expected internal server error, got %v", err)
+	}
+	if data != nil {
+		t.Errorf("expected no data, got %s", string(data))
+	}
 }
