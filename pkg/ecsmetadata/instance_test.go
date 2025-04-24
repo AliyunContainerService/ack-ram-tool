@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"testing"
+	"time"
 )
 
 func TestGetInstanceType(t *testing.T) {
@@ -323,6 +324,71 @@ func TestGetSerialNumber(t *testing.T) {
 		}
 		if result != "" {
 			t.Errorf("expected empty result, got '%s'", result)
+		}
+	})
+}
+
+func TestGetSpotTerminationTime(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("normal case", func(t *testing.T) {
+		client, err := NewClient(ClientOptions{
+			TransportWrappers: []TransportWrapper{
+				func(rt http.RoundTripper) http.RoundTripper {
+					return &MockWrapper{
+						Mock: func(path string) (int, string, error) {
+							if path == "/latest/api/token" {
+								return 200, "token", nil
+							}
+							if path != "/latest/meta-data/instance/spot/termination-time" {
+								t.Errorf("expected path '/latest/meta-data/instance/spot/termination-time', got '%s'", path)
+							}
+							return 200, "2023-10-01T12:00:00Z", nil
+						},
+					}
+				},
+			},
+		})
+		if err != nil {
+			t.Errorf("expected no error, got '%v'", err)
+		}
+		result, err := client.GetSpotTerminationTime(ctx)
+		if err != nil {
+			t.Errorf("expected no error, got '%v'", err)
+		}
+		expectedTime, _ := time.Parse(time.RFC3339, "2023-10-01T12:00:00Z")
+		if !result.Equal(expectedTime) {
+			t.Errorf("expected result '%v', got '%v'", expectedTime, result)
+		}
+	})
+
+	t.Run("error case", func(t *testing.T) {
+		client, err := NewClient(ClientOptions{
+			TransportWrappers: []TransportWrapper{
+				func(rt http.RoundTripper) http.RoundTripper {
+					return &MockWrapper{
+						Mock: func(path string) (int, string, error) {
+							if path == "/latest/api/token" {
+								return 200, "token", nil
+							}
+							if path != "/latest/meta-data/instance/spot/termination-time" {
+								t.Errorf("expected path '/latest/meta-data/instance/spot/termination-time', got '%s'", path)
+							}
+							return 400, "", errors.New("mock error")
+						},
+					}
+				},
+			},
+		})
+		if err != nil {
+			t.Errorf("expected no error, got '%v'", err)
+		}
+		result, err := client.GetSpotTerminationTime(ctx)
+		if err == nil {
+			t.Errorf("expected error, got nil")
+		}
+		if !result.IsZero() {
+			t.Errorf("expected zero time, got '%v'", result)
 		}
 	})
 }
