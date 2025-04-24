@@ -2,6 +2,7 @@ package ecsmetadata
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -112,7 +113,7 @@ func TestDefaultClient(t *testing.T) {
 			w.Write([]byte("test-token"))
 			return
 		}
-		if v := r.Header.Get("X-aliyun-ecs-metadata-token"); v != "" && v != "test-token" {
+		if v := r.Header.Get("X-aliyun-ecs-metadata-token"); v != "test-token" {
 			http.Error(w, "forbidden", http.StatusForbidden)
 			return
 		}
@@ -184,7 +185,7 @@ func TestGetMetaDataWithRetry(t *testing.T) {
 			w.Write([]byte("test-token"))
 			return
 		}
-		if v := r.Header.Get("X-aliyun-ecs-metadata-token"); v != "" && v != "test-token" {
+		if v := r.Header.Get("X-aliyun-ecs-metadata-token"); v != "test-token" {
 			http.Error(w, "forbidden", http.StatusForbidden)
 			return
 		}
@@ -290,4 +291,77 @@ func TestGetMetaDataWithToken500NotIgnored(t *testing.T) {
 	if data != nil {
 		t.Errorf("expected no data, got %s", string(data))
 	}
+}
+
+func TestReuseToken(t *testing.T) {
+	accessTokenCount := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.RequestURI == "/latest/api/token" {
+			accessTokenCount++
+			w.Write([]byte(fmt.Sprintf("test-token-%d", accessTokenCount)))
+			return
+		}
+		if v := r.Header.Get("X-aliyun-ecs-metadata-token"); v != "test-token-1" {
+			http.Error(w, "forbidden", http.StatusForbidden)
+			return
+		}
+		w.Write([]byte("metadata-value"))
+	}))
+	defer server.Close()
+	client, err := NewClient(ClientOptions{Endpoint: server.URL})
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	for i := 0; i < 5; i++ {
+		data, err := client.GetMetaData(context.Background(), http.MethodGet, "/test-path")
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		if string(data) != "metadata-value" {
+			t.Errorf("expected metadata-value, got %s", string(data))
+		}
+		if accessTokenCount != 1 {
+			t.Errorf("expected 1 access token, got %d", accessTokenCount)
+		}
+	}
+}
+
+func TestRefreshToken(t *testing.T) {
+	accessTokenCount := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.RequestURI == "/latest/api/token" {
+			accessTokenCount++
+			w.Write([]byte(fmt.Sprintf("test-token-%d", accessTokenCount)))
+			return
+		}
+		w.Write([]byte("metadata-value"))
+	}))
+	defer server.Close()
+	client, err := NewClient(ClientOptions{
+		Endpoint:        server.URL,
+		TokenTTLSeconds: 75 + 5,
+	})
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	for i := 0; i < 5; i++ {
+		data, err := client.GetMetaData(context.Background(), http.MethodGet, "/test-path")
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		if string(data) != "metadata-value" {
+			t.Errorf("expected metadata-value, got %s", string(data))
+		}
+		time.Sleep(time.Second)
+	}
+	if accessTokenCount != 2 {
+		t.Errorf("expected 2 access token, got %d", accessTokenCount)
+	}
+	if client.metadataToken != "test-token-2" {
+		t.Errorf("expected test-token-2, got %s", client.metadataToken)
+	}
+	t.Log(time.Now())
+	t.Log(client.metadataTokenExp)
 }

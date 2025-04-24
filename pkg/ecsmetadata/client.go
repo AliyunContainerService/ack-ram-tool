@@ -110,7 +110,7 @@ func (c *Client) getToken(ctx context.Context) (string, error) {
 	}
 
 	now := c.getNow()
-	if !c.tokenExpired(now) {
+	if c.metadataToken != "" && !c.tokenExpired(now) {
 		return c.metadataToken, nil
 	}
 
