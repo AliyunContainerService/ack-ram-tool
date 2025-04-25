@@ -20,7 +20,7 @@ var edOpts = ecsMetadataOpts{}
 var testEcsMetadataCmd = &cobra.Command{
 	Use: "test-ecs-metadata",
 	Run: func(cmd *cobra.Command, args []string) {
-		os.Setenv(ctl.EnvCredentialType, "imds")
+		os.Setenv(ctl.EnvCredentialType, "imds") // #nosec G104
 		client := ctlcommon.GetClientOrDie()
 		ctx := ctlcommon.SetupSignalHandler(context.Background())
 		sleep := time.Second * 30
