@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/utils"
 	golog "log"
 	"os"
 
@@ -46,6 +47,7 @@ func init() {
 	rbac.SetupCmd(rootCmd)
 	exportcredentials.SetupCmd(rootCmd)
 	auth.SetupCmd(rootCmd)
+	utils.SetupUtilsCmd(rootCmd)
 
 	rootCmd.PersistentFlags().StringVar(&ctl.GlobalOption.Region, "region-id",
 		"", "The region to use"+

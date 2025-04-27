@@ -36,6 +36,7 @@ require (
 )
 
 require (
+	github.com/AliyunContainerService/ack-ram-tool/pkg/ecsmetadata v0.0.6 // indirect
 	github.com/alibabacloud-go/alibabacloud-gateway-spi v0.0.4 // indirect
 	github.com/alibabacloud-go/debug v1.0.1 // indirect
 	github.com/alibabacloud-go/endpoint-util v1.1.0 // indirect
