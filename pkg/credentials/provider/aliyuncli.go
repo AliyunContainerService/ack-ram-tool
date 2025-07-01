@@ -188,6 +188,7 @@ func (p *profileWrapper) getCredentialsByRoleArnWithPro(preP CredentialsProvider
 		STSEndpoint: p.stsEndpoint,
 		SessionName: cp.RoleSessionName,
 		Logger:      p.logger,
+		ExternalId:  cp.ExternalId,
 	})
 	return credP, nil
 }
