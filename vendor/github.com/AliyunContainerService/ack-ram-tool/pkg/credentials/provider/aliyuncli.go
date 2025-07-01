@@ -26,6 +26,8 @@ type profileWrapper struct {
 	stsEndpoint string
 	client      *http.Client
 	logger      Logger
+
+	getProviderForUnknownMode func(p Profile) (CredentialsProvider, error)
 }
 
 type CLIConfigProvider struct {
@@ -41,6 +43,8 @@ type CLIConfigProviderOptions struct {
 	ProfileName string
 	STSEndpoint string
 	Logger      Logger
+
+	GetProviderForUnknownMode func(p Profile) (CredentialsProvider, error)
 
 	conf *Configuration
 }
@@ -65,7 +69,8 @@ func NewCLIConfigProvider(opts CLIConfigProviderOptions) (*CLIConfigProvider, er
 			client: &http.Client{
 				Timeout: time.Second * 30,
 			},
-			logger: logger,
+			logger:                    logger,
+			getProviderForUnknownMode: opts.GetProviderForUnknownMode,
 		},
 		logger: logger,
 	}
@@ -133,8 +138,6 @@ func (p *profileWrapper) getProvider() (CredentialsProvider, error) {
 	case EcsRamRole:
 		p.logger.Debug(fmt.Sprintf("using %s mode", cp.Mode))
 		return p.getCredentialsByEcsRamRole()
-	//case config.RsaKeyPair:
-	//	return p.getCredentialsByPrivateKey()
 	case RamRoleArnWithEcs:
 		p.logger.Debug(fmt.Sprintf("using %s mode", cp.Mode))
 		return p.getCredentialsByRamRoleArnWithEcs()
@@ -148,6 +151,9 @@ func (p *profileWrapper) getProvider() (CredentialsProvider, error) {
 		p.logger.Debug(fmt.Sprintf("using %s mode", cp.Mode))
 		return p.getCredentialsByCredentialsURI()
 	default:
+		if p.getProviderForUnknownMode != nil {
+			return p.getProviderForUnknownMode(cp)
+		}
 		return nil, fmt.Errorf("unexcepted credentials mode: %s", cp.Mode)
 	}
 }
@@ -182,6 +188,7 @@ func (p *profileWrapper) getCredentialsByRoleArnWithPro(preP CredentialsProvider
 		STSEndpoint: p.stsEndpoint,
 		SessionName: cp.RoleSessionName,
 		Logger:      p.logger,
+		ExternalId:  cp.ExternalId,
 	})
 	return credP, nil
 }
@@ -217,13 +224,8 @@ func (p *profileWrapper) getCredentialsByChainableRamRoleArn() (CredentialsProvi
 	if !loaded {
 		return nil, fmt.Errorf("can not load the source profile: " + profileName)
 	}
-	newP := &profileWrapper{
-		cp:          source,
-		conf:        p.conf,
-		stsEndpoint: p.stsEndpoint,
-		client:      p.client,
-		logger:      p.logger,
-	}
+
+	newP := p.clone(source)
 	preP, err := newP.getProvider()
 	if err != nil {
 		return nil, err
@@ -272,12 +274,19 @@ func (p *profileWrapper) getCredentialsByExternal() (CredentialsProvider, error)
 	}
 
 	p.logger.Debug(fmt.Sprintf("using profile from output of external program"))
-	newP := &profileWrapper{
-		cp:     newCP,
-		conf:   p.conf,
-		logger: p.logger,
-	}
+	newP := p.clone(newCP)
 	return newP.getProvider()
+}
+
+func (w *profileWrapper) clone(newCP Profile) profileWrapper {
+	return profileWrapper{
+		client:                    w.client,
+		conf:                      w.conf,
+		cp:                        newCP,
+		getProviderForUnknownMode: w.getProviderForUnknownMode,
+		logger:                    w.logger,
+		stsEndpoint:               w.stsEndpoint,
+	}
 }
 
 var regexpCredJSON = regexp.MustCompile(`{[^}]+"mode":[^}]+}`)

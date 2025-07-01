@@ -58,10 +58,12 @@ retry:
 }
 
 func isRetryable(err error) bool {
+	if err == nil {
+		return false
+	}
 	var httperr *HTTPError
 	if errors.As(err, &httperr) {
 		if httperr.StatusCode == http.StatusNotFound ||
-			httperr.StatusCode == http.StatusForbidden ||
 			httperr.StatusCode == http.StatusBadRequest {
 			return false
 		}
