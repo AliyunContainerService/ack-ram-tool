@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 	"testing"
 	"time"
@@ -113,5 +114,49 @@ func TestRetryWithOptions_ContextCancelled(t *testing.T) {
 	err := retryWithOptions(ctx, fn, *opts)
 	if !errors.Is(err, context.Canceled) {
 		t.Fatalf("expected context.Canceled error, got %v", err)
+	}
+}
+
+func Test_isRetryable(t *testing.T) {
+	type args struct {
+		err error
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{
+			name: "nil error should not be retryable",
+			args: args{err: nil},
+			want: false,
+		},
+		{
+			name: "generic error should be retryable",
+			args: args{err: errors.New("generic error")},
+			want: true,
+		},
+		{
+			name: "HTTPError with 404 status code should not be retryable",
+			args: args{err: &HTTPError{StatusCode: http.StatusNotFound}},
+			want: false,
+		},
+		{
+			name: "HTTPError with 400 status code should not be retryable",
+			args: args{err: &HTTPError{StatusCode: http.StatusBadRequest}},
+			want: false,
+		},
+		{
+			name: "HTTPError with 500 status code should be retryable",
+			args: args{err: &HTTPError{StatusCode: http.StatusInternalServerError}},
+			want: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := isRetryable(tt.args.err); got != tt.want {
+				t.Errorf("isRetryable() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }

@@ -3,6 +3,7 @@ package common
 import (
 	"context"
 	"fmt"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/aliyuncli"
 	"os"
 
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/alibabacloudgo/env"
@@ -152,10 +153,11 @@ func getCredential(opt getCredentialOption) (provider.CredentialsProvider, error
 			utils.ShortHomePath(aliyuncliConfigFilePath))
 
 		acli, err := provider.NewCLIConfigProvider(provider.CLIConfigProviderOptions{
-			ConfigPath:  aliyuncliConfigFilePath,
-			ProfileName: aliyuncliProfileName,
-			STSEndpoint: opt.stsEndpoint,
-			Logger:      log.ProviderLogger(),
+			ConfigPath:                aliyuncliConfigFilePath,
+			ProfileName:               aliyuncliProfileName,
+			STSEndpoint:               opt.stsEndpoint,
+			GetProviderForUnknownMode: aliyuncli.GetCredentialsProvider,
+			Logger:                    log.ProviderLogger(),
 		})
 		if err == nil && acli != nil {
 			log.Logger.Debugf("try to get credentials from aliyun cli (%s) with profile name %s",

@@ -1,6 +1,6 @@
 module github.com/AliyunContainerService/ack-ram-tool/ci/ossutil
 
-go 1.19
+go 1.23.0
 
 require (
 	github.com/alibabacloud-go/tea v1.2.0

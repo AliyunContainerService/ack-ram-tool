@@ -33,30 +33,39 @@ const (
 )
 
 type Profile struct {
-	Name            string           `json:"name"`
-	Mode            AuthenticateMode `json:"mode"`
-	AccessKeyId     string           `json:"access_key_id"`
-	AccessKeySecret string           `json:"access_key_secret"`
-	StsToken        string           `json:"sts_token"`
-	StsRegion       string           `json:"sts_region"`
-	RamRoleName     string           `json:"ram_role_name"`
-	RamRoleArn      string           `json:"ram_role_arn"`
-	RoleSessionName string           `json:"ram_session_name"`
-	SourceProfile   string           `json:"source_profile"`
-	PrivateKey      string           `json:"private_key"`
-	KeyPairName     string           `json:"key_pair_name"`
-	ExpiredSeconds  int              `json:"expired_seconds"`
-	Verified        string           `json:"verified"`
-	RegionId        string           `json:"region_id"`
-	OutputFormat    string           `json:"output_format"`
-	Language        string           `json:"language"`
-	Site            string           `json:"site"`
-	ReadTimeout     int              `json:"retry_timeout"`
-	ConnectTimeout  int              `json:"connect_timeout"`
-	RetryCount      int              `json:"retry_count"`
-	ProcessCommand  string           `json:"process_command"`
-	CredentialsURI  string           `json:"credentials_uri"`
-	parent          *Configuration   //`json:"-"`
+	Name                      string           `json:"name"`
+	Mode                      AuthenticateMode `json:"mode"`
+	AccessKeyId               string           `json:"access_key_id,omitempty"`
+	AccessKeySecret           string           `json:"access_key_secret,omitempty"`
+	StsToken                  string           `json:"sts_token,omitempty"`
+	StsRegion                 string           `json:"sts_region,omitempty"`
+	RamRoleName               string           `json:"ram_role_name,omitempty"`
+	RamRoleArn                string           `json:"ram_role_arn,omitempty"`
+	RoleSessionName           string           `json:"ram_session_name,omitempty"`
+	ExternalId                string           `json:"external_id,omitempty"`
+	SourceProfile             string           `json:"source_profile,omitempty"`
+	PrivateKey                string           `json:"private_key,omitempty"`
+	KeyPairName               string           `json:"key_pair_name,omitempty"`
+	ExpiredSeconds            int              `json:"expired_seconds,omitempty"`
+	Verified                  string           `json:"verified,omitempty"`
+	RegionId                  string           `json:"region_id,omitempty"`
+	OutputFormat              string           `json:"output_format,omitempty"`
+	Language                  string           `json:"language,omitempty"`
+	Site                      string           `json:"site,omitempty"`
+	ReadTimeout               int              `json:"retry_timeout,omitempty"`
+	ConnectTimeout            int              `json:"connect_timeout,omitempty"`
+	RetryCount                int              `json:"retry_count,omitempty"`
+	ProcessCommand            string           `json:"process_command,omitempty"`
+	CredentialsURI            string           `json:"credentials_uri,omitempty"`
+	OIDCProviderARN           string           `json:"oidc_provider_arn,omitempty"`
+	OIDCTokenFile             string           `json:"oidc_token_file,omitempty"`
+	CloudSSOSignInUrl         string           `json:"cloud_sso_sign_in_url,omitempty"`
+	AccessToken               string           `json:"access_token,omitempty"`                  // for CloudSSO, read only
+	CloudSSOAccessTokenExpire int64            `json:"cloud_sso_access_token_expire,omitempty"` // for CloudSSO, read only
+	StsExpiration             int64            `json:"sts_expiration,omitempty"`                // for CloudSSO, read only
+	CloudSSOAccessConfig      string           `json:"cloud_sso_access_config,omitempty"`       // for CloudSSO
+	CloudSSOAccountId         string           `json:"cloud_sso_account_id,omitempty"`          // for CloudSSO, read only
+	parent                    *Configuration   //`json:"-"`
 }
 
 func newProfile(name string) Profile {
@@ -121,8 +130,6 @@ func (cp *Profile) validate() error {
 		if cp.RoleSessionName == "" {
 			return fmt.Errorf("invalid role_session_name")
 		}
-	default:
-		return fmt.Errorf("invalid mode: %s", cp.Mode)
 	}
 	return nil
 }
