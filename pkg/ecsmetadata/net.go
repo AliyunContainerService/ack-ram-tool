@@ -8,7 +8,12 @@ func (c *Client) GetVpcId(ctx context.Context) (string, error) {
 	return c.getTidyStringData(ctx, "/latest/meta-data/vpc-id")
 }
 
+// GetVpcCidrBlockId deprecated, use GetVpcCidrBlock instead
 func (c *Client) GetVpcCidrBlockId(ctx context.Context) (string, error) {
+	return c.GetVpcCidrBlock(ctx)
+}
+
+func (c *Client) GetVpcCidrBlock(ctx context.Context) (string, error) {
 	return c.getTidyStringData(ctx, "/latest/meta-data/vpc-cidr-block")
 }
 
@@ -16,7 +21,12 @@ func (c *Client) GetVSwitchId(ctx context.Context) (string, error) {
 	return c.getTidyStringData(ctx, "/latest/meta-data/vswitch-id")
 }
 
+// GetVSwitchCidrBlockId deprecated, use GetVSwitchCidrBlock instead
 func (c *Client) GetVSwitchCidrBlockId(ctx context.Context) (string, error) {
+	return c.GetVSwitchCidrBlock(ctx)
+}
+
+func (c *Client) GetVSwitchCidrBlock(ctx context.Context) (string, error) {
 	return c.getTidyStringData(ctx, "/latest/meta-data/vswitch-cidr-block")
 }
 
@@ -38,4 +48,12 @@ func (c *Client) GetNetworkType(ctx context.Context) (string, error) {
 
 func (c *Client) GetMac(ctx context.Context) (string, error) {
 	return c.getTidyStringData(ctx, "/latest/meta-data/mac")
+}
+
+func (c *Client) GetDNSNameServers(ctx context.Context) (string, error) {
+	return c.getTidyStringData(ctx, "/latest/meta-data/dns-conf/nameservers")
+}
+
+func (c *Client) GetNTPServers(ctx context.Context) (string, error) {
+	return c.getTidyStringData(ctx, "/latest/meta-data/ntp-conf/ntp-servers")
 }
