@@ -23,3 +23,11 @@ func (c *Client) GetHostname(ctx context.Context) (string, error) {
 func (c *Client) GetSourceAddress(ctx context.Context) (string, error) {
 	return c.getTidyStringData(ctx, "/latest/meta-data/source-address")
 }
+
+func (c *Client) GetSourceAddressList(ctx context.Context) ([]string, error) {
+	data, err := c.GetSourceAddress(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return parsePathNames(data), nil
+}

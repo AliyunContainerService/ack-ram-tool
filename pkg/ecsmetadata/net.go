@@ -54,6 +54,22 @@ func (c *Client) GetDNSNameServers(ctx context.Context) (string, error) {
 	return c.getTidyStringData(ctx, "/latest/meta-data/dns-conf/nameservers")
 }
 
+func (c *Client) GetDNSNameServersList(ctx context.Context) ([]string, error) {
+	data, err := c.GetDNSNameServers(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return parsePathNames(data), nil
+}
+
 func (c *Client) GetNTPServers(ctx context.Context) (string, error) {
 	return c.getTidyStringData(ctx, "/latest/meta-data/ntp-conf/ntp-servers")
+}
+
+func (c *Client) GetNTPServersList(ctx context.Context) ([]string, error) {
+	data, err := c.GetNTPServers(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return parsePathNames(data), nil
 }
