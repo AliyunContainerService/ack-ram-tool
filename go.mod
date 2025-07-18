@@ -12,7 +12,7 @@ require (
 	github.com/alibabacloud-go/tea v1.3.9
 	github.com/aliyun/alibaba-cloud-sdk-go v1.63.107
 	github.com/aliyun/credentials-go v1.4.6
-	github.com/briandowns/spinner v1.23.0
+	github.com/briandowns/spinner v1.23.2
 	github.com/fatih/color v1.18.0
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
@@ -26,7 +26,6 @@ require (
 )
 
 require (
-	github.com/AliyunContainerService/ack-ram-tool/pkg/ecsmetadata v0.0.7
 	github.com/AliyunContainerService/ack-ram-tool/pkg/ramauthenticator v0.0.0
 	github.com/alibabacloud-go/cs-20151215/v5 v5.9.5
 	github.com/alibabacloud-go/tea-utils/v2 v2.0.7
@@ -38,6 +37,7 @@ require (
 )
 
 require (
+	github.com/AliyunContainerService/ack-ram-tool/pkg/ecsmetadata v0.0.7 // indirect
 	github.com/alibabacloud-go/alibabacloud-gateway-spi v0.0.5 // indirect
 	github.com/alibabacloud-go/debug v1.0.1 // indirect
 	github.com/alibabacloud-go/endpoint-util v1.1.0 // indirect
