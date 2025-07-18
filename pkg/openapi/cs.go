@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/types"
-	cs "github.com/alibabacloud-go/cs-20151215/v3/client"
+	cs "github.com/alibabacloud-go/cs-20151215/v5/client"
 	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
 	util "github.com/alibabacloud-go/tea-utils/v2/service"
 	"github.com/alibabacloud-go/tea/tea"
@@ -48,7 +48,7 @@ func (c *Client) GetCluster(ctx context.Context, clusterId string) (*types.Clust
 	return cluster, nil
 }
 
-// XXXDeprecated: use ListClustersV1 instead
+// Deprecated: use ListClustersForRegion instead
 func (c *Client) ListClusters(ctx context.Context) ([]types.Cluster, error) {
 	client := c.csClient
 	resp, err := client.DescribeClusters(&cs.DescribeClustersRequest{})
@@ -59,6 +59,7 @@ func (c *Client) ListClusters(ctx context.Context) ([]types.Cluster, error) {
 	return convertDescribeClustersResponse(resp), nil
 }
 
+// Deprecated: use ListClustersForRegion instead
 func (c *Client) ListClustersV1(ctx context.Context) ([]types.Cluster, error) {
 	client := c.csClient
 	var ret []types.Cluster
@@ -84,6 +85,44 @@ func (c *Client) ListClustersV1(ctx context.Context) ([]types.Cluster, error) {
 			return nil, err
 		}
 		clusters := convertDescribeClustersV1Response(resp)
+		if len(clusters) == 0 {
+			break
+		}
+		for _, c := range clusters {
+			if c.ClusterType == "aliyun" {
+				continue
+			}
+			ret = append(ret, c)
+		}
+		pageNumber++
+	}
+
+	return ret, nil
+}
+
+func (c *Client) ListClustersForRegion(ctx context.Context, region string) ([]types.Cluster, error) {
+	client := c.csClient
+	var ret []types.Cluster
+	pageNumber := int64(1)
+
+	for {
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		default:
+		}
+
+		resp, err := client.DescribeClustersForRegion(tea.String(region), &cs.DescribeClustersForRegionRequest{
+			ClusterSpec: nil,
+			ClusterType: nil,
+			Name:        nil,
+			PageNumber:  tea.Int64(pageNumber),
+			//PageSize:    tea.Int64(),
+		})
+		if err != nil {
+			return nil, err
+		}
+		clusters := convertDescribeClustersForRegionResponse(resp)
 		if len(clusters) == 0 {
 			break
 		}
@@ -421,6 +460,26 @@ func convertDescribeClustersV1Response(resp *cs.DescribeClustersV1Response) []ty
 		metadata := &types.ClusterMetaData{}
 		_ = json.Unmarshal([]byte(tea.StringValue(item.MetaData)), metadata)
 		c.MetaData = *metadata
+		clusters = append(clusters, c)
+	}
+
+	return clusters
+}
+
+func convertDescribeClustersForRegionResponse(resp *cs.DescribeClustersForRegionResponse) []types.Cluster {
+	body := resp.Body
+	if body == nil {
+		return nil
+	}
+	var clusters []types.Cluster
+	for _, item := range body.Clusters {
+		c := types.Cluster{}
+		c.ClusterId = tea.StringValue(item.ClusterId)
+		c.ClusterType = types.ClusterType(tea.StringValue(item.ClusterType))
+		c.Name = tea.StringValue(item.Name)
+		c.RegionId = tea.StringValue(item.RegionId)
+		c.State = types.ClusterState(tea.StringValue(item.State))
+
 		clusters = append(clusters, c)
 	}
 

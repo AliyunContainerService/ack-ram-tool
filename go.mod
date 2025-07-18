@@ -5,7 +5,6 @@ go 1.23.0
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider v0.0.0
-	github.com/alibabacloud-go/cs-20151215/v3 v3.0.42
 	github.com/alibabacloud-go/darabonba-openapi v0.2.1
 	github.com/alibabacloud-go/darabonba-openapi/v2 v2.1.7
 	github.com/alibabacloud-go/ram-20150501 v1.0.2
@@ -29,6 +28,7 @@ require (
 require (
 	github.com/AliyunContainerService/ack-ram-tool/pkg/ecsmetadata v0.0.7
 	github.com/AliyunContainerService/ack-ram-tool/pkg/ramauthenticator v0.0.0
+	github.com/alibabacloud-go/cs-20151215/v5 v5.9.5
 	github.com/alibabacloud-go/tea-utils/v2 v2.0.7
 	github.com/aliyun/aliyun-cli/v3 v3.0.286
 	github.com/go-logr/zapr v1.3.0

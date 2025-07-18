@@ -3,7 +3,7 @@ package openapi
 import (
 	"fmt"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider"
-	cs "github.com/alibabacloud-go/cs-20151215/v3/client"
+	cs "github.com/alibabacloud-go/cs-20151215/v5/client"
 	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
 	ram "github.com/alibabacloud-go/ram-20150501/client"
 	sts "github.com/alibabacloud-go/sts-20150401/client"

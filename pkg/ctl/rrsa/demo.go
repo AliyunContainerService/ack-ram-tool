@@ -12,9 +12,12 @@ import (
 
 type DemoOpts struct {
 	noLoop bool
+	region string
 }
 
-var demoOpts = DemoOpts{}
+var demoOpts = DemoOpts{
+	region: "cn-hangzhou",
+}
 
 var demoCmd = &cobra.Command{
 	Use:   "demo",
@@ -25,7 +28,7 @@ var demoCmd = &cobra.Command{
 		for {
 			log.Logger.Info("======= [begin] list ACK clusters with RRSA =======")
 			client := common.GetClientOrDie()
-			cs, err := client.ListClusters(context.Background())
+			cs, err := client.ListClustersForRegion(context.Background(), demoOpts.region)
 			if err != nil {
 				if demoOpts.noLoop {
 					common.ExitByError(err.Error())
@@ -51,4 +54,5 @@ var demoCmd = &cobra.Command{
 func setupDemoCmd(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(demoCmd)
 	demoCmd.Flags().BoolVar(&demoOpts.noLoop, "no-loop", false, "")
+	demoCmd.Flags().StringVar(&demoOpts.region, "region", demoOpts.region, "")
 }
