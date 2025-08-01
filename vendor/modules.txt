@@ -71,7 +71,7 @@ github.com/aliyun/aliyun-cli/v3/cloudsso
 github.com/aliyun/aliyun-cli/v3/config
 github.com/aliyun/aliyun-cli/v3/i18n
 github.com/aliyun/aliyun-cli/v3/util
-# github.com/aliyun/credentials-go v1.4.6
+# github.com/aliyun/credentials-go v1.4.7
 ## explicit; go 1.14
 github.com/aliyun/credentials-go/credentials
 github.com/aliyun/credentials-go/credentials/internal/http

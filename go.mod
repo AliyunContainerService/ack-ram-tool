@@ -12,7 +12,7 @@ require (
 	github.com/alibabacloud-go/sts-20150401 v1.1.0
 	github.com/alibabacloud-go/tea v1.3.9
 	github.com/aliyun/alibaba-cloud-sdk-go v1.63.107
-	github.com/aliyun/credentials-go v1.4.6
+	github.com/aliyun/credentials-go v1.4.7
 	github.com/briandowns/spinner v1.23.2
 	github.com/fatih/color v1.18.0
 	github.com/json-iterator/go v1.1.12 // indirect
