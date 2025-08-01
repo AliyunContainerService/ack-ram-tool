@@ -2,135 +2,12 @@
 package client
 
 import (
+	"context"
 	"encoding/hex"
 	spi "github.com/alibabacloud-go/alibabacloud-gateway-spi/client"
-	models "github.com/alibabacloud-go/darabonba-openapi/v2/models"
 	openapiutil "github.com/alibabacloud-go/darabonba-openapi/v2/utils"
 	"github.com/alibabacloud-go/tea/dara"
-	credential "github.com/aliyun/credentials-go/credentials"
 )
-
-type Config = models.Config
-type GlobalParameters = models.GlobalParameters
-type Params = models.Params
-type OpenApiRequest = models.OpenApiRequest
-type Client struct {
-	DisableSDKError      *bool
-	Endpoint             *string
-	RegionId             *string
-	Protocol             *string
-	Method               *string
-	UserAgent            *string
-	EndpointRule         *string
-	EndpointMap          map[string]*string
-	Suffix               *string
-	ReadTimeout          *int
-	ConnectTimeout       *int
-	HttpProxy            *string
-	HttpsProxy           *string
-	Socks5Proxy          *string
-	Socks5NetWork        *string
-	NoProxy              *string
-	Network              *string
-	ProductId            *string
-	MaxIdleConns         *int
-	EndpointType         *string
-	OpenPlatformEndpoint *string
-	Credential           credential.Credential
-	SignatureVersion     *string
-	SignatureAlgorithm   *string
-	Headers              map[string]*string
-	Spi                  spi.ClientInterface
-	GlobalParameters     *openapiutil.GlobalParameters
-	Key                  *string
-	Cert                 *string
-	Ca                   *string
-	DisableHttp2         *bool
-	RetryOptions         *dara.RetryOptions
-	HttpClient           dara.HttpClient
-	TlsMinVersion        *string
-}
-
-// Description:
-//
-// # Init client with Config
-//
-// @param config - config contains the necessary information to create a client
-func NewClient(config *openapiutil.Config) (*Client, error) {
-	client := new(Client)
-	err := client.Init(config)
-	return client, err
-}
-
-func (client *Client) Init(config *openapiutil.Config) (_err error) {
-	if dara.IsNil(config) {
-		_err = &ClientError{
-			Code:    dara.String("ParameterMissing"),
-			Message: dara.String("'config' can not be unset"),
-		}
-		return _err
-	}
-
-	if (!dara.IsNil(config.AccessKeyId) && dara.StringValue(config.AccessKeyId) != "") && (!dara.IsNil(config.AccessKeySecret) && dara.StringValue(config.AccessKeySecret) != "") {
-		if !dara.IsNil(config.SecurityToken) && dara.StringValue(config.SecurityToken) != "" {
-			config.Type = dara.String("sts")
-		} else {
-			config.Type = dara.String("access_key")
-		}
-
-		credentialConfig := &credential.Config{
-			AccessKeyId:     config.AccessKeyId,
-			Type:            config.Type,
-			AccessKeySecret: config.AccessKeySecret,
-		}
-		credentialConfig.SecurityToken = config.SecurityToken
-		client.Credential, _err = credential.NewCredential(credentialConfig)
-		if _err != nil {
-			return _err
-		}
-
-	} else if !dara.IsNil(config.BearerToken) && dara.StringValue(config.BearerToken) != "" {
-		cc := &credential.Config{
-			Type:        dara.String("bearer"),
-			BearerToken: config.BearerToken,
-		}
-		client.Credential, _err = credential.NewCredential(cc)
-		if _err != nil {
-			return _err
-		}
-
-	} else if !dara.IsNil(config.Credential) {
-		client.Credential = config.Credential
-	}
-
-	client.Endpoint = config.Endpoint
-	client.EndpointType = config.EndpointType
-	client.Network = config.Network
-	client.Suffix = config.Suffix
-	client.Protocol = config.Protocol
-	client.Method = config.Method
-	client.RegionId = config.RegionId
-	client.UserAgent = config.UserAgent
-	client.ReadTimeout = config.ReadTimeout
-	client.ConnectTimeout = config.ConnectTimeout
-	client.HttpProxy = config.HttpProxy
-	client.HttpsProxy = config.HttpsProxy
-	client.NoProxy = config.NoProxy
-	client.Socks5Proxy = config.Socks5Proxy
-	client.Socks5NetWork = config.Socks5NetWork
-	client.MaxIdleConns = config.MaxIdleConns
-	client.SignatureVersion = config.SignatureVersion
-	client.SignatureAlgorithm = config.SignatureAlgorithm
-	client.GlobalParameters = config.GlobalParameters
-	client.Key = config.Key
-	client.Cert = config.Cert
-	client.Ca = config.Ca
-	client.DisableHttp2 = config.DisableHttp2
-	client.RetryOptions = config.RetryOptions
-	client.HttpClient = config.HttpClient
-	client.TlsMinVersion = config.TlsMinVersion
-	return nil
-}
 
 // Description:
 //
@@ -153,7 +30,7 @@ func (client *Client) Init(config *openapiutil.Config) (_err error) {
 // @param runtime - which controls some details of call api, such as retry times
 //
 // @return the response
-func (client *Client) DoRPCRequest(action *string, version *string, protocol *string, method *string, authType *string, bodyType *string, request *openapiutil.OpenApiRequest, runtime *dara.RuntimeOptions) (_result map[string]interface{}, _err error) {
+func (client *Client) DoRPCRequestWithCtx(ctx context.Context, action *string, version *string, protocol *string, method *string, authType *string, bodyType *string, request *openapiutil.OpenApiRequest, runtime *dara.RuntimeOptions) (_result map[string]interface{}, _err error) {
 	_runtime := dara.NewRuntimeObject(map[string]interface{}{
 		"key":            dara.ToString(dara.Default(dara.StringValue(runtime.Key), dara.StringValue(client.Key))),
 		"cert":           dara.ToString(dara.Default(dara.StringValue(runtime.Cert), dara.StringValue(client.Cert))),
@@ -168,7 +45,6 @@ func (client *Client) DoRPCRequest(action *string, version *string, protocol *st
 		"maxIdleConns":   dara.ForceInt(dara.Default(dara.IntValue(runtime.MaxIdleConns), dara.IntValue(client.MaxIdleConns))),
 		"retryOptions":   client.RetryOptions,
 		"ignoreSSL":      dara.BoolValue(runtime.IgnoreSSL),
-		"httpClient":     client.HttpClient,
 		"tlsMinVersion":  dara.StringValue(client.TlsMinVersion),
 	})
 
@@ -327,7 +203,7 @@ func (client *Client) DoRPCRequest(action *string, version *string, protocol *st
 
 		}
 
-		response_, _err := dara.DoRequest(request_, _runtime)
+		response_, _err := dara.DoRequestWithCtx(ctx, request_, _runtime)
 		if _err != nil {
 			retriesAttempted++
 			retryPolicyContext = &dara.RetryPolicyContext{
@@ -340,7 +216,7 @@ func (client *Client) DoRPCRequest(action *string, version *string, protocol *st
 			continue
 		}
 
-		_result, _err = doRPCRequest_opResponse(response_, client, bodyType)
+		_result, _err = doRPCRequestWithCtx_opResponse(response_, client, bodyType)
 		if _err != nil {
 			retriesAttempted++
 			retryPolicyContext = &dara.RetryPolicyContext{
@@ -384,7 +260,7 @@ func (client *Client) DoRPCRequest(action *string, version *string, protocol *st
 // @param runtime - which controls some details of call api, such as retry times
 //
 // @return the response
-func (client *Client) DoROARequest(action *string, version *string, protocol *string, method *string, authType *string, pathname *string, bodyType *string, request *openapiutil.OpenApiRequest, runtime *dara.RuntimeOptions) (_result map[string]interface{}, _err error) {
+func (client *Client) DoROARequestWithCtx(ctx context.Context, action *string, version *string, protocol *string, method *string, authType *string, pathname *string, bodyType *string, request *openapiutil.OpenApiRequest, runtime *dara.RuntimeOptions) (_result map[string]interface{}, _err error) {
 	_runtime := dara.NewRuntimeObject(map[string]interface{}{
 		"key":            dara.ToString(dara.Default(dara.StringValue(runtime.Key), dara.StringValue(client.Key))),
 		"cert":           dara.ToString(dara.Default(dara.StringValue(runtime.Cert), dara.StringValue(client.Cert))),
@@ -399,7 +275,6 @@ func (client *Client) DoROARequest(action *string, version *string, protocol *st
 		"maxIdleConns":   dara.ForceInt(dara.Default(dara.IntValue(runtime.MaxIdleConns), dara.IntValue(client.MaxIdleConns))),
 		"retryOptions":   client.RetryOptions,
 		"ignoreSSL":      dara.BoolValue(runtime.IgnoreSSL),
-		"httpClient":     client.HttpClient,
 		"tlsMinVersion":  dara.StringValue(client.TlsMinVersion),
 	})
 
@@ -524,7 +399,7 @@ func (client *Client) DoROARequest(action *string, version *string, protocol *st
 
 		}
 
-		response_, _err := dara.DoRequest(request_, _runtime)
+		response_, _err := dara.DoRequestWithCtx(ctx, request_, _runtime)
 		if _err != nil {
 			retriesAttempted++
 			retryPolicyContext = &dara.RetryPolicyContext{
@@ -537,7 +412,7 @@ func (client *Client) DoROARequest(action *string, version *string, protocol *st
 			continue
 		}
 
-		_result, _err = doROARequest_opResponse(response_, client, bodyType)
+		_result, _err = doROARequestWithCtx_opResponse(response_, client, bodyType)
 		if _err != nil {
 			retriesAttempted++
 			retryPolicyContext = &dara.RetryPolicyContext{
@@ -581,7 +456,7 @@ func (client *Client) DoROARequest(action *string, version *string, protocol *st
 // @param runtime - which controls some details of call api, such as retry times
 //
 // @return the response
-func (client *Client) DoROARequestWithForm(action *string, version *string, protocol *string, method *string, authType *string, pathname *string, bodyType *string, request *openapiutil.OpenApiRequest, runtime *dara.RuntimeOptions) (_result map[string]interface{}, _err error) {
+func (client *Client) DoROAFormRequestWithCtx(ctx context.Context, action *string, version *string, protocol *string, method *string, authType *string, pathname *string, bodyType *string, request *openapiutil.OpenApiRequest, runtime *dara.RuntimeOptions) (_result map[string]interface{}, _err error) {
 	_runtime := dara.NewRuntimeObject(map[string]interface{}{
 		"key":            dara.ToString(dara.Default(dara.StringValue(runtime.Key), dara.StringValue(client.Key))),
 		"cert":           dara.ToString(dara.Default(dara.StringValue(runtime.Cert), dara.StringValue(client.Cert))),
@@ -596,7 +471,6 @@ func (client *Client) DoROARequestWithForm(action *string, version *string, prot
 		"maxIdleConns":   dara.ForceInt(dara.Default(dara.IntValue(runtime.MaxIdleConns), dara.IntValue(client.MaxIdleConns))),
 		"retryOptions":   client.RetryOptions,
 		"ignoreSSL":      dara.BoolValue(runtime.IgnoreSSL),
-		"httpClient":     client.HttpClient,
 		"tlsMinVersion":  dara.StringValue(client.TlsMinVersion),
 	})
 
@@ -722,7 +596,7 @@ func (client *Client) DoROARequestWithForm(action *string, version *string, prot
 
 		}
 
-		response_, _err := dara.DoRequest(request_, _runtime)
+		response_, _err := dara.DoRequestWithCtx(ctx, request_, _runtime)
 		if _err != nil {
 			retriesAttempted++
 			retryPolicyContext = &dara.RetryPolicyContext{
@@ -735,7 +609,7 @@ func (client *Client) DoROARequestWithForm(action *string, version *string, prot
 			continue
 		}
 
-		_result, _err = doROARequestWithForm_opResponse(response_, client, bodyType)
+		_result, _err = doROAFormRequestWithCtx_opResponse(response_, client, bodyType)
 		if _err != nil {
 			retriesAttempted++
 			retryPolicyContext = &dara.RetryPolicyContext{
@@ -777,7 +651,7 @@ func (client *Client) DoROARequestWithForm(action *string, version *string, prot
 // @param runtime - which controls some details of call api, such as retry times
 //
 // @return the response
-func (client *Client) DoRequest(params *openapiutil.Params, request *openapiutil.OpenApiRequest, runtime *dara.RuntimeOptions) (_result map[string]interface{}, _err error) {
+func (client *Client) DoRequestWithCtx(ctx context.Context, params *openapiutil.Params, request *openapiutil.OpenApiRequest, runtime *dara.RuntimeOptions) (_result map[string]interface{}, _err error) {
 	_runtime := dara.NewRuntimeObject(map[string]interface{}{
 		"key":            dara.ToString(dara.Default(dara.StringValue(runtime.Key), dara.StringValue(client.Key))),
 		"cert":           dara.ToString(dara.Default(dara.StringValue(runtime.Cert), dara.StringValue(client.Cert))),
@@ -792,7 +666,6 @@ func (client *Client) DoRequest(params *openapiutil.Params, request *openapiutil
 		"maxIdleConns":   dara.ForceInt(dara.Default(dara.IntValue(runtime.MaxIdleConns), dara.IntValue(client.MaxIdleConns))),
 		"retryOptions":   client.RetryOptions,
 		"ignoreSSL":      dara.BoolValue(runtime.IgnoreSSL),
-		"httpClient":     client.HttpClient,
 		"tlsMinVersion":  dara.StringValue(client.TlsMinVersion),
 	})
 
@@ -975,7 +848,7 @@ func (client *Client) DoRequest(params *openapiutil.Params, request *openapiutil
 
 		}
 
-		response_, _err := dara.DoRequest(request_, _runtime)
+		response_, _err := dara.DoRequestWithCtx(ctx, request_, _runtime)
 		if _err != nil {
 			retriesAttempted++
 			retryPolicyContext = &dara.RetryPolicyContext{
@@ -988,7 +861,7 @@ func (client *Client) DoRequest(params *openapiutil.Params, request *openapiutil
 			continue
 		}
 
-		_result, _err = doRequest_opResponse(response_, client, params)
+		_result, _err = doRequestWithCtx_opResponse(response_, client, params)
 		if _err != nil {
 			retriesAttempted++
 			retryPolicyContext = &dara.RetryPolicyContext{
@@ -1030,7 +903,7 @@ func (client *Client) DoRequest(params *openapiutil.Params, request *openapiutil
 // @param runtime - which controls some details of call api, such as retry times
 //
 // @return the response
-func (client *Client) Execute(params *openapiutil.Params, request *openapiutil.OpenApiRequest, runtime *dara.RuntimeOptions) (_result map[string]interface{}, _err error) {
+func (client *Client) ExecuteWithCtx(ctx context.Context, params *openapiutil.Params, request *openapiutil.OpenApiRequest, runtime *dara.RuntimeOptions) (_result map[string]interface{}, _err error) {
 	_runtime := dara.NewRuntimeObject(map[string]interface{}{
 		"key":            dara.ToString(dara.Default(dara.StringValue(runtime.Key), dara.StringValue(client.Key))),
 		"cert":           dara.ToString(dara.Default(dara.StringValue(runtime.Cert), dara.StringValue(client.Cert))),
@@ -1045,7 +918,6 @@ func (client *Client) Execute(params *openapiutil.Params, request *openapiutil.O
 		"maxIdleConns":   dara.ForceInt(dara.Default(dara.IntValue(runtime.MaxIdleConns), dara.IntValue(client.MaxIdleConns))),
 		"retryOptions":   client.RetryOptions,
 		"ignoreSSL":      dara.BoolValue(runtime.IgnoreSSL),
-		"httpClient":     client.HttpClient,
 		"tlsMinVersion":  dara.StringValue(client.TlsMinVersion),
 		"disableHttp2":   dara.ForceBoolean(dara.Default(dara.BoolValue(client.DisableHttp2), false)),
 	})
@@ -1182,7 +1054,7 @@ func (client *Client) Execute(params *openapiutil.Params, request *openapiutil.O
 		request_.Query = interceptorContext.Request.Query
 		request_.Body = interceptorContext.Request.Stream
 		request_.Headers = interceptorContext.Request.Headers
-		response_, _err := dara.DoRequest(request_, _runtime)
+		response_, _err := dara.DoRequestWithCtx(ctx, request_, _runtime)
 		if _err != nil {
 			retriesAttempted++
 			retryPolicyContext = &dara.RetryPolicyContext{
@@ -1229,7 +1101,7 @@ func (client *Client) Execute(params *openapiutil.Params, request *openapiutil.O
 	return _result, _resultErr
 }
 
-func (client *Client) CallSSEApi(params *openapiutil.Params, request *openapiutil.OpenApiRequest, runtime *dara.RuntimeOptions, _yield chan *SSEResponse, _yieldErr chan error) {
+func (client *Client) CallSSEApiWithCtx(ctx context.Context, params *openapiutil.Params, request *openapiutil.OpenApiRequest, runtime *dara.RuntimeOptions, _yield chan *SSEResponse, _yieldErr chan error) {
 	defer close(_yield)
 	defer close(_yieldErr)
 	_runtime := dara.NewRuntimeObject(map[string]interface{}{
@@ -1246,7 +1118,6 @@ func (client *Client) CallSSEApi(params *openapiutil.Params, request *openapiuti
 		"maxIdleConns":   dara.ForceInt(dara.Default(dara.IntValue(runtime.MaxIdleConns), dara.IntValue(client.MaxIdleConns))),
 		"retryOptions":   client.RetryOptions,
 		"ignoreSSL":      dara.BoolValue(runtime.IgnoreSSL),
-		"httpClient":     client.HttpClient,
 		"tlsMinVersion":  dara.StringValue(client.TlsMinVersion),
 	})
 
@@ -1411,7 +1282,7 @@ func (client *Client) CallSSEApi(params *openapiutil.Params, request *openapiuti
 
 		}
 
-		response_, _err := dara.DoRequest(request_, _runtime)
+		response_, _err := dara.DoRequestWithCtx(ctx, request_, _runtime)
 		if _err != nil {
 			retriesAttempted++
 			retryPolicyContext = &dara.RetryPolicyContext{
@@ -1424,7 +1295,7 @@ func (client *Client) CallSSEApi(params *openapiutil.Params, request *openapiuti
 			continue
 		}
 
-		callSSEApi_opResponse(_yield, _yieldErr, response_)
+		callSSEApiWithCtx_opResponse(_yield, _yieldErr, response_)
 		_err = <-_yieldErr
 		if _err != nil {
 			retriesAttempted++
@@ -1444,7 +1315,7 @@ func (client *Client) CallSSEApi(params *openapiutil.Params, request *openapiuti
 	return
 }
 
-func (client *Client) CallApi(params *openapiutil.Params, request *openapiutil.OpenApiRequest, runtime *dara.RuntimeOptions) (_result map[string]interface{}, _err error) {
+func (client *Client) CallApiWithCtx(ctx context.Context, params *openapiutil.Params, request *openapiutil.OpenApiRequest, runtime *dara.RuntimeOptions) (_result map[string]interface{}, _err error) {
 	if dara.IsNil(params) {
 		_err = &ClientError{
 			Code:    dara.String("ParameterMissing"),
@@ -1455,28 +1326,28 @@ func (client *Client) CallApi(params *openapiutil.Params, request *openapiutil.O
 
 	if dara.IsNil(client.SignatureVersion) || dara.StringValue(client.SignatureVersion) != "v4" {
 		if dara.IsNil(client.SignatureAlgorithm) || dara.StringValue(client.SignatureAlgorithm) != "v2" {
-			_body, _err := client.DoRequest(params, request, runtime)
+			_body, _err := client.DoRequestWithCtx(ctx, params, request, runtime)
 			if _err != nil {
 				return _result, _err
 			}
 			_result = _body
 			return _result, _err
 		} else if (dara.StringValue(params.Style) == "ROA") && (dara.StringValue(params.ReqBodyType) == "json") {
-			_body, _err := client.DoROARequest(params.Action, params.Version, params.Protocol, params.Method, params.AuthType, params.Pathname, params.BodyType, request, runtime)
+			_body, _err := client.DoROARequestWithCtx(ctx, params.Action, params.Version, params.Protocol, params.Method, params.AuthType, params.Pathname, params.BodyType, request, runtime)
 			if _err != nil {
 				return _result, _err
 			}
 			_result = _body
 			return _result, _err
 		} else if dara.StringValue(params.Style) == "ROA" {
-			_body, _err := client.DoROARequestWithForm(params.Action, params.Version, params.Protocol, params.Method, params.AuthType, params.Pathname, params.BodyType, request, runtime)
+			_body, _err := client.DoROAFormRequestWithCtx(ctx, params.Action, params.Version, params.Protocol, params.Method, params.AuthType, params.Pathname, params.BodyType, request, runtime)
 			if _err != nil {
 				return _result, _err
 			}
 			_result = _body
 			return _result, _err
 		} else {
-			_body, _err := client.DoRPCRequest(params.Action, params.Version, params.Protocol, params.Method, params.AuthType, params.BodyType, request, runtime)
+			_body, _err := client.DoRPCRequestWithCtx(ctx, params.Action, params.Version, params.Protocol, params.Method, params.AuthType, params.BodyType, request, runtime)
 			if _err != nil {
 				return _result, _err
 			}
@@ -1485,7 +1356,7 @@ func (client *Client) CallApi(params *openapiutil.Params, request *openapiutil.O
 		}
 
 	} else {
-		_body, _err := client.Execute(params, request, runtime)
+		_body, _err := client.ExecuteWithCtx(ctx, params, request, runtime)
 		if _err != nil {
 			return _result, _err
 		}
@@ -1495,163 +1366,7 @@ func (client *Client) CallApi(params *openapiutil.Params, request *openapiutil.O
 
 }
 
-// Description:
-//
-// # Get accesskey id by using credential
-//
-// @return accesskey id
-func (client *Client) GetAccessKeyId() (_result *string, _err error) {
-	if dara.IsNil(client.Credential) {
-		_result = dara.String("")
-		return _result, _err
-	}
-
-	accessKeyIdTmp, _err := client.Credential.GetAccessKeyId()
-	accessKeyId := dara.StringValue(accessKeyIdTmp)
-	if _err != nil {
-		return _result, _err
-	}
-
-	_result = dara.String(accessKeyId)
-	return _result, _err
-}
-
-// Description:
-//
-// # Get accesskey secret by using credential
-//
-// @return accesskey secret
-func (client *Client) GetAccessKeySecret() (_result *string, _err error) {
-	if dara.IsNil(client.Credential) {
-		_result = dara.String("")
-		return _result, _err
-	}
-
-	secretTmp, _err := client.Credential.GetAccessKeySecret()
-	secret := dara.StringValue(secretTmp)
-	if _err != nil {
-		return _result, _err
-	}
-
-	_result = dara.String(secret)
-	return _result, _err
-}
-
-// Description:
-//
-// # Get security token by using credential
-//
-// @return security token
-func (client *Client) GetSecurityToken() (_result *string, _err error) {
-	if dara.IsNil(client.Credential) {
-		_result = dara.String("")
-		return _result, _err
-	}
-
-	tokenTmp, _err := client.Credential.GetSecurityToken()
-	token := dara.StringValue(tokenTmp)
-	if _err != nil {
-		return _result, _err
-	}
-
-	_result = dara.String(token)
-	return _result, _err
-}
-
-// Description:
-//
-// # Get bearer token by credential
-//
-// @return bearer token
-func (client *Client) GetBearerToken() (_result *string, _err error) {
-	if dara.IsNil(client.Credential) {
-		_result = dara.String("")
-		return _result, _err
-	}
-
-	token := dara.StringValue(client.Credential.GetBearerToken())
-	_result = dara.String(token)
-	return _result, _err
-}
-
-// Description:
-//
-// # Get credential type by credential
-//
-// @return credential type e.g. access_key
-func (client *Client) GetType() (_result *string, _err error) {
-	if dara.IsNil(client.Credential) {
-		_result = dara.String("")
-		return _result, _err
-	}
-
-	authType := dara.StringValue(client.Credential.GetType())
-	_result = dara.String(authType)
-	return _result, _err
-}
-
-// Description:
-//
-// # If the endpointRule and config.endpoint are empty, throw error
-//
-// @param config - config contains the necessary information to create a client
-func (client *Client) CheckConfig(config *openapiutil.Config) (_err error) {
-	if dara.IsNil(client.EndpointRule) && dara.IsNil(config.Endpoint) {
-		_err = &ClientError{
-			Code:    dara.String("ParameterMissing"),
-			Message: dara.String("'config.endpoint' can not be empty"),
-		}
-		return _err
-	}
-
-	return _err
-}
-
-// Description:
-//
-// set gateway client
-//
-// @param spi - .
-func (client *Client) SetGatewayClient(spi spi.ClientInterface) (_err error) {
-	client.Spi = spi
-	return _err
-}
-
-// Description:
-//
-// set RPC header for debug
-//
-// @param headers - headers for debug, this header can be used only once.
-func (client *Client) SetRpcHeaders(headers map[string]*string) (_err error) {
-	client.Headers = headers
-	return _err
-}
-
-// Description:
-//
-// get RPC header for debug
-func (client *Client) GetRpcHeaders() (_result map[string]*string, _err error) {
-	headers := client.Headers
-	client.Headers = nil
-	_result = headers
-	return _result, _err
-}
-
-func (client *Client) GetAccessDeniedDetail(err map[string]interface{}) (_result map[string]interface{}) {
-	var accessDeniedDetail map[string]interface{}
-	if !dara.IsNil(err["AccessDeniedDetail"]) {
-		detail1 := dara.ToMap(err["AccessDeniedDetail"])
-		accessDeniedDetail = detail1
-	} else if !dara.IsNil(err["accessDeniedDetail"]) {
-		detail2 := dara.ToMap(err["accessDeniedDetail"])
-		accessDeniedDetail = detail2
-	}
-
-	_result = accessDeniedDetail
-	return _result
-}
-
-func doRPCRequest_opResponse(response_ *dara.Response, client *Client, bodyType *string) (_result map[string]interface{}, _err error) {
+func doRPCRequestWithCtx_opResponse(response_ *dara.Response, client *Client, bodyType *string) (_result map[string]interface{}, _err error) {
 	if (dara.IntValue(response_.StatusCode) >= 400) && (dara.IntValue(response_.StatusCode) < 600) {
 		_res, _err := dara.ReadAsJSON(response_.Body)
 		if _err != nil {
@@ -1769,7 +1484,7 @@ func doRPCRequest_opResponse(response_ *dara.Response, client *Client, bodyType 
 
 }
 
-func doROARequest_opResponse(response_ *dara.Response, client *Client, bodyType *string) (_result map[string]interface{}, _err error) {
+func doROARequestWithCtx_opResponse(response_ *dara.Response, client *Client, bodyType *string) (_result map[string]interface{}, _err error) {
 	if dara.IntValue(response_.StatusCode) == 204 {
 		_err = dara.Convert(map[string]map[string]*string{
 			"headers": response_.Headers,
@@ -1896,7 +1611,7 @@ func doROARequest_opResponse(response_ *dara.Response, client *Client, bodyType 
 
 }
 
-func doROARequestWithForm_opResponse(response_ *dara.Response, client *Client, bodyType *string) (_result map[string]interface{}, _err error) {
+func doROAFormRequestWithCtx_opResponse(response_ *dara.Response, client *Client, bodyType *string) (_result map[string]interface{}, _err error) {
 	if dara.IntValue(response_.StatusCode) == 204 {
 		_err = dara.Convert(map[string]map[string]*string{
 			"headers": response_.Headers,
@@ -2022,7 +1737,7 @@ func doROARequestWithForm_opResponse(response_ *dara.Response, client *Client, b
 
 }
 
-func doRequest_opResponse(response_ *dara.Response, client *Client, params *openapiutil.Params) (_result map[string]interface{}, _err error) {
+func doRequestWithCtx_opResponse(response_ *dara.Response, client *Client, params *openapiutil.Params) (_result map[string]interface{}, _err error) {
 	if (dara.IntValue(response_.StatusCode) >= 400) && (dara.IntValue(response_.StatusCode) < 600) {
 		err := map[string]interface{}{}
 		if !dara.IsNil(response_.Headers["content-type"]) && dara.StringValue(response_.Headers["content-type"]) == "text/xml;charset=utf-8" {
@@ -2158,7 +1873,7 @@ func doRequest_opResponse(response_ *dara.Response, client *Client, params *open
 
 }
 
-func callSSEApi_opResponse(_yield chan *SSEResponse, _yieldErr chan error, response_ *dara.Response) {
+func callSSEApiWithCtx_opResponse(_yield chan *SSEResponse, _yieldErr chan error, response_ *dara.Response) {
 	if (dara.IntValue(response_.StatusCode) >= 400) && (dara.IntValue(response_.StatusCode) < 600) {
 		err := map[string]interface{}{}
 		if !dara.IsNil(response_.Headers["content-type"]) && dara.StringValue(response_.Headers["content-type"]) == "text/xml;charset=utf-8" {
