@@ -3,6 +3,7 @@ package rrsa
 import (
 	"context"
 	"fmt"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
 	"time"
 
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/common"
@@ -24,6 +25,9 @@ var demoCmd = &cobra.Command{
 	Short: "A demo for using RRSA Token in ACK Cluster when running it as pod container",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
+		if demoOpts.region != "" {
+			ctl.GlobalOption.Region = demoOpts.region
+		}
 		sleep := time.Second * 30
 		for {
 			log.Logger.Info("======= [begin] list ACK clusters with RRSA =======")
