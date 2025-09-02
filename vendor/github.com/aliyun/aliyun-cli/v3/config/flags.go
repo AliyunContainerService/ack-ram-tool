@@ -48,6 +48,7 @@ const (
 	CloudSSOSignInUrlFlagName    = "cloud-sso-sign-in-url"
 	CloudSSOAccessConfigFlagName = "cloud-sso-access-config"
 	CloudSSOAccountIdFlagName    = "cloud-sso-account-id"
+	OAuthSiteTypeName            = "oauth-site-type"
 )
 
 func AddFlags(fs *cli.FlagSet) {
@@ -63,6 +64,7 @@ func AddFlags(fs *cli.FlagSet) {
 	fs.Add(NewStsRegionFlag())
 	fs.Add(NewRamRoleNameFlag())
 	fs.Add(NewRamRoleArnFlag())
+	fs.Add(NewSourceProfileFlag())
 	fs.Add(NewRoleSessionNameFlag())
 	fs.Add(NewExternalIdFlag())
 	fs.Add(NewPrivateKeyFlag())
@@ -78,6 +80,7 @@ func AddFlags(fs *cli.FlagSet) {
 	fs.Add(NewCloudSSOSignInUrlFlag())
 	fs.Add(NewCloudSSOAccessConfigFlag())
 	fs.Add(NewCloudSSOAccountIdFlag())
+	fs.Add(NewOAuthSiteTypeFlag())
 }
 
 func ConnectTimeoutFlag(fs *cli.FlagSet) *cli.Flag {
@@ -185,6 +188,10 @@ func CloudSSOSignInUrlFlag(fs *cli.FlagSet) *cli.Flag {
 	return fs.Get(CloudSSOSignInUrlFlagName)
 }
 
+func OAuthSiteTypeFlag(fs *cli.FlagSet) *cli.Flag {
+	return fs.Get(OAuthSiteTypeName)
+}
+
 // CloudSSOAccessConfigFlag returns the flag for cloud sso access config
 func CloudSSOAccessConfigFlag(fs *cli.FlagSet) *cli.Flag {
 	return fs.Get(CloudSSOAccessConfigFlagName)
@@ -284,6 +291,17 @@ func NewRamRoleArnFlag() *cli.Flag {
 		Short: i18n.T(
 			"use `--ram-role-arn <RamRoleArn>` to assign RamRoleArn",
 			"使用 `--ram-role-arn <RamRoleArn>` 指定RamRoleArn"),
+	}
+}
+
+func NewSourceProfileFlag() *cli.Flag {
+	return &cli.Flag{
+		Category:     "config",
+		Name:         SourceProfileFlagName,
+		AssignedMode: cli.AssignedOnce,
+		Short: i18n.T(
+			"use `--source-profile <SourceProfile>` to assign SourceProfile",
+			"使用 `--source-profile <SourceProfile>` 指定SourceProfile"),
 	}
 }
 
@@ -497,5 +515,17 @@ func NewCloudSSOAccountIdFlag() *cli.Flag {
 		Short: i18n.T(
 			"use `--cloud-sso-account-id` to specify the cloud sso account id",
 			"使用 `--cloud-sso-account-id` 指定云SSO账号ID"),
+	}
+}
+
+func NewOAuthSiteTypeFlag() *cli.Flag {
+	return &cli.Flag{
+		Category:     "config",
+		Name:         OAuthSiteTypeName,
+		AssignedMode: cli.AssignedOnce,
+		Persistent:   true,
+		Short: i18n.T(
+			"use `--oauth-site-type` to specify the oauth site type, support CN|INTL",
+			"使用 `--oauth-site-type` 指定 OAuth 站点类型, 支持 CN|INTL"),
 	}
 }
