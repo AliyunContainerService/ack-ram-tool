@@ -41,7 +41,7 @@ github.com/alibabacloud-go/ram-20150501/client
 # github.com/alibabacloud-go/sts-20150401 v1.1.0
 ## explicit; go 1.15
 github.com/alibabacloud-go/sts-20150401/client
-# github.com/alibabacloud-go/tea v1.3.9
+# github.com/alibabacloud-go/tea v1.3.11
 ## explicit; go 1.14
 github.com/alibabacloud-go/tea/dara
 github.com/alibabacloud-go/tea/tea
