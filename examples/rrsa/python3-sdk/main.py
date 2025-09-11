@@ -34,19 +34,23 @@ def test_open_api_sdk(cred):
 
 
 def new_cred():
-    # https://www.alibabacloud.com/help/doc-detail/378661.html
+    # https://www.alibabacloud.com/help/doc-detail/2567976.html
     cred = CredClient()
     return cred
 
 
 def new_oidc_cred():
-    # https://www.alibabacloud.com/help/doc-detail/378661.html
+    # https://www.alibabacloud.com/help/doc-detail/2567976.html
     config = CredConfig(
         type='oidc_role_arn',
         role_arn=os.environ[ENV_ROLE_ARN],
         oidc_provider_arn=os.environ[ENV_OIDC_PROVIDER_ARN],
         oidc_token_file_path=os.environ[ENV_OIDC_TOKEN_FILE],
         role_session_name='auth-with-rrsa-oidc-token')
+
+    # https://next.api.aliyun.com/product/Sts
+    # config.sts_endpoint = 'sts-vpc.cn-hangzhou.aliyuncs.com'
+
     cred = CredClient(config)
     return cred
 
