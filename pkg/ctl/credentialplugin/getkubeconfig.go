@@ -113,6 +113,19 @@ func fillGlobalFlags(args []string) []string {
 	if ctl.GlobalOption.GetRoleArn() != "" {
 		args = append(args, "--role-arn", ctl.GlobalOption.GetRoleArn())
 	}
+	if ctl.GlobalOption.GetRegion() != "" {
+		args = append(args, "--region-id", ctl.GlobalOption.GetRegion())
+	}
+	if ctl.GlobalOption.GetSTSEndpoint() != "" {
+		args = append(args, "--sts-endpoint", ctl.GlobalOption.GetSTSEndpoint())
+	}
+	if ctl.GlobalOption.GetCSEndpoint() != "" {
+		args = append(args, "--cs-endpoint", ctl.GlobalOption.GetCSEndpoint())
+	}
+	if ctl.GlobalOption.GetCredentialType() != "" && ctl.GlobalOption.GetCredentialType() != "auto" {
+		args = append(args, "--credential-type", ctl.GlobalOption.GetCredentialType())
+	}
+
 	args = append(args, "--log-level", log.LogLevelError)
 	return args
 }

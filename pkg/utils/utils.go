@@ -67,3 +67,16 @@ func ShortHomePath(path string) string {
 	home, _ := os.UserHomeDir()
 	return strings.Replace(path, home, "~", 1)
 }
+
+func Or[T comparable](a T, fallbacks ...T) T {
+	var zero T
+	if a != zero {
+		return a
+	}
+	for _, fb := range fallbacks {
+		if fb != zero {
+			return fb
+		}
+	}
+	return zero
+}

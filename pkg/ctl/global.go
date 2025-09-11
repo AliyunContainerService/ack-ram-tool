@@ -2,6 +2,7 @@ package ctl
 
 import (
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/openapi"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/utils"
 	"os"
 	"strconv"
 	"strings"
@@ -21,6 +22,10 @@ const (
 	EnvVerbose                    = "ACK_RAM_TOOL_VERBOSE"
 	EnvCredentialType             = "ACK_RAM_TOOL_CREDENTIAL_TYPE" // #nosec G101
 
+	EnvSTSEndpoint = "ACK_RAM_TOOL_STS_ENDPOINT"
+	EnvCSEndpoint  = "ACK_RAM_TOOL_CS_ENDPOINT"
+	EnvRAMEndpoint = "ACK_RAM_TOOL_RAM_ENDPOINT"
+
 	DefaultRegion   = ""
 	DefaultLogLevel = "info"
 	debugLogLevel   = "debug"
@@ -34,11 +39,16 @@ type globalOption struct {
 
 	UseSpecifiedCredentialFile bool
 	CredentialFilePath         string
+	CredentialType             string
 
 	ProfileName                   string
 	IgnoreEnv                     bool
 	IgnoreAliyuncliConfig         bool
 	FinalAssumeRoleAnotherRoleArn string
+
+	STSEndpoint string
+	RAMEndpoint string
+	CSEndpoint  string
 
 	LogLevel  string
 	ClusterId string
@@ -148,14 +158,30 @@ func (g *globalOption) GetEndpoints() openapi.Endpoints {
 	region := g.GetRegion()
 	endpoints := openapi.NewEndpoints(region, g.UseVPCEndpoint)
 	endpoints.STS = g.GetSTSEndpoint()
+	endpoints.RAM = utils.Or(g.GetRAMEndpoint(), endpoints.RAM)
+	endpoints.CS = utils.Or(g.GetCSEndpoint(), endpoints.CS)
 	return endpoints
 }
 
 func (g *globalOption) GetCredentialType() string {
-	return os.Getenv(EnvCredentialType)
+	return utils.Or(g.CredentialType, os.Getenv(EnvCredentialType))
+}
+
+func (g *globalOption) GetCSEndpoint() string {
+	return utils.Or(g.CSEndpoint, os.Getenv(EnvCSEndpoint))
+}
+
+func (g *globalOption) GetRAMEndpoint() string {
+	return utils.Or(g.RAMEndpoint, os.Getenv(EnvRAMEndpoint))
 }
 
 func (g *globalOption) GetSTSEndpoint() string {
+	if g.STSEndpoint != "" {
+		return g.STSEndpoint
+	}
+	if v := os.Getenv(EnvSTSEndpoint); v != "" {
+		return v
+	}
 	region := g.GetRegion()
 	return provider.GetSTSEndpoint(region, g.UseVPCEndpoint)
 }

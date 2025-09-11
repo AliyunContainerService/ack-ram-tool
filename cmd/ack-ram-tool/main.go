@@ -75,6 +75,15 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&ctl.GlobalOption.Verbose, "verbose", "v", false,
 		"Make the operation more talkative"+
 			fmt.Sprintf(" (env: %q)", ctl.EnvVerbose))
+
+	rootCmd.PersistentFlags().StringVar(&ctl.GlobalOption.STSEndpoint, "sts-endpoint", "",
+		"endpoint of STS service OpenAPI"+fmt.Sprintf(" (env: %q)", ctl.EnvSTSEndpoint))
+	rootCmd.PersistentFlags().StringVar(&ctl.GlobalOption.RAMEndpoint, "ram-endpoint", "",
+		"endpoint of RAM service OpenAPI"+fmt.Sprintf(" (env: %q)", ctl.EnvRAMEndpoint))
+	rootCmd.PersistentFlags().StringVar(&ctl.GlobalOption.CSEndpoint, "cs-endpoint", "",
+		"endpoint of CS service OpenAPI"+fmt.Sprintf(" (env: %q)", ctl.EnvCSEndpoint))
+	rootCmd.PersistentFlags().StringVar(&ctl.GlobalOption.CredentialType, "credential-type", "auto",
+		"credential type: auto, imds"+fmt.Sprintf(" (env: %q)", ctl.EnvCredentialType))
 }
 
 func main() {
