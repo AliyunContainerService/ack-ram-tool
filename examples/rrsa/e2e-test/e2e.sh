@@ -3,7 +3,7 @@ set -e
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /dev/null && pwd )"
 CLUSTER_ID="$1"
-ROLE_NAME="test-rrsa-demo"
+ROLE_NAME="e2e-test-rrsa-demo"
 POLICY_NAME="AliyunCSReadOnlyAccess"
 KUBECONFIG_PATH="${SCRIPT_DIR}/kubeconfig"
 NAMESPACE="rrsa-demo"

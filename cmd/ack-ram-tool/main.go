@@ -48,6 +48,7 @@ func init() {
 	exportcredentials.SetupCmd(rootCmd)
 	auth.SetupCmd(rootCmd)
 	utils.SetupUtilsCmd(rootCmd)
+	credentialplugin.SetupGetKubeconfigCmd(rootCmd)
 
 	rootCmd.PersistentFlags().StringVar(&ctl.GlobalOption.Region, "region-id",
 		"", "The region to use"+

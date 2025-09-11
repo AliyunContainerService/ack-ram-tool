@@ -14,14 +14,15 @@ function bar_tip() {
 }
 
 function get_kubeconfig() {
-  bar_tip "get kubeconfig"
+  sub_cmd="$1"
+  bar_tip "get kubeconfig via ${sub_cmd}, mode: ${MODE}"
 
-  ack-ram-tool credential-plugin get-kubeconfig -m ${MODE} --cluster-id ${CLUSTER_ID} > ${KUBECONFIG_PATH}
+  ack-ram-tool ${sub_cmd} -m ${MODE} --cluster-id ${CLUSTER_ID} > ${KUBECONFIG_PATH}
 
   if echo ${MODE} |grep token; then
     Arn=$(aliyun sts GetCallerIdentity | jq .Arn -r)
     UserId=$(aliyun sts GetCallerIdentity | jq .UserId -r)
-    ack-ram-tool credential-plugin get-kubeconfig --cluster-id ${CLUSTER_ID} > ${KUBECONFIG_PATH}.crt.yaml
+    ack-ram-tool ${sub_cmd} --cluster-id ${CLUSTER_ID} > ${KUBECONFIG_PATH}.crt.yaml
     cat <<EOF | kubectl --kubeconfig=${KUBECONFIG_PATH}.crt.yaml apply -f -
 apiVersion: ramauthenticator.k8s.alibabacloud/v1alpha1
 kind: RAMIdentityMapping
@@ -63,8 +64,11 @@ function main() {
     exit 1
   fi
 
-  get_kubeconfig
-  exec_auth
+  get_kubeconfig "credential-plugin get-kubeconfig"
+  exec_auth "credential-plugin get-kubeconfig"
+
+  get_kubeconfig "get-kubeconfig"
+  exec_auth "get-kubeconfig"
 }
 
 main
