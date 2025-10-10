@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
 	openapiutil "github.com/alibabacloud-go/openapi-util/service"
 	util "github.com/alibabacloud-go/tea-utils/service"
@@ -181,18 +182,12 @@ func generatePreSignedReq(request *openapi.OpenApiRequest, params *openapi.Param
 
 			newReq.Headers["x-acs-bearer-token"] = bearerToken
 		} else {
-			accessKeyId, _err := cred.GetAccessKeyId()
+			model, _err := cred.GetCredential()
 			if _err != nil {
-				return nil, _err
+				return nil, fmt.Errorf("GetCredential failed: %w", _err)
 			}
-			accessKeySecret, _err := cred.GetAccessKeySecret()
-			if _err != nil {
-				return nil, _err
-			}
-			securityToken, _err := cred.GetSecurityToken()
-			if _err != nil {
-				return nil, _err
-			}
+			accessKeyId, accessKeySecret, securityToken := model.AccessKeyId,
+				model.AccessKeySecret, model.SecurityToken
 			if !tea.BoolValue(util.Empty(securityToken)) {
 				//newReq.Headers["x-acs-accesskey-id"] = accessKeyId
 				newReq.Headers["x-acs-security-token"] = securityToken

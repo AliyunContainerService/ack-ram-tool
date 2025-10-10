@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	cs20151215 "github.com/alibabacloud-go/cs-20151215/v3/client"
+	cs20151215 "github.com/alibabacloud-go/cs-20151215/v5/client"
 	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
 	"github.com/alibabacloud-go/tea/tea"
 	// github.com/aliyun/credentials-go >= v1.2.6
@@ -39,12 +39,13 @@ func testOpenAPISDK() {
 		panic(err)
 	}
 
-	req := &cs20151215.DescribeClustersRequest{}
-	resp, err := client.DescribeClusters(req)
+	req := &cs20151215.DescribeClustersForRegionRequest{}
+	region := tea.String("cn-hangzhou")
+	resp, err := client.DescribeClustersForRegion(region, req)
 	if err != nil {
 		panic(err)
 	}
-	for _, c := range resp.Body {
+	for _, c := range resp.Body.Clusters {
 		fmt.Printf("cluster id: %s, cluster name: %s\n", *c.ClusterId, *c.Name)
 	}
 }

@@ -13,7 +13,7 @@ metadata:
   name: demo-sa
   namespace: rrsa-demo
   annotations:
-    pod-identity.alibabacloud.com/role-name: test-rrsa-demo
+    pod-identity.alibabacloud.com/role-name: e2e-test-rrsa-demo
 
 ---
 apiVersion: batch/v1

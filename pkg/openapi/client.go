@@ -3,10 +3,10 @@ package openapi
 import (
 	"fmt"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider"
-	cs "github.com/alibabacloud-go/cs-20151215/v3/client"
+	cs "github.com/alibabacloud-go/cs-20151215/v5/client"
 	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
-	ram "github.com/alibabacloud-go/ram-20150501/client"
-	sts "github.com/alibabacloud-go/sts-20150401/client"
+	ram "github.com/alibabacloud-go/ram-20150501/v2/client"
+	sts "github.com/alibabacloud-go/sts-20150401/v2/client"
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/credentials-go/credentials"
 	"os"
@@ -68,13 +68,12 @@ func NewClient(config *openapi.Config) (*Client, error) {
 	}
 	csClient.Endpoint = tea.String(defaultCsApiEndpoint)
 
-	v1config := openapiConfigToV1(config)
-	ramClient, err := ram.NewClient(v1config)
+	ramClient, err := ram.NewClient(config)
 	if err != nil {
 		return nil, err
 	}
 	ramClient.Endpoint = tea.String(defaultRamApiEndpoint)
-	stsClient, err := sts.NewClient(v1config)
+	stsClient, err := sts.NewClient(config)
 	if err != nil {
 		return nil, err
 	}

@@ -600,3 +600,214 @@ func TestGetNetworkType(t *testing.T) {
 		}
 	})
 }
+
+func TestGetDNSNameServersList(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("normal case", func(t *testing.T) {
+		client, err := NewClient(ClientOptions{
+			TransportWrappers: []TransportWrapper{
+				func(rt http.RoundTripper) http.RoundTripper {
+					return &MockTransportWrapper{
+						rt: rt,
+						callback: func(path string) (int, string, error) {
+							if path == "/latest/api/token" {
+								return 200, "token", nil
+							}
+							if path != "/latest/meta-data/dns-conf/nameservers" {
+								t.Errorf("expected path '/latest/meta-data/dns-conf/nameservers', got '%s'", path)
+							}
+							return 200, "8.8.8.8\n8.8.4.4", nil
+						},
+					}
+				},
+			},
+		})
+		if err != nil {
+			t.Errorf("expected no error, got '%v'", err)
+		}
+		result, err := client.GetDNSNameServersList(ctx)
+		if err != nil {
+			t.Errorf("expected no error, got '%v'", err)
+		}
+		expected := []string{"8.8.8.8", "8.8.4.4"}
+		if len(result) != len(expected) {
+			t.Errorf("expected result length %d, got %d", len(expected), len(result))
+		}
+		for i := range expected {
+			if result[i] != expected[i] {
+				t.Errorf("expected result[%d] '%s', got '%s'", i, expected[i], result[i])
+			}
+		}
+	})
+
+	t.Run("error case", func(t *testing.T) {
+		client, err := NewClient(ClientOptions{
+			TransportWrappers: []TransportWrapper{
+				func(rt http.RoundTripper) http.RoundTripper {
+					return &MockTransportWrapper{
+						rt: rt,
+						callback: func(path string) (int, string, error) {
+							if path == "/latest/api/token" {
+								return 200, "token", nil
+							}
+							if path != "/latest/meta-data/dns-conf/nameservers" {
+								t.Errorf("expected path '/latest/meta-data/dns-conf/nameservers', got '%s'", path)
+							}
+							return 400, "", errors.New("mock error")
+						},
+					}
+				},
+			},
+		})
+		if err != nil {
+			t.Errorf("expected no error, got '%v'", err)
+		}
+		result, err := client.GetDNSNameServersList(ctx)
+		if err == nil {
+			t.Errorf("expected error, got nil")
+		}
+		if result != nil {
+			t.Errorf("expected nil result, got '%v'", result)
+		}
+	})
+}
+
+func TestGetNTPServers(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("normal case", func(t *testing.T) {
+		client, err := NewClient(ClientOptions{
+			TransportWrappers: []TransportWrapper{
+				func(rt http.RoundTripper) http.RoundTripper {
+					return &MockTransportWrapper{
+						rt: rt,
+						callback: func(path string) (int, string, error) {
+							if path == "/latest/api/token" {
+								return 200, "token", nil
+							}
+							if path != "/latest/meta-data/ntp-conf/ntp-servers" {
+								t.Errorf("expected path '/latest/meta-data/ntp-conf/ntp-servers', got '%s'", path)
+							}
+							return 200, "ntp1.example.com\nntp2.example.com", nil
+						},
+					}
+				},
+			},
+		})
+		if err != nil {
+			t.Errorf("expected no error, got '%v'", err)
+		}
+		result, err := client.GetNTPServers(ctx)
+		if err != nil {
+			t.Errorf("expected no error, got '%v'", err)
+		}
+		expected := "ntp1.example.com\nntp2.example.com"
+		if result != expected {
+			t.Errorf("expected result '%s', got '%s'", expected, result)
+		}
+	})
+
+	t.Run("error case", func(t *testing.T) {
+		client, err := NewClient(ClientOptions{
+			TransportWrappers: []TransportWrapper{
+				func(rt http.RoundTripper) http.RoundTripper {
+					return &MockTransportWrapper{
+						rt: rt,
+						callback: func(path string) (int, string, error) {
+							if path == "/latest/api/token" {
+								return 200, "token", nil
+							}
+							if path != "/latest/meta-data/ntp-conf/ntp-servers" {
+								t.Errorf("expected path '/latest/meta-data/ntp-conf/ntp-servers', got '%s'", path)
+							}
+							return 400, "", errors.New("mock error")
+						},
+					}
+				},
+			},
+		})
+		if err != nil {
+			t.Errorf("expected no error, got '%v'", err)
+		}
+		result, err := client.GetNTPServers(ctx)
+		if err == nil {
+			t.Errorf("expected error, got nil")
+		}
+		if result != "" {
+			t.Errorf("expected nil result, got '%v'", result)
+		}
+	})
+}
+
+func TestGetNTPServersList(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("normal case", func(t *testing.T) {
+		client, err := NewClient(ClientOptions{
+			TransportWrappers: []TransportWrapper{
+				func(rt http.RoundTripper) http.RoundTripper {
+					return &MockTransportWrapper{
+						rt: rt,
+						callback: func(path string) (int, string, error) {
+							if path == "/latest/api/token" {
+								return 200, "token", nil
+							}
+							if path != "/latest/meta-data/ntp-conf/ntp-servers" {
+								t.Errorf("expected path '/latest/meta-data/ntp-conf/ntp-servers', got '%s'", path)
+							}
+							return 200, "ntp1.example.com\nntp2.example.com", nil
+						},
+					}
+				},
+			},
+		})
+		if err != nil {
+			t.Errorf("expected no error, got '%v'", err)
+		}
+		result, err := client.GetNTPServersList(ctx)
+		if err != nil {
+			t.Errorf("expected no error, got '%v'", err)
+		}
+		expected := []string{"ntp1.example.com", "ntp2.example.com"}
+		if len(result) != len(expected) {
+			t.Errorf("expected result length %d, got %d", len(expected), len(result))
+		}
+		for i := range expected {
+			if result[i] != expected[i] {
+				t.Errorf("expected result[%d] '%s', got '%s'", i, expected[i], result[i])
+			}
+		}
+	})
+
+	t.Run("error case", func(t *testing.T) {
+		client, err := NewClient(ClientOptions{
+			TransportWrappers: []TransportWrapper{
+				func(rt http.RoundTripper) http.RoundTripper {
+					return &MockTransportWrapper{
+						rt: rt,
+						callback: func(path string) (int, string, error) {
+							if path == "/latest/api/token" {
+								return 200, "token", nil
+							}
+							if path != "/latest/meta-data/ntp-conf/ntp-servers" {
+								t.Errorf("expected path '/latest/meta-data/ntp-conf/ntp-servers', got '%s'", path)
+							}
+							return 400, "", errors.New("mock error")
+						},
+					}
+				},
+			},
+		})
+		if err != nil {
+			t.Errorf("expected no error, got '%v'", err)
+		}
+		result, err := client.GetNTPServersList(ctx)
+		if err == nil {
+			t.Errorf("expected error, got nil")
+		}
+		if result != nil {
+			t.Errorf("expected nil result, got '%v'", result)
+		}
+	})
+}

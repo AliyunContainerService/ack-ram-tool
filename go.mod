@@ -5,11 +5,8 @@ go 1.23.0
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider v0.0.0
-	github.com/alibabacloud-go/cs-20151215/v3 v3.0.42
 	github.com/alibabacloud-go/darabonba-openapi v0.2.1
 	github.com/alibabacloud-go/darabonba-openapi/v2 v2.1.7
-	github.com/alibabacloud-go/ram-20150501 v1.0.2
-	github.com/alibabacloud-go/sts-20150401 v1.1.0
 	github.com/alibabacloud-go/tea v1.3.9
 	github.com/aliyun/alibaba-cloud-sdk-go v1.63.107
 	github.com/aliyun/credentials-go v1.4.7
@@ -27,7 +24,12 @@ require (
 )
 
 require (
+	github.com/AliyunContainerService/ack-ram-tool/pkg/ecsmetadata v0.0.9
 	github.com/AliyunContainerService/ack-ram-tool/pkg/ramauthenticator v0.0.0
+	github.com/alibabacloud-go/cs-20151215/v5 v5.9.5
+	github.com/alibabacloud-go/ram-20150501/v2 v2.2.0
+	github.com/alibabacloud-go/sts-20150401 v1.1.2
+	github.com/alibabacloud-go/sts-20150401/v2 v2.0.4
 	github.com/alibabacloud-go/tea-utils/v2 v2.0.7
 	github.com/aliyun/aliyun-cli/v3 v3.0.286
 	github.com/go-logr/zapr v1.3.0
@@ -37,7 +39,6 @@ require (
 )
 
 require (
-	github.com/AliyunContainerService/ack-ram-tool/pkg/ecsmetadata v0.0.7 // indirect
 	github.com/alibabacloud-go/alibabacloud-gateway-spi v0.0.5 // indirect
 	github.com/alibabacloud-go/debug v1.0.1 // indirect
 	github.com/alibabacloud-go/endpoint-util v1.1.0 // indirect

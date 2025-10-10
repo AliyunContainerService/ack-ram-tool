@@ -35,22 +35,35 @@ var (
 
 var getKubeconfigCmd = &cobra.Command{
 	Use:   "get-kubeconfig",
-	Short: "Get a kubeconfig with exec credential plugin format.",
+	Short: "Get/create a kubeconfig with exec credential plugin format.",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		client := common.GetClientOrDie()
-		ctx := context.Background()
-		clusterId := ctl.GlobalOption.ClusterId
-
-		kubeconfig, err := client.GetUserKubeConfig(ctx, clusterId,
-			getCredentialOpts.privateIpAddress, getCredentialOpts.temporaryDuration)
-		common.ExitIfError(err)
-		newConf := generateExecKubeconfig(clusterId, kubeconfig, credentialMode(selectedMode))
-
-		d, err := yaml.Marshal(newConf)
-		common.ExitIfError(err)
-		fmt.Println(string(d))
+		runGetKubeconfig()
 	},
+}
+
+var getKubeconfigTopCmd = &cobra.Command{
+	Use:   "get-kubeconfig",
+	Short: "Get/create a kubeconfig with exec credential plugin format. alias of `credential-plugin get-kubeconfig`",
+	Long:  ``,
+	Run: func(cmd *cobra.Command, args []string) {
+		runGetKubeconfig()
+	},
+}
+
+func runGetKubeconfig() {
+	client := common.GetClientOrDie()
+	ctx := context.Background()
+	clusterId := ctl.GlobalOption.ClusterId
+
+	kubeconfig, err := client.GetUserKubeConfig(ctx, clusterId,
+		getCredentialOpts.privateIpAddress, getCredentialOpts.temporaryDuration)
+	common.ExitIfError(err)
+	newConf := generateExecKubeconfig(clusterId, kubeconfig, credentialMode(selectedMode))
+
+	d, err := yaml.Marshal(newConf)
+	common.ExitIfError(err)
+	fmt.Println(string(d))
 }
 
 func generateExecKubeconfig(clusterId string, config *types.KubeConfig, mode credentialMode) *types.KubeConfig {
@@ -100,6 +113,19 @@ func fillGlobalFlags(args []string) []string {
 	if ctl.GlobalOption.GetRoleArn() != "" {
 		args = append(args, "--role-arn", ctl.GlobalOption.GetRoleArn())
 	}
+	if ctl.GlobalOption.GetRegion() != "" {
+		args = append(args, "--region-id", ctl.GlobalOption.GetRegion())
+	}
+	if ctl.GlobalOption.GetSTSEndpoint() != "" {
+		args = append(args, "--sts-endpoint", ctl.GlobalOption.GetSTSEndpoint())
+	}
+	if ctl.GlobalOption.GetCSEndpoint() != "" {
+		args = append(args, "--cs-endpoint", ctl.GlobalOption.GetCSEndpoint())
+	}
+	if ctl.GlobalOption.GetCredentialType() != "" && ctl.GlobalOption.GetCredentialType() != "auto" {
+		args = append(args, "--credential-type", ctl.GlobalOption.GetCredentialType())
+	}
+
 	args = append(args, "--log-level", log.LogLevelError)
 	return args
 }
@@ -131,15 +157,23 @@ func getExecArgs(clusterId string, mode credentialMode, opt GetCredentialOpts) [
 	}
 }
 
-func setupGetKubeconfigCmd(rootCmd *cobra.Command) {
-	rootCmd.AddCommand(getKubeconfigCmd)
-	common.SetupClusterIdFlag(getKubeconfigCmd)
+func setupGetKubeconfigCmdCommon(rootCmd, subCmd *cobra.Command) {
+	rootCmd.AddCommand(subCmd)
+	common.SetupClusterIdFlag(subCmd)
 
-	getKubeconfigCmd.Flags().DurationVar(&getCredentialOpts.temporaryDuration, "expiration", getCredentialOpts.temporaryDuration, "The certificate expiration")
-	getKubeconfigCmd.Flags().BoolVar(&getCredentialOpts.privateIpAddress, "private-address", getCredentialOpts.privateIpAddress, "Use private ip as api-server address")
-	getKubeconfigCmd.Flags().StringVarP(&selectedMode, "mode", "m", string(modeCert),
+	subCmd.Flags().DurationVar(&getCredentialOpts.temporaryDuration, "expiration", getCredentialOpts.temporaryDuration, "The certificate expiration")
+	subCmd.Flags().BoolVar(&getCredentialOpts.privateIpAddress, "private-address", getCredentialOpts.privateIpAddress, "Use private ip as api-server address")
+	subCmd.Flags().StringVarP(&selectedMode, "mode", "m", string(modeCert),
 		fmt.Sprintf("credential mode: %s", strings.Join([]string{string(modeCert), string(modeToken)}, " or ")))
-	getKubeconfigCmd.Flags().StringVar(&getCredentialOpts.apiVersion, "api-version", "v1beta1", "v1 or v1beta1")
-	getKubeconfigCmd.Flags().StringVar(&getCredentialOpts.cacheDir, "credential-cache-dir", getCredentialOpts.cacheDir, "Directory to cache certificate")
+	subCmd.Flags().StringVar(&getCredentialOpts.apiVersion, "api-version", "v1beta1", "v1 or v1beta1")
+	subCmd.Flags().StringVar(&getCredentialOpts.cacheDir, "credential-cache-dir", getCredentialOpts.cacheDir, "Directory to cache certificate")
 	//getcredentialCmd.Flags().BoolVar(&getCredentialOpts.disableCache, "disable-credential-cache", false, "disable credential cache")
+}
+
+func setupGetKubeconfigCmd(rootCmd *cobra.Command) {
+	setupGetKubeconfigCmdCommon(rootCmd, getKubeconfigCmd)
+}
+
+func SetupGetKubeconfigCmd(rootCmd *cobra.Command) {
+	setupGetKubeconfigCmdCommon(rootCmd, getKubeconfigTopCmd)
 }
