@@ -22,6 +22,7 @@ func GetCredentialsProvider(p provider.Profile) (provider.CredentialsProvider, e
 	ctx := cli.NewCommandContext(os.Stdout, os.Stderr)
 
 	cp := provider.NewFunctionProvider(func(_ context.Context) (*provider.Credentials, error) {
+		log.Logger.Debugf("try to get credential from aliyun cli profile %q with fallback mode", p.Name)
 		ret, err := newP.GetCredential(ctx, nil)
 		if err != nil {
 			return nil, fmt.Errorf("can not get credential from aliyun cli profile %q: %w", p.Name, err)

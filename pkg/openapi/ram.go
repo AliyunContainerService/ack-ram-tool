@@ -7,7 +7,7 @@ import (
 
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/types"
-	ram "github.com/alibabacloud-go/ram-20150501/client"
+	ram "github.com/alibabacloud-go/ram-20150501/v2/client"
 	"github.com/alibabacloud-go/tea/tea"
 )
 
