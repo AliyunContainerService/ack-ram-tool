@@ -225,8 +225,9 @@ func (c *Client) GetUserKubeConfig(ctx context.Context, clusterId string,
 
 func (c *Client) GetAddonMetaData(ctx context.Context, clusterId string, name string) (*types.ClusterAddon, error) {
 	client := c.csClient
+	// TODO: replace DescribeClusterAddonMetadata
 	resp, err := client.DescribeClusterAddonMetadata(
-		tea.String(clusterId), tea.String(name), nil)
+		tea.String(clusterId), tea.String(name), nil) //nolint:SA1019
 	if err != nil {
 		return nil, err
 	}
@@ -269,7 +270,8 @@ func (c *Client) InstallAddon(ctx context.Context, clusterId string, addon types
 
 func (c *Client) ListAddons(ctx context.Context, clusterId string) ([]types.ClusterAddon, error) {
 	client := c.csClient
-	resp, err := client.DescribeClusterAddonsVersion(tea.String(clusterId))
+	// TODO: replace DescribeClusterAddonsVersion
+	resp, err := client.DescribeClusterAddonsVersion(tea.String(clusterId)) //nolint:SA1019
 	if err != nil {
 		return nil, err
 	}
