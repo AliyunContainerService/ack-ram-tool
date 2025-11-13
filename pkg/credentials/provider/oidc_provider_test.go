@@ -151,7 +151,7 @@ func TestOIDCProvider_Credentials_error_no_token(t *testing.T) {
 		t.Errorf("got unexpected error: %s", err)
 	}
 	if cred != nil {
-		t.Errorf("got unexpected cred: %s", cred)
+		t.Errorf("got unexpected cred: %#v", cred)
 	}
 }
 
@@ -188,7 +188,7 @@ func TestOIDCProvider_Credentials_error_invalid_json(t *testing.T) {
 		t.Errorf("got unexpected error: %s", err)
 	}
 	if cred != nil {
-		t.Errorf("got unexpected cred: %s", cred)
+		t.Errorf("got unexpected cred: %#v", cred)
 	}
 }
 
@@ -223,7 +223,7 @@ func TestOIDCProvider_Credentials_error_invalid_data(t *testing.T) {
 		t.Errorf("got unexpected error: %s", err)
 	}
 	if cred != nil {
-		t.Errorf("got unexpected cred: %s", cred)
+		t.Errorf("got unexpected cred: %#v", cred)
 	}
 }
 
@@ -260,6 +260,6 @@ func TestOIDCProvider_Credentials_error_invalid_date(t *testing.T) {
 		t.Errorf("got unexpected error: %s", err)
 	}
 	if cred != nil {
-		t.Errorf("got unexpected cred: %s", cred)
+		t.Errorf("got unexpected cred: %#v", cred)
 	}
 }

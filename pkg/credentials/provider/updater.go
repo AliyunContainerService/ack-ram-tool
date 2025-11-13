@@ -98,8 +98,8 @@ loop:
 }
 
 func (u *Updater) Credentials(ctx context.Context) (*Credentials, error) {
-	if u.Expired() {
-		if err := u.refreshCred(ctx); err != nil {
+	if u.shouldRefresh() {
+		if err := u.refreshCred(ctx); err != nil && u.Expired() {
 			return nil, err
 		}
 	}
@@ -156,7 +156,7 @@ func (u *Updater) setCred(cred *Credentials) {
 	newCred := cred.DeepCopy()
 	newCred.Expiration = newCred.Expiration.Round(0)
 	if u.expiryWindow > 0 {
-		newCred.Expiration = newCred.Expiration.Add(-u.expiryWindow)
+		newCred.nextRefresh = newCred.Expiration.Add(-u.expiryWindow)
 	}
 	u.cred = newCred
 }
@@ -172,13 +172,20 @@ func (u *Updater) Expired() bool {
 	return u.expired(0)
 }
 
+func (u *Updater) shouldRefresh() bool {
+	if u.expired(0) {
+		return true
+	}
+	return u.getCred().shouldRefresh(u.now())
+}
+
 func (u *Updater) expired(expiryDelta time.Duration) bool {
 	exp := u.expiration()
 	if expiryDelta > 0 {
 		exp = exp.Add(-expiryDelta)
 	}
 
-	return exp.Before(u.now())
+	return exp.Before(u.now()) || exp.Equal(u.now())
 }
 
 func (u *Updater) expiration() time.Time {

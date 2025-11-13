@@ -51,7 +51,7 @@ func TestFileCacheProvider_Credentials_cache_expired(t *testing.T) {
 	cacheDir := ensureTmpDir(t)
 	defer os.RemoveAll(cacheDir)
 
-	exp := time.Now().Add(time.Minute * 8).Truncate(0)
+	exp := time.Now().Add(time.Second).Truncate(0)
 	exp2 := time.Now().Add(time.Minute * 10).Truncate(0)
 	callCount := 0
 	cp := NewFunctionProvider(func(ctx context.Context) (*Credentials, error) {
@@ -80,7 +80,7 @@ func TestFileCacheProvider_Credentials_cache_expired(t *testing.T) {
 		t.Fatal(err)
 	}
 	if callCount != 2 {
-		t.Fatal("callCount should be 2")
+		t.Fatalf("callCount should be 2: got %d", callCount)
 	}
 	if !cred1.Expiration.Equal(exp) {
 		t.Fatal("cred1 should be equal to exp")
@@ -128,6 +128,9 @@ func TestFileCacheProvider_Credentials_cache_broken(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			cp.u.nowFunc = func() time.Time {
+				return time.Now().Add(time.Hour * 1)
+			}
 
 			// use cache but cache was broken
 			cred2, err := fp.Credentials(context.Background())
@@ -135,7 +138,7 @@ func TestFileCacheProvider_Credentials_cache_broken(t *testing.T) {
 				t.Fatal(err)
 			}
 			if callCount != 2 {
-				t.Fatal("callCount should be 2")
+				t.Fatalf("callCount should be 2, got %d", callCount)
 			}
 			if !cred1.Expiration.Equal(exp) {
 				t.Fatal("cred1 should be equal to exp")
