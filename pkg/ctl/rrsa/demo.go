@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/ecsmetadata"
 	"time"
 
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/common"
@@ -25,13 +26,22 @@ var demoCmd = &cobra.Command{
 	Short: "A demo for using RRSA Token in ACK Cluster when running it as pod container",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
+		if demoOpts.region == "" {
+			var err error
+			demoOpts.region, err = getRegionFromImds()
+			if err != nil {
+				common.ExitByError(err.Error())
+			}
+			ctl.GlobalOption.UseVPCEndpoint = true
+		}
 		if demoOpts.region != "" {
 			ctl.GlobalOption.Region = demoOpts.region
 		}
 		sleep := time.Second * 30
+		client := common.GetClientOrDie()
+
 		for {
 			log.Logger.Info("======= [begin] list ACK clusters with RRSA =======")
-			client := common.GetClientOrDie()
 			cs, err := client.ListClustersForRegion(context.Background(), demoOpts.region)
 			if err != nil {
 				if demoOpts.noLoop {
@@ -53,6 +63,13 @@ var demoCmd = &cobra.Command{
 			time.Sleep(sleep)
 		}
 	},
+}
+
+func getRegionFromImds() (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	cancel()
+	region, err := ecsmetadata.DefaultClient.GetRegionId(ctx)
+	return region, err
 }
 
 func setupDemoCmd(rootCmd *cobra.Command) {

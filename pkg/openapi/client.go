@@ -3,6 +3,7 @@ package openapi
 import (
 	"fmt"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider"
+	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
 	cs "github.com/alibabacloud-go/cs-20151215/v5/client"
 	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
 	ram "github.com/alibabacloud-go/ram-20150501/v2/client"
@@ -49,12 +50,15 @@ func NewClientWithEndpoints(config *openapi.Config, endpoints Endpoints) (*Clien
 		return nil, err
 	}
 	if endpoints.STS != "" {
+		log.Logger.Debugf("will use %s as STS endpoint", endpoints.STS)
 		client.stsClient.Endpoint = tea.String(endpoints.STS)
 	}
 	if endpoints.RAM != "" {
+		log.Logger.Debugf("will use %s as RAM endpoint", endpoints.RAM)
 		client.ramClient.Endpoint = tea.String(endpoints.RAM)
 	}
 	if endpoints.CS != "" {
+		log.Logger.Debugf("will use %s as CS endpoint", endpoints.CS)
 		client.csClient.Endpoint = tea.String(endpoints.CS)
 	}
 
