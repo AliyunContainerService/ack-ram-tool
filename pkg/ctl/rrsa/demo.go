@@ -17,9 +17,7 @@ type DemoOpts struct {
 	region string
 }
 
-var demoOpts = DemoOpts{
-	region: "cn-hangzhou",
-}
+var demoOpts = DemoOpts{}
 
 var demoCmd = &cobra.Command{
 	Use:   "demo",
@@ -28,15 +26,19 @@ var demoCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if demoOpts.region == "" {
 			var err error
+			log.Logger.Debug("try to get region id from IMDS")
 			demoOpts.region, err = getRegionFromImds()
 			if err != nil {
-				common.ExitByError(err.Error())
+				log.Logger.Errorf("get region id from IMDS failed: %+v, you can setting the --region flag instead",
+					err)
+				common.ExitIfError(err)
 			}
 			ctl.GlobalOption.UseVPCEndpoint = true
 		}
 		if demoOpts.region != "" {
 			ctl.GlobalOption.Region = demoOpts.region
 		}
+
 		sleep := time.Second * 30
 		client := common.GetClientOrDie()
 
@@ -45,14 +47,18 @@ var demoCmd = &cobra.Command{
 			cs, err := client.ListClustersForRegion(context.Background(), demoOpts.region)
 			if err != nil {
 				if demoOpts.noLoop {
-					common.ExitByError(err.Error())
+					common.ExitIfError(err)
 				} else {
 					log.Logger.Error(err)
 				}
 			} else {
-				fmt.Println("clusters:")
-				for _, c := range cs {
-					fmt.Printf("cluster id: %s, cluster name: %s\n", c.ClusterId, c.Name)
+				if len(cs) == 0 {
+					log.Logger.Infof("ListClusters succeeded, no clusters found in region %s", demoOpts.region)
+				} else {
+					fmt.Println("clusters:")
+					for _, c := range cs {
+						fmt.Printf("cluster id: %s, cluster name: %s\n", c.ClusterId, c.Name)
+					}
 				}
 				log.Logger.Info("======= [end]   list ACK clusters with RRSA =======")
 				if demoOpts.noLoop {
@@ -67,7 +73,7 @@ var demoCmd = &cobra.Command{
 
 func getRegionFromImds() (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-	cancel()
+	defer cancel()
 	region, err := ecsmetadata.DefaultClient.GetRegionId(ctx)
 	return region, err
 }
