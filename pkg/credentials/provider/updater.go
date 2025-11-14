@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"sync"
 	"time"
 )
@@ -111,7 +112,8 @@ func (u *Updater) Credentials(ctx context.Context) (*Credentials, error) {
 func (u *Updater) refreshCredForLoop(ctx context.Context) {
 	exp := u.expiration()
 
-	if !u.expired(u.expiryWindowForRefreshLoop) {
+	if !(u.expired(u.expiryWindow+u.expiryWindowForRefreshLoop) ||
+		u.shouldRefresh()) {
 		return
 	}
 
@@ -154,10 +156,21 @@ func (u *Updater) setCred(cred *Credentials) {
 	defer u.lockForCred.Unlock()
 
 	newCred := cred.DeepCopy()
-	newCred.Expiration = newCred.Expiration.Round(0)
-	if u.expiryWindow > 0 {
-		newCred.nextRefresh = newCred.Expiration.Add(-u.expiryWindow)
+
+	if !newCred.Expiration.IsZero() {
+		newCred.Expiration = newCred.Expiration.Round(0)
+		if u.expiryWindow > 0 {
+			window := u.expiryWindow
+			window += time.Second * time.Duration(rand.Int63n(60))
+			newCred.nextRefresh = newCred.Expiration.Add(-window)
+		} else {
+			window := newCred.Expiration.Sub(u.now())
+			window = time.Duration(float64(window) * 0.2)
+			window += time.Second * time.Duration(rand.Int63n(60))
+			newCred.nextRefresh = newCred.Expiration.Add(-window)
+		}
 	}
+
 	u.cred = newCred
 }
 

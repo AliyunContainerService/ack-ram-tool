@@ -39,9 +39,6 @@ func TestURIProvider_Credentials_success(t *testing.T) {
 		t.Errorf("Expiration is wrong: %s", cred.Expiration.Format("2006-01-02T15:04:05Z"))
 	}
 
-	if cred.nextRefresh.Add(defaultExpiryWindow).Format("2006-01-02T15:04:05Z") != "2006-01-02T15:04:05Z" {
-		t.Errorf("nextRefresh is wrong: %s", cred.Expiration.Format("2006-01-02T15:04:05Z"))
-	}
 	e.Stop(context.TODO())
 }
 
