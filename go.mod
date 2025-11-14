@@ -95,5 +95,6 @@ require (
 
 replace (
 	github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider => ./pkg/credentials/provider
+	github.com/AliyunContainerService/ack-ram-tool/pkg/ecsmetadata => ./pkg/ecsmetadata
 	github.com/AliyunContainerService/ack-ram-tool/pkg/ramauthenticator => ./pkg/ramauthenticator
 )

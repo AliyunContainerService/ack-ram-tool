@@ -61,6 +61,11 @@ func isRetryable(err error) bool {
 	if err == nil {
 		return false
 	}
+
+	if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {
+		return false
+	}
+
 	var httperr *HTTPError
 	if errors.As(err, &httperr) {
 		if httperr.StatusCode == http.StatusNotFound ||
