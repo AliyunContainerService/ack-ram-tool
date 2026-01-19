@@ -32,7 +32,7 @@ func (d TLogger) Error(err error, msg string) {
 func TestUpdater_refreshCredForLoop_refresh(t *testing.T) {
 	var callCount int32
 	fakeCred := Credentials{
-		Expiration: time.Now().Add(time.Minute),
+		Expiration: time.Now().Add(time.Minute * 10),
 	}
 	u := NewUpdater(func(ctx context.Context) (*Credentials, error) {
 		atomic.AddInt32(&callCount, 1)
@@ -61,14 +61,14 @@ func TestUpdater_refreshCredForLoop_refresh(t *testing.T) {
 	}
 
 	u.nowFunc = func() time.Time {
-		return time.Now().Add(time.Minute)
+		return time.Now().Add(time.Minute * 10)
 	}
 	ret = u.Expired()
 	if !ret {
 		t.Errorf("should expired")
 	}
 
-	fakeCred.Expiration = time.Now().Add(time.Minute * 5)
+	fakeCred.Expiration = time.Now().Add(time.Minute * 25)
 	u.refreshCredForLoop(context.TODO())
 	cv = atomic.LoadInt32(&callCount)
 	if cv != 2 {
@@ -159,6 +159,120 @@ func TestUpdater_Credentials_refresh(t *testing.T) {
 	})
 }
 
+func TestUpdater_Credentials_try_refresh_error_not_expired(t *testing.T) {
+	t.Run("Credentials use cache", func(t *testing.T) {
+		var callCount int32
+		fakeCred := Credentials{
+			Expiration: time.Now().Add(time.Minute),
+		}
+		u := NewUpdater(func(ctx context.Context) (*Credentials, error) {
+			atomic.AddInt32(&callCount, 1)
+			t.Log(atomic.LoadInt32(&callCount))
+			if atomic.LoadInt32(&callCount) > 1 {
+				return nil, errors.New("error message")
+			}
+			return &fakeCred, nil
+		}, UpdaterOptions{
+			ExpiryWindow:  0,
+			RefreshPeriod: 0,
+			Logger:        TLogger{t: t},
+		})
+
+		u.Credentials(context.TODO())
+		cv := atomic.LoadInt32(&callCount)
+		if cv != 1 {
+			t.Errorf("callCount should be 1 but got %d", cv)
+		}
+		ret := u.Expired()
+		if ret {
+			t.Errorf("should not expired")
+		}
+
+		u.Credentials(context.TODO())
+		cv = atomic.LoadInt32(&callCount)
+		if cv != 1 {
+			t.Errorf("callCount should be 1 but got %d", cv)
+		}
+	})
+
+	t.Run("not expire + refresh error -> not return error", func(t *testing.T) {
+		var callCount int32
+		fakeCred := Credentials{
+			Expiration: time.Now().Add(time.Minute),
+		}
+		u := NewUpdater(func(ctx context.Context) (*Credentials, error) {
+			atomic.AddInt32(&callCount, 1)
+			t.Log(atomic.LoadInt32(&callCount))
+			if atomic.LoadInt32(&callCount) > 1 {
+				return nil, errors.New("error message")
+			}
+			return &fakeCred, nil
+		}, UpdaterOptions{
+			ExpiryWindow:  time.Minute * 4,
+			RefreshPeriod: 0,
+			Logger:        TLogger{t: t},
+		})
+		fakeCred.Expiration = time.Now().Add(time.Minute * 5)
+		u.nowFunc = func() time.Time {
+			return time.Now().Add(time.Minute * 2)
+		}
+
+		u.Credentials(context.TODO())
+
+		_, err := u.Credentials(context.TODO())
+		if err != nil {
+			t.Errorf("should not return error: %+v", err)
+		}
+		cv := atomic.LoadInt32(&callCount)
+		if cv != 2 {
+			t.Errorf("callCount should be 2 but got %d", cv)
+		}
+		ret := u.Expired()
+		if ret {
+			t.Errorf("should not expired")
+		}
+	})
+
+	t.Run("expired + refresh error -> return error", func(t *testing.T) {
+		var callCount int32
+		fakeCred := Credentials{
+			Expiration: time.Now().Add(time.Minute),
+		}
+		u := NewUpdater(func(ctx context.Context) (*Credentials, error) {
+			atomic.AddInt32(&callCount, 1)
+			t.Log(atomic.LoadInt32(&callCount))
+			if atomic.LoadInt32(&callCount) > 1 {
+				return nil, errors.New("error message")
+			}
+			return &fakeCred, nil
+		}, UpdaterOptions{
+			ExpiryWindow:  time.Minute * 4,
+			RefreshPeriod: 0,
+			Logger:        TLogger{t: t},
+		})
+		fakeCred.Expiration = time.Now().Add(time.Minute * 5)
+		u.nowFunc = func() time.Time {
+			return time.Now().Add(time.Minute * 6)
+		}
+
+		u.Credentials(context.TODO())
+
+		_, err := u.Credentials(context.TODO())
+		if err == nil {
+			t.Errorf("should return error")
+		}
+		cv := atomic.LoadInt32(&callCount)
+		if cv != 2 {
+			t.Errorf("callCount should be 3 but got %d", cv)
+		}
+		ret := u.Expired()
+		if !ret {
+			t.Errorf("should expired")
+		}
+	})
+
+}
+
 func TestUpdater_expired(t *testing.T) {
 	u := &Updater{}
 	u.setCred(&Credentials{Expiration: time.Now().Add(time.Minute)})
@@ -245,4 +359,132 @@ func catchPanic() {
 	if err := recover(); err != nil {
 		log.Printf("catch panic:\n%+v", err)
 	}
+}
+
+func TestUpdater_refreshCredForLoop_check_should_refresh(t *testing.T) {
+	var callCount int32
+	fakeCred := Credentials{
+		Expiration: time.Now().Add(time.Minute * 15),
+	}
+	u := NewUpdater(func(ctx context.Context) (*Credentials, error) {
+		atomic.AddInt32(&callCount, 1)
+		return &fakeCred, nil
+	}, UpdaterOptions{
+		ExpiryWindow:  0,
+		RefreshPeriod: 0,
+		Logger:        TLogger{t: t},
+	})
+
+	u.refreshCredForLoop(context.TODO())
+	if atomic.LoadInt32(&callCount) != 1 {
+		t.Errorf("callCount should be 1 but got %d", atomic.LoadInt32(&callCount))
+	}
+
+	t.Run("not expired should not refresh", func(t *testing.T) {
+		u.refreshCredForLoop(context.TODO())
+		if atomic.LoadInt32(&callCount) != 1 {
+			t.Errorf("callCount should be 1 but got %d", atomic.LoadInt32(&callCount))
+		}
+	})
+
+	t.Run("expiryWindow should refresh", func(t *testing.T) {
+		u.expiryWindow = time.Minute * 15
+		u.expiryWindowForRefreshLoop = 0
+		u.refreshCredForLoop(context.TODO())
+		if atomic.LoadInt32(&callCount) != 2 {
+			t.Errorf("callCount should be 1 but got %d", atomic.LoadInt32(&callCount))
+		}
+	})
+
+	t.Run("expiryWindowForRefreshLoop should refresh", func(t *testing.T) {
+		u.expiryWindow = 0
+		u.expiryWindowForRefreshLoop = time.Minute * 15
+		u.refreshCredForLoop(context.TODO())
+		if atomic.LoadInt32(&callCount) != 3 {
+			t.Errorf("callCount should be 1 but got %d", atomic.LoadInt32(&callCount))
+		}
+	})
+
+	t.Run("should not refresh", func(t *testing.T) {
+		u.expiryWindow = time.Second * 10
+		u.expiryWindowForRefreshLoop = time.Second * 10
+		u.refreshCredForLoop(context.TODO())
+		if atomic.LoadInt32(&callCount) != 3 {
+			t.Errorf("callCount should be 3 but got %d", atomic.LoadInt32(&callCount))
+		}
+	})
+}
+
+func TestUpdater_setCred(t *testing.T) {
+	var callCount int32
+	fakeCred := Credentials{
+		Expiration: time.Now().Add(time.Minute),
+	}
+	u := NewUpdater(func(ctx context.Context) (*Credentials, error) {
+		atomic.AddInt32(&callCount, 1)
+		return &fakeCred, nil
+	}, UpdaterOptions{
+		Logger: TLogger{t: t},
+	})
+
+	t.Run("exp is zero", func(t *testing.T) {
+		u.setCred(&Credentials{Expiration: time.Time{}})
+		cred := u.getCred()
+		if !cred.Expiration.IsZero() {
+			t.Errorf("exp should be zero, but got %v", cred.Expiration)
+		}
+		if !cred.nextRefresh.IsZero() {
+			t.Errorf("nextRefresh should be zero, but got %v", cred.nextRefresh)
+		}
+	})
+
+	t.Run("expiryWindow not zero", func(t *testing.T) {
+		u.expiryWindow = time.Minute * 5
+		input := &Credentials{Expiration: time.Now().Add(time.Minute * 10)}
+		u.setCred(input)
+
+		cred := u.getCred()
+		if cred.Expiration.IsZero() {
+			t.Errorf("exp should not be zero")
+		}
+		if cred.nextRefresh.IsZero() {
+			t.Errorf("nextRefresh should not be zero")
+		}
+
+		sub := input.Expiration.Sub(cred.nextRefresh)
+		t.Logf("expiryWindow: %v, input.Expiration: %v, cred.nextRefresh: %v, sub: %v",
+			u.expiryWindow, input.Expiration, cred.nextRefresh, sub)
+
+		if sub > u.expiryWindow+time.Minute ||
+			sub < u.expiryWindow-time.Second {
+			t.Errorf("nextRefresh should be in expiryWindow (%v), but got %v",
+				u.expiryWindow, sub)
+		}
+	})
+
+	t.Run("expiryWindow is zero", func(t *testing.T) {
+		u.expiryWindow = 0
+		input := &Credentials{Expiration: time.Now().Add(time.Minute * 10)}
+		u.setCred(input)
+
+		cred := u.getCred()
+		if cred.Expiration.IsZero() {
+			t.Errorf("exp should not be zero")
+		}
+		if cred.nextRefresh.IsZero() {
+			t.Errorf("nextRefresh should not be zero")
+		}
+
+		sub := input.Expiration.Sub(cred.nextRefresh)
+		t.Logf("expiryWindow: %v, input.Expiration: %v, cred.nextRefresh: %v, sub: %v",
+			u.expiryWindow, input.Expiration, cred.nextRefresh, sub)
+
+		window := time.Duration(float64(time.Minute*10) * 0.2)
+		if sub > window+time.Minute ||
+			sub < window-time.Second {
+			t.Errorf("nextRefresh should be in 80%% (%v), but got %v",
+				window, sub)
+		}
+	})
+
 }

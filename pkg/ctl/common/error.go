@@ -13,7 +13,7 @@ func ExitIfError(err error) {
 		return
 	}
 	if err != nil {
-		ExitByError(err.Error())
+		ExitByError(fmt.Sprintf("%+v", err))
 	}
 }
 

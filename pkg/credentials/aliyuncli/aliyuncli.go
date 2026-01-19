@@ -36,7 +36,7 @@ func GetCredentialsProvider(p provider.Profile) (provider.CredentialsProvider, e
 			AccessKeyId:     tea.StringValue(cred.AccessKeyId),
 			AccessKeySecret: tea.StringValue(cred.AccessKeySecret),
 			SecurityToken:   tea.StringValue(cred.SecurityToken),
-			Expiration:      time.Time{},
+			Expiration:      time.Now().Add(time.Minute * 5),
 		}, nil
 	})
 
@@ -77,5 +77,11 @@ func newProfile(p provider.Profile) config.Profile {
 		StsExpiration:             p.StsExpiration,
 		CloudSSOAccessConfig:      p.CloudSSOAccessConfig,
 		CloudSSOAccountId:         p.CloudSSOAccountId,
+		OAuthAccessToken:          p.OAuthAccessToken,
+		OAuthRefreshToken:         p.OAuthRefreshToken,
+		OAuthAccessTokenExpire:    p.OAuthAccessTokenExpire,
+		OAuthRefreshTokenExpire:   p.OAuthRefreshTokenExpire,
+		OAuthSiteType:             p.OAuthSiteType,
+		EndpointType:              p.EndpointType,
 	}
 }
