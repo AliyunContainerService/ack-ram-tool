@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package cli
 
 import (
@@ -160,9 +161,29 @@ func (ctx *Context) detectFlagByShorthand(ch rune) (*Flag, error) {
 	if flag != nil {
 		return flag, nil
 	}
+	if ctx.command != nil && ctx.command.EnableUnknownFlag && ctx.unknownFlags != nil {
+		return ctx.unknownFlags.AddByName(string(ch))
+	}
 	return nil, fmt.Errorf("unknown flag -%s", string(ch))
 }
 
 func (ctx *Context) SetInConfigureMode(mode bool) {
 	ctx.inConfigureMode = mode
+}
+
+func (ctx *Context) SetCommand(cmd *Command) {
+	ctx.command = cmd
+	if ctx.command == nil {
+		ctx.flags = NewFlagSet()
+	} else {
+		ctx.flags = ctx.command.flags.mergeWith(ctx.flags, func(f *Flag) bool {
+			return f.Persistent
+		})
+		ctx.flags.Add(NewHelpFlag())
+	}
+	if !ctx.command.EnableUnknownFlag {
+		ctx.unknownFlags = nil
+	} else if ctx.unknownFlags == nil {
+		ctx.unknownFlags = NewFlagSet()
+	}
 }

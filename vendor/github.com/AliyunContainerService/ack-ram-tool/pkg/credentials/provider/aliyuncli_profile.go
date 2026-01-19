@@ -62,9 +62,15 @@ type Profile struct {
 	CloudSSOSignInUrl         string           `json:"cloud_sso_sign_in_url,omitempty"`
 	AccessToken               string           `json:"access_token,omitempty"`                  // for CloudSSO, read only
 	CloudSSOAccessTokenExpire int64            `json:"cloud_sso_access_token_expire,omitempty"` // for CloudSSO, read only
-	StsExpiration             int64            `json:"sts_expiration,omitempty"`                // for CloudSSO, read only
+	StsExpiration             int64            `json:"sts_expiration,omitempty"`                // for CloudSSO or OAuth, read only
 	CloudSSOAccessConfig      string           `json:"cloud_sso_access_config,omitempty"`       // for CloudSSO
 	CloudSSOAccountId         string           `json:"cloud_sso_account_id,omitempty"`          // for CloudSSO, read only
+	OAuthAccessToken          string           `json:"oauth_access_token,omitempty"`
+	OAuthRefreshToken         string           `json:"oauth_refresh_token,omitempty"`
+	OAuthAccessTokenExpire    int64            `json:"oauth_access_token_expire,omitempty"`
+	OAuthRefreshTokenExpire   int64            `json:"oauth_refresh_token_expire,omitempty"`
+	OAuthSiteType             string           `json:"oauth_site_type,omitempty"` // CN or INTL
+	EndpointType              string           `json:"endpoint_type,omitempty"`   // vpc or empty (default public)
 	parent                    *Configuration   //`json:"-"`
 }
 

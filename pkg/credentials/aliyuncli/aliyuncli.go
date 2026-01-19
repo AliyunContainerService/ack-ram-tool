@@ -77,5 +77,11 @@ func newProfile(p provider.Profile) config.Profile {
 		StsExpiration:             p.StsExpiration,
 		CloudSSOAccessConfig:      p.CloudSSOAccessConfig,
 		CloudSSOAccountId:         p.CloudSSOAccountId,
+		OAuthAccessToken:          p.OAuthAccessToken,
+		OAuthRefreshToken:         p.OAuthRefreshToken,
+		OAuthAccessTokenExpire:    p.OAuthAccessTokenExpire,
+		OAuthRefreshTokenExpire:   p.OAuthRefreshTokenExpire,
+		OAuthSiteType:             p.OAuthSiteType,
+		EndpointType:              p.EndpointType,
 	}
 }

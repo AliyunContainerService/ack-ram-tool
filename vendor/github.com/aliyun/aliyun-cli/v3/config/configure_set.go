@@ -14,7 +14,7 @@
 package config
 
 import (
-	"io"
+	"fmt"
 
 	"github.com/aliyun/aliyun-cli/v3/cli"
 	"github.com/aliyun/aliyun-cli/v3/i18n"
@@ -26,10 +26,9 @@ func NewConfigureSetCommand() *cli.Command {
 		Short: i18n.T(
 			"set config in non interactive mode",
 			"使用非交互式方式进行配置"),
-		Usage: "set [--profile <profileName>] [--language {en|zh}] ...",
+		Usage: "set [--profile <profileName>] [--language {en|zh}] [--config-path <configPath>]...",
 		Run: func(c *cli.Context, args []string) error {
-			doConfigureSet(c.Stdout(), c.Flags())
-			return nil
+			return doConfigureSet(c)
 		},
 	}
 
@@ -38,13 +37,13 @@ func NewConfigureSetCommand() *cli.Command {
 	return cmd
 }
 
-func doConfigureSet(w io.Writer, flags *cli.FlagSet) {
-	config, err := loadConfiguration()
+func doConfigureSet(ctx *cli.Context) error {
+	config, err := loadOrCreateConfiguration()
 	if err != nil {
-		cli.Errorf(w, "load configuration failed %s", err)
-		return
+		return fmt.Errorf("load configuration failed %v", err)
 	}
 
+	flags := ctx.Flags()
 	profileName, ok := ProfileFlag(flags).GetValue()
 	if !ok {
 		profileName = config.CurrentProfile
@@ -59,8 +58,7 @@ func doConfigureSet(w io.Writer, flags *cli.FlagSet) {
 	if ok {
 		profile, err = LoadProfile(path, profileName)
 		if err != nil {
-			cli.Errorf(w, "load configuration file failed %s", err)
-			return
+			return fmt.Errorf("load configuration file failed %v", err)
 		}
 	}
 
@@ -116,6 +114,8 @@ func doConfigureSet(w io.Writer, flags *cli.FlagSet) {
 		profile.CloudSSOAccessConfig = CloudSSOAccessConfigFlag(flags).GetStringOrDefault(profile.CloudSSOAccessConfig)
 		profile.CloudSSOAccountId = CloudSSOAccountIdFlag(flags).GetStringOrDefault(profile.CloudSSOAccountId)
 		profile.CloudSSOSignInUrl = CloudSSOSignInUrlFlag(flags).GetStringOrDefault(profile.CloudSSOSignInUrl)
+	case OAuth:
+		profile.OAuthSiteType = OAuthSiteTypeFlag(flags).GetStringOrDefault(profile.OAuthSiteType)
 	}
 
 	profile.RegionId = RegionFlag(flags).GetStringOrDefault(profile.RegionId)
@@ -126,17 +126,18 @@ func doConfigureSet(w io.Writer, flags *cli.FlagSet) {
 	profile.ConnectTimeout = ConnectTimeoutFlag(flags).GetIntegerOrDefault(profile.ConnectTimeout)
 	profile.RetryCount = RetryCountFlag(flags).GetIntegerOrDefault(profile.RetryCount)
 	profile.StsRegion = StsRegionFlag(flags).GetStringOrDefault(profile.StsRegion)
+	profile.EndpointType = EndpointTypeFlag(flags).GetStringOrDefault(profile.EndpointType)
 
 	err = profile.Validate()
 	if err != nil {
-		cli.Errorf(w, "fail to set configuration: %s", err.Error())
-		return
+		return fmt.Errorf("fail to set configuration: %v", err)
 	}
 
 	config.PutProfile(profile)
 	config.CurrentProfile = profile.Name
-	err = hookSaveConfiguration(SaveConfiguration)(config)
+	err = hookSaveConfigurationWithContext(SaveConfigurationWithContext)(ctx, config)
 	if err != nil {
-		cli.Errorf(w, "save configuration failed %s", err)
+		return fmt.Errorf("save configuration failed %v", err)
 	}
+	return nil
 }
