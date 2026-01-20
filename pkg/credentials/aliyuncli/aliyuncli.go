@@ -28,7 +28,7 @@ func GetCredentialsProvider(p provider.Profile) (provider.CredentialsProvider, e
 		log.Logger.Debugf("try to get credential from aliyun cli profile %q with fallback mode", p.Name)
 		ret, err := newP.GetCredential(ctx, nil)
 		if err != nil {
-			log.Logger.Warnf("get credential from aliyun cli profile %q failed: %s", p.Name, err)
+			log.Logger.Debugf("get credential from aliyun cli profile %q failed: %s", p.Name, err)
 			if newP.Mode == config.OAuth {
 				if authErr := runOAuthFlow(c, newP); authErr != nil {
 					log.Logger.Errorf("run OAuth Flow failed: %s", authErr)
