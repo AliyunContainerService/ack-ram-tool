@@ -3,15 +3,16 @@ package aliyuncli
 import (
 	"context"
 	"fmt"
+	"os"
+	"os/exec"
+	"strings"
+	"time"
+
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/credentials/provider"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/log"
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/aliyun-cli/v3/cli"
 	"github.com/aliyun/aliyun-cli/v3/config"
-	"os"
-	"os/exec"
-	"strings"
-	"time"
 )
 
 func GetCredentialsProvider(p provider.Profile) (provider.CredentialsProvider, error) {
