@@ -12,7 +12,7 @@ jobs:
     name: lint
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: Set up Go
       uses: actions/setup-go@v5
       with:
@@ -26,7 +26,7 @@ jobs:
     name: Run Gosec Security Scanner
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: securego/gosec@v2.22.9
         with:
           args: -exclude-dir pkg/credentials/alibabacloudgo/helper -exclude-dir pkg/credentials/alibabacloudsdkgo/helper -exclude-dir pkg/credentials/provider -exclude-dir ci/ossutil -exclude-dir examples ./...
@@ -34,7 +34,7 @@ jobs:
   releaser-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -56,7 +56,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: Set up Go
       uses: actions/setup-go@v5
@@ -74,7 +74,7 @@ jobs:
   build-cli-docker-image-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
@@ -92,7 +92,7 @@ jobs:
 #  build-rrsa-example-go-docker-image-test:
 #    runs-on: ubuntu-latest
 #    steps:
-#      - uses: actions/checkout@v4
+#      - uses: actions/checkout@v6
 #      - name: Set up QEMU
 #        uses: docker/setup-qemu-action@v3
 #      - name: Set up Docker Buildx
@@ -110,7 +110,7 @@ jobs:
 #  build-rrsa-example-java-docker-image-test:
 #    runs-on: ubuntu-latest
 #    steps:
-#      - uses: actions/checkout@v4
+#      - uses: actions/checkout@v6
 #      - name: Set up QEMU
 #        uses: docker/setup-qemu-action@v3
 #      - name: Set up Docker Buildx
@@ -128,7 +128,7 @@ jobs:
 #  build-rrsa-example-nodejs-docker-image-test:
 #    runs-on: ubuntu-latest
 #    steps:
-#      - uses: actions/checkout@v4
+#      - uses: actions/checkout@v6
 #      - name: Set up QEMU
 #        uses: docker/setup-qemu-action@v3
 #      - name: Set up Docker Buildx
@@ -146,7 +146,7 @@ jobs:
 #  build-rrsa-example-python3-docker-image-test:
 #    runs-on: ubuntu-latest
 #    steps:
-#      - uses: actions/checkout@v4
+#      - uses: actions/checkout@v6
 #      - name: Set up QEMU
 #        uses: docker/setup-qemu-action@v3
 #      - name: Set up Docker Buildx
