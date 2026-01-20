@@ -46,14 +46,14 @@ type CLIConfigProviderOptions struct {
 
 	GetProviderForUnknownMode func(p Profile) (CredentialsProvider, error)
 
-	conf *Configuration
+	Config *Configuration
 }
 
 func NewCLIConfigProvider(opts CLIConfigProviderOptions) (*CLIConfigProvider, error) {
 	opts.applyDefaults()
 	logger := opts.Logger
 
-	conf, profile, err := loadProfile(opts.ConfigPath, opts.ProfileName, opts.conf)
+	conf, profile, err := loadProfile(opts.ConfigPath, opts.ProfileName, opts.Config)
 	if err != nil {
 		return nil, NewNotEnableError(fmt.Errorf("load profile: %w", err))
 	}

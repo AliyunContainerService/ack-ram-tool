@@ -42,7 +42,7 @@ func NewIniConfigProvider(opts INIConfigProviderOptions) (*INIConfigProvider, er
 		ProfileName: opts.SectionName,
 		STSEndpoint: opts.STSEndpoint,
 		Logger:      opts.Logger,
-		conf:        cf,
+		Config:      cf,
 	})
 	if err != nil {
 		return nil, NewNotEnableError(err)
