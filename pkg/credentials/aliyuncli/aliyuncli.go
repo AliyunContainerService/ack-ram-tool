@@ -96,7 +96,7 @@ func runOAuthFlow(ctx context.Context, profile config.Profile) error {
 	cmdArgs := buildOAuthCmd(profile)
 	log.Logger.Infof("run OAuth Flow via %s", strings.Join(cmdArgs, " "))
 
-	cmd := exec.CommandContext(ctx, cmdArgs[0], cmdArgs[1:]...)
+	cmd := exec.CommandContext(ctx, cmdArgs[0], cmdArgs[1:]...) // #nosec G204
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
