@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl"
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ecsmetadata"
+	"os"
 	"time"
 
 	"github.com/AliyunContainerService/ack-ram-tool/pkg/ctl/common"
@@ -75,6 +76,13 @@ func getRegionFromImds() (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 	region, err := ecsmetadata.DefaultClient.GetRegionId(ctx)
+	if err == nil {
+		return region, nil
+	}
+	region = os.Getenv("ALIBABA_CLOUD_STS_REGION")
+	if region != "" {
+		return region, nil
+	}
 	return region, err
 }
 
