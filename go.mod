@@ -30,7 +30,7 @@ require (
 	github.com/alibabacloud-go/ram-20150501/v2 v2.2.0
 	github.com/alibabacloud-go/sts-20150401 v1.1.2
 	github.com/alibabacloud-go/sts-20150401/v2 v2.0.4
-	github.com/alibabacloud-go/tea-utils/v2 v2.0.7
+	github.com/alibabacloud-go/tea-utils/v2 v2.0.9
 	github.com/aliyun/aliyun-cli/v3 v3.2.6
 	github.com/go-logr/zapr v1.3.0
 	github.com/olekukonko/tablewriter v0.0.6-0.20230925090304-df64c4bbad77
